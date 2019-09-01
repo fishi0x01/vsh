@@ -1,0 +1,13 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: /home/circleci/.go_workspace/src/github.com/fishi0x01/vsh
+    steps:
+      - checkout
+      - run: make cross-compile
+      - run: make integration-test
