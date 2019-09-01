@@ -39,7 +39,7 @@ func (cmd *MoveCommand) validate() error {
 	return nil
 }
 
-// Execute runs 'mv' with given MoveCommand's parameters
+// Run executes 'mv' with given MoveCommand's parameters
 func (cmd *MoveCommand) Run() error {
 	err := cmd.validate()
 

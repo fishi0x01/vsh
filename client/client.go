@@ -107,9 +107,8 @@ func (client *Client) IsFile(path string) (bool, error) {
 
 	if s == nil {
 		return true, nil
-	} else {
-		return false, nil
 	}
+	return false, nil
 }
 
 // Traverse traverses paths via DFS and returns found paths array

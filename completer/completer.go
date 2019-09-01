@@ -6,10 +6,12 @@ import (
 	"strings"
 )
 
+// Completer struct for tab completion
 type Completer struct {
 	client *client.Client
 }
 
+// NewCompleter creates a new Completer with given client
 func NewCompleter(client *client.Client) (*Completer) {
 	return &Completer{
 		client: client,
@@ -26,7 +28,7 @@ func isSupportedCommand(cmd string) bool {
 
 func (c *Completer) getTopLevelSuggestions() []prompt.Suggest {
 	var suggestions = []prompt.Suggest{}
-	for k, _ := range c.client.KVBackends {
+	for k := range c.client.KVBackends {
 		suggestions = append(suggestions, prompt.Suggest{k, ""})
 	}
 	suggestions = append(suggestions, prompt.Suggest{".", ""})

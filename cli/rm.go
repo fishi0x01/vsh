@@ -37,7 +37,7 @@ func (cmd *RemoveCommand) validate() error {
 	return nil
 }
 
-// Execute runs 'rm' with given RemoveCommand's parameters
+// Run executes 'rm' with given RemoveCommand's parameters
 func (cmd *RemoveCommand) Run() error {
 	err := cmd.validate()
 	if err != nil {

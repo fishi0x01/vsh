@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// LsCommand container for all 'ls' parameters
+// ListCommand container for 'ls' parameters
 type ListCommand struct {
 	name string
 
@@ -47,7 +47,7 @@ func (cmd *ListCommand) Run() (error) {
 
 	var result []string
 	if (cmd.Path == "") {
-		for k, _ := range cmd.client.KVBackends {
+		for k := range cmd.client.KVBackends {
 			result = append(result, k)
 		}
 		result = append(result, ".")
