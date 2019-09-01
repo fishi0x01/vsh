@@ -39,14 +39,14 @@ func (cmd *ListCommand) validate() error {
 }
 
 // Run executes 'ls' with given ListCommand's parameters
-func (cmd *ListCommand) Run() (error) {
+func (cmd *ListCommand) Run() error {
 	err := cmd.validate()
 	if err != nil {
 		return err
 	}
 
 	var result []string
-	if (cmd.Path == "") {
+	if cmd.Path == "" {
 		for k := range cmd.client.KVBackends {
 			result = append(result, k)
 		}

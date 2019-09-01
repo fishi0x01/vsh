@@ -21,7 +21,7 @@ func (client *Client) kvPath(path string, prefix string) string {
 	case 2:
 		// https://www.vaultproject.io/docs/secrets/kv/kv-v2.html#acl-rules
 		s := strings.SplitN(path, "/", 2)
-		if (len(s) != 2) {
+		if len(s) != 2 {
 			panic(fmt.Errorf("Could not properly split path '%s'", path))
 		}
 		return s[0] + prefix + s[1]

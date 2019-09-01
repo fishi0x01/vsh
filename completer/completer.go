@@ -12,7 +12,7 @@ type Completer struct {
 }
 
 // NewCompleter creates a new Completer with given client
-func NewCompleter(client *client.Client) (*Completer) {
+func NewCompleter(client *client.Client) *Completer {
 	return &Completer{
 		client: client,
 	}
@@ -41,20 +41,20 @@ func (c *Completer) Complete(in prompt.Document) []prompt.Suggest {
 	cur := in.GetWordBeforeCursor()
 
 	var suggestions = []prompt.Suggest{}
-	if (isSupportedCommand(com)) {
-		if (c.client.Pwd == "") {
+	if isSupportedCommand(com) {
+		if c.client.Pwd == "" {
 			suggestions = c.getTopLevelSuggestions()
 		} else {
 			completePath := c.client.Pwd + cur
 			li := strings.LastIndex(completePath, "/")
-			if (li > 0) {
+			if li > 0 {
 				completePath = completePath[:li+1]
 			} else {
 				completePath = completePath[0:li]
 			}
 			options, err := c.client.List(completePath)
 			if err != nil {
-				// TODO: handle error
+				panic(err)
 			}
 			options = append(options, ".", "..")
 			for _, node := range options {
@@ -69,7 +69,7 @@ func (c *Completer) Complete(in prompt.Document) []prompt.Suggest {
 func (c *Completer) PromptPrefix() (string, bool) {
 	var p string
 	parts := strings.Split(c.client.Pwd, "/")
-	if (len(parts) > 1) {
+	if len(parts) > 1 {
 		p = parts[len(parts)-2] + "/"
 	} else {
 		p = parts[0]

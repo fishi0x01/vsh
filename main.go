@@ -43,7 +43,7 @@ func executor(in string) {
 	switch args[0] {
 	case commands.ls.GetName():
 		// 'ls' the current path
-		if (len(args) > 1) {
+		if len(args) > 1 {
 			commands.ls.Path = vaultClient.Pwd + args[1]
 		} else {
 			commands.ls.Path = vaultClient.Pwd
@@ -95,7 +95,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if (inputString != "") {
+	if inputString != "" {
 		// Run non-interactive mode
 		executor(inputString)
 	} else {

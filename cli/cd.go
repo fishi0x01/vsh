@@ -39,7 +39,7 @@ func (cmd *CdCommand) validate() error {
 }
 
 // Run executes 'cd' with given CdCommand's parameters
-func (cmd *CdCommand) Run() (error) {
+func (cmd *CdCommand) Run() error {
 	err := cmd.validate()
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func (cmd *CdCommand) Run() (error) {
 		return err
 	}
 
-	if (isFile) {
+	if isFile {
 		fmt.Fprintln(cmd.stderr, "cannot cd to '"+newPwd+"' because it is a file")
 		return nil
 	}
