@@ -5,6 +5,8 @@
 
 # vsh
 
+**The project is still in a very alpha stage. Expect many bugs.**
+
 vsh is a simple interactive HashiCorp Vault shell which treats vault secret paths like directories. That way you can do recursive operations on paths. Vault KV v1 and v2 are both supported.
 Commands can also be executed in a non-interacitve way.
 
