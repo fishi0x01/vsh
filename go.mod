@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	github.com/c-bata/go-prompt v0.2.3
-	github.com/fishi0x01/vcmd v0.0.0-20190828160911-a94806fa1ffb // indirect
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/logrusorgru/aurora v0.0.0-20190803045625-94edacc10f9b
 	github.com/mattn/go-runewidth v0.0.4 // indirect
