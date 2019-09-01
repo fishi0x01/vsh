@@ -8,21 +8,20 @@ import (
 	"strings"
 )
 
-// RemoveCommand container for all 'rm' parameters
+// LsCommand container for all 'ls' parameters
 type ListCommand struct {
 	name string
 
 	client *client.Client
 	stderr io.Writer
 	stdout io.Writer
-	Path string
-
+	Path   string
 }
 
 // NewListCommand creates a new ListCommand parameter container
 func NewListCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *ListCommand {
 	return &ListCommand{
-		name: "ls",
+		name:   "ls",
 		client: c,
 		stdout: stdout,
 		stderr: stderr,

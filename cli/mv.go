@@ -22,7 +22,7 @@ type MoveCommand struct {
 // NewMoveCommand creates a new MoveCommand parameter container
 func NewMoveCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *MoveCommand {
 	return &MoveCommand{
-		name: "mv",
+		name:   "mv",
 		client: c,
 		stdout: stdout,
 		stderr: stderr,
@@ -48,12 +48,12 @@ func (cmd *MoveCommand) Run() error {
 	}
 
 	for _, path := range cmd.client.Traverse(cmd.client.Pwd + cmd.Source) {
-		target := strings.Replace(path, cmd.client.Pwd + cmd.Source, cmd.client.Pwd + cmd.Target, 1)
+		target := strings.Replace(path, cmd.client.Pwd+cmd.Source, cmd.client.Pwd+cmd.Target, 1)
 		err := moveSecret(cmd.client, path, target)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(cmd.stdout, "Moved " + path + " to " + target)
+		fmt.Fprintln(cmd.stdout, "Moved "+path+" to "+target)
 	}
 
 	return nil

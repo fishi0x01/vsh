@@ -7,21 +7,20 @@ import (
 	"io"
 )
 
-// RemoveCommand container for all 'rm' parameters
+// CatCommand container for all 'cat' parameters
 type CatCommand struct {
 	name string
 
 	client *client.Client
 	stderr io.Writer
 	stdout io.Writer
-	Path string
-
+	Path   string
 }
 
 // NewCatCommand creates a new CatCommand parameter container
 func NewCatCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *CatCommand {
 	return &CatCommand{
-		name: "cat",
+		name:   "cat",
 		client: c,
 		stderr: stderr,
 		stdout: stdout,
@@ -39,7 +38,7 @@ func (cmd *CatCommand) validate() error {
 }
 
 // Run executes 'cat' with given CatCommand's parameters
-func (cmd *CatCommand) Run() (error) {
+func (cmd *CatCommand) Run() error {
 	err := cmd.validate()
 	if err != nil {
 		return err
@@ -50,17 +49,17 @@ func (cmd *CatCommand) Run() (error) {
 		return err
 	}
 
-	if (isFile) {
+	if isFile {
 		secret, err := cmd.client.Read(cmd.client.Pwd + cmd.Path)
 		if err != nil {
 			return err
 		}
 
 		for k, v := range secret.Data {
-			fmt.Fprintln(cmd.stdout, k, "=" , v)
+			fmt.Fprintln(cmd.stdout, k, "=", v)
 		}
 	} else {
-		fmt.Fprintln(cmd.stderr, "'", cmd.client.Pwd + cmd.Path, "' is not a file")
+		fmt.Fprintln(cmd.stderr, "'", cmd.client.Pwd+cmd.Path, "' is not a file")
 	}
 
 	return err

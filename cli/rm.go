@@ -14,13 +14,13 @@ type RemoveCommand struct {
 	client *client.Client
 	stderr io.Writer
 	stdout io.Writer
-	Path string
+	Path   string
 }
 
 // NewRemoveCommand creates a new RemoveCommand parameter container
 func NewRemoveCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *RemoveCommand {
 	return &RemoveCommand{
-		name: "rm",
+		name:   "rm",
 		client: c,
 		stdout: stdout,
 		stderr: stderr,
@@ -49,7 +49,7 @@ func (cmd *RemoveCommand) Run() error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(cmd.stdout, "Removed " + path)
+		fmt.Fprintln(cmd.stdout, "Removed "+path)
 	}
 
 	return nil

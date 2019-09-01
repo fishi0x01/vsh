@@ -8,20 +8,20 @@ import (
 	"path/filepath"
 )
 
-// RemoveCommand container for all 'rm' parameters
+// CdCommand container for all 'cd' parameters
 type CdCommand struct {
 	name string
 
 	client *client.Client
 	stderr io.Writer
 	stdout io.Writer
-	Path string
+	Path   string
 }
 
 // NewCdCommand creates a new CdCommand parameter container
 func NewCdCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *CdCommand {
 	return &CdCommand{
-		name: "cd",
+		name:   "cd",
 		client: c,
 		stdout: stdout,
 		stderr: stderr,
@@ -52,9 +52,9 @@ func (cmd *CdCommand) Run() (error) {
 	}
 
 	if (isFile) {
-		fmt.Fprintln(cmd.stderr, "cannot cd to '" + newPwd + "' because it is a file")
+		fmt.Fprintln(cmd.stderr, "cannot cd to '"+newPwd+"' because it is a file")
 		return nil
 	}
-	cmd.client.Pwd = filepath.Clean(cmd.client.Pwd + cmd.Path) + "/"
+	cmd.client.Pwd = filepath.Clean(cmd.client.Pwd+cmd.Path) + "/"
 	return err
 }

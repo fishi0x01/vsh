@@ -17,11 +17,11 @@ func NewCompleter(client *client.Client) (*Completer) {
 }
 
 func isSupportedCommand(cmd string) bool {
-	return cmd + " " == "cd " ||
-		cmd + " " == "rm " ||
-		cmd + " " == "mv " ||
-		cmd + " " == "cat " ||
-		cmd + " " == "ls "
+	return cmd+" " == "cd " ||
+		cmd+" " == "rm " ||
+		cmd+" " == "mv " ||
+		cmd+" " == "cat " ||
+		cmd+" " == "ls "
 }
 
 func (c *Completer) getTopLevelSuggestions() []prompt.Suggest {
