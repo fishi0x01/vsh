@@ -44,22 +44,31 @@ func (cmd *CatCommand) Run() error {
 		return err
 	}
 
-	isFile, err := cmd.client.IsFile(cmd.client.Pwd + cmd.Path)
+	absPath := cmd.client.Pwd + cmd.Path
+	isFile, err := cmd.client.IsFile(absPath)
 	if err != nil {
 		return err
 	}
 
 	if isFile {
-		secret, err := cmd.client.Read(cmd.client.Pwd + cmd.Path)
+		secret, err := cmd.client.Read(absPath)
 		if err != nil {
 			return err
 		}
 
 		for k, v := range secret.Data {
-			fmt.Fprintln(cmd.stdout, k, "=", v)
+			if rec, ok := v.(map[string]interface{}); ok {
+				// KV 2
+				for kk, vv := range rec {
+					fmt.Fprintln(cmd.stdout, kk, "=", vv)
+				}
+			} else {
+				// KV 1
+				fmt.Fprintln(cmd.stdout, k, "=", v)
+			}
 		}
 	} else {
-		fmt.Fprintln(cmd.stderr, "'", cmd.client.Pwd+cmd.Path, "' is not a file")
+		fmt.Fprintln(cmd.stderr, cmd.client.Pwd+cmd.Path, "is not a file")
 	}
 
 	return err
