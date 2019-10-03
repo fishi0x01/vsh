@@ -3,9 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
 	"io"
-	"strings"
 )
 
 // MoveCommand container for all 'mv' parameters
@@ -34,49 +32,34 @@ func (cmd *MoveCommand) GetName() string {
 	return cmd.name
 }
 
-func (cmd *MoveCommand) validate() error {
-	log.Warn("Missing implementation of 'mv' validation")
-	return nil
-}
-
 // Run executes 'mv' with given MoveCommand's parameters
 func (cmd *MoveCommand) Run() error {
-	err := cmd.validate()
+	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
+	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 
-	if err != nil {
-		return err
-	}
-
-	for _, path := range cmd.client.Traverse(cmd.client.Pwd + cmd.Source) {
-		target := strings.Replace(path, cmd.client.Pwd+cmd.Source, cmd.client.Pwd+cmd.Target, 1)
-		err := moveSecret(cmd.client, path, target)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintln(cmd.stdout, "Moved "+path+" to "+target)
-	}
-
-	return nil
+	return runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.moveSecret)
 }
 
-func moveSecret(client *client.Client, source string, target string) error {
+func (cmd *MoveCommand) moveSecret(source string, target string) error {
 	// read
-	secret, err := client.Read(source)
+	secret, err := cmd.client.Read(source)
 	if err != nil {
 		return err
 	}
 
 	// write
-	err = client.Write(target, secret)
+	err = cmd.client.Write(target, secret)
 	if err != nil {
 		return err
 	}
 
 	// delete
-	err = client.Delete(source)
+	err = cmd.client.Delete(source)
 	if err != nil {
 		return err
 	}
+
+	fmt.Fprintln(cmd.stdout, "Moved "+source+" to "+target)
 
 	return nil
 }

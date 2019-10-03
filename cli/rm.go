@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
 	"io"
 )
 
@@ -32,35 +31,28 @@ func (cmd *RemoveCommand) GetName() string {
 	return cmd.name
 }
 
-func (cmd *RemoveCommand) validate() error {
-	log.Warn("Missing implementation of 'rm' validation")
-	return nil
-}
-
 // Run executes 'rm' with given RemoveCommand's parameters
 func (cmd *RemoveCommand) Run() error {
-	err := cmd.validate()
-	if err != nil {
-		return err
-	}
+	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
 
-	for _, path := range cmd.client.Traverse(cmd.client.Pwd + cmd.Path) {
-		err := removeSecret(cmd.client, path)
+	for _, path := range cmd.client.Traverse(newPwd) {
+		err := cmd.removeSecret(path)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(cmd.stdout, "Removed "+path)
 	}
 
 	return nil
 }
 
-func removeSecret(client *client.Client, path string) error {
+func (cmd *RemoveCommand) removeSecret(path string) error {
 	// delete
-	err := client.Delete(path)
+	err := cmd.client.Delete(path)
 	if err != nil {
 		return err
 	}
+
+	fmt.Fprintln(cmd.stdout, "Removed "+path)
 
 	return nil
 }

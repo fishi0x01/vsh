@@ -10,9 +10,9 @@ import (
 
 const (
 	debugLvl = iota
-	infoLvl  = iota
-	warnLvl  = iota
-	errorLvl = iota
+	infoLvl
+	warnLvl
+	errorLvl
 )
 
 // Init initializes the logger

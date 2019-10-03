@@ -4,6 +4,7 @@ import (
 	"github.com/fishi0x01/vsh/log"
 	"github.com/hashicorp/vault/api"
 	"strconv"
+	"strings"
 )
 
 // Client wrapper for Vault API client
@@ -16,8 +17,9 @@ type Client struct {
 
 // VaultConfig container to keep parameters for Client configuration
 type VaultConfig struct {
-	Addr  string
-	Token string
+	Addr      string
+	Token     string
+	StartPath string
 }
 
 // NewClient creates a new Client Vault wrapper
@@ -49,87 +51,80 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 		}
 	}
 
-	return &Client{Vault: vault, Name: conf.Addr, Pwd: "", KVBackends: backends}, nil
+	startPath := conf.StartPath
+	if startPath == "" {
+		startPath = "/"
+	}
+
+	if !strings.HasSuffix(startPath, "/") {
+		startPath = startPath + "/"
+	}
+
+	return &Client{Vault: vault, Name: conf.Addr, Pwd: startPath, KVBackends: backends}, nil
 }
 
 // Read returns secret at given path, using given Client
-func (client *Client) Read(path string) (secret *api.Secret, err error) {
-	secret, err = client.Vault.Logical().Read(client.getKVDataPath(path))
-	if err != nil {
-		return nil, err
+func (client *Client) Read(absolutePath string) (secret *api.Secret, err error) {
+	if client.isTopLevelPath(absolutePath) {
+		secret, err = client.topLevelRead(absolutePath[1:])
+	} else {
+		secret, err = client.lowLevelRead(absolutePath[1:])
 	}
-	return secret, nil
+
+	return secret, err
 }
 
 // Write writes secret to given path, using given Client
-func (client *Client) Write(path string, secret *api.Secret) (err error) {
-	_, err = client.Vault.Logical().Write(client.getKVDataPath(path), secret.Data)
-	if err != nil {
-		return err
+func (client *Client) Write(absolutePath string, secret *api.Secret) (err error) {
+	if client.isTopLevelPath(absolutePath) {
+		err = client.topLevelWrite(absolutePath[1:])
+	} else {
+		err = client.lowLevelWrite(absolutePath[1:], secret)
 	}
-	return nil
+
+	return err
 }
 
-// Delete deletes secret at given path, using given Client
-func (client *Client) Delete(path string) (err error) {
-	_, err = client.Vault.Logical().Delete(client.getKVMetaDataPath(path))
-	if err != nil {
-		return err
+// Delete deletes secret at given absolutePath, using given client
+func (client *Client) Delete(absolutePath string) (err error) {
+	if client.isTopLevelPath(absolutePath) {
+		err = client.topLevelDelete(absolutePath[1:])
+	} else {
+		err = client.lowLevelDelete(absolutePath[1:])
 	}
-	return nil
+
+	return err
 }
 
-// List nodes at given path, using given Client
-func (client *Client) List(path string) (result []string, err error) {
-	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
-	if err != nil {
-		return result, err
-	}
-
-	if s != nil {
-		if keysInterface, ok := s.Data["keys"]; ok {
-			for _, valInterface := range keysInterface.([]interface{}) {
-				val := valInterface.(string)
-				result = append(result, val)
-			}
-		}
+// List elements at the given absolutePath, using the given client
+func (client *Client) List(absolutePath string) (result []string, err error) {
+	if client.isTopLevelPath(absolutePath) {
+		result = client.listTopLevel()
+	} else {
+		result, err = client.listLowLevel(absolutePath[1:])
 	}
 
 	return result, err
 }
 
-// IsFile checks if given path is a file
-func (client *Client) IsFile(path string) (bool, error) {
-	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
-	if err != nil {
-		return false, err
+// GetType returns the file type the given absolutePath points to. Possible return values are BACKEND, NODE or LEAF
+func (client *Client) GetType(absolutePath string) (kind PathKind, err error) {
+	if client.isTopLevelPath(absolutePath) {
+		kind, err = client.topLevelType()
+	} else {
+		kind, err = client.lowLevelType(absolutePath[1:])
 	}
 
-	if s == nil {
-		return true, nil
-	}
-	return false, nil
+	return kind, err
 }
 
-// Traverse traverses paths via DFS and returns found paths array
-func (client *Client) Traverse(path string) (paths []string) {
-	var result []string
-	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
-	if err != nil {
-		log.Error("Error traversing path: %v", err)
-		return nil
-	}
-
-	if s != nil {
-		if keysInterface, ok := s.Data["keys"]; ok {
-			for _, valInterface := range keysInterface.([]interface{}) {
-				val := valInterface.(string)
-				result = append(result, client.Traverse(path+"/"+val)...)
-			}
-		}
+// Traverse traverses given absolutePath via DFS and returns sub-paths in array
+func (client *Client) Traverse(absolutePath string) (paths []string) {
+	if client.isTopLevelPath(absolutePath) {
+		paths = client.topLevelTraverse(absolutePath[1:])
 	} else {
-		result = append(result, path)
+		paths = client.lowLevelTraverse(absolutePath[1:])
 	}
 
-	return result
+	return paths
 }

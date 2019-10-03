@@ -18,61 +18,111 @@ func NewCompleter(client *client.Client) *Completer {
 	}
 }
 
-func isSupportedCommand(cmd string) bool {
-	return cmd+" " == "cd " ||
-		cmd+" " == "rm " ||
-		cmd+" " == "mv " ||
-		cmd+" " == "cat " ||
-		cmd+" " == "ls "
+func (c *Completer) getAbsoluteTopLevelSuggestions() []prompt.Suggest {
+	var suggestions = []prompt.Suggest{}
+	for k := range c.client.KVBackends {
+		suggestions = append(suggestions, prompt.Suggest{"/" + k, ""})
+	}
+	return suggestions
 }
 
-func (c *Completer) getTopLevelSuggestions() []prompt.Suggest {
+func (c *Completer) getRelativeTopLevelSuggestions() []prompt.Suggest {
 	var suggestions = []prompt.Suggest{}
 	for k := range c.client.KVBackends {
 		suggestions = append(suggestions, prompt.Suggest{k, ""})
 	}
-	suggestions = append(suggestions, prompt.Suggest{".", ""})
 	return suggestions
 }
 
-// Complete suggestions for completion
-func (c *Completer) Complete(in prompt.Document) []prompt.Suggest {
-	com := strings.Split(in.TextBeforeCursor(), " ")[0]
-	cur := in.GetWordBeforeCursor()
+func (c *Completer) absolutePathSuggestions(arg string) (result []prompt.Suggest) {
+	if strings.Count(arg, "/") < 2 {
+		result = c.getAbsoluteTopLevelSuggestions()
+	} else {
+		li := strings.LastIndex(arg, "/")
+		queryPath := arg[0 : li+1]
 
-	var suggestions = []prompt.Suggest{}
-	if isSupportedCommand(com) {
-		if c.client.Pwd == "" {
-			suggestions = c.getTopLevelSuggestions()
-		} else {
-			completePath := c.client.Pwd + cur
-			li := strings.LastIndex(completePath, "/")
-			if li > 0 {
-				completePath = completePath[:li+1]
-			} else {
-				completePath = completePath[0:li]
-			}
-			options, err := c.client.List(completePath)
-			if err != nil {
-				panic(err)
-			}
-			options = append(options, ".", "..")
-			for _, node := range options {
-				suggestions = append(suggestions, prompt.Suggest{node, ""})
-			}
+		var options []string
+		var err error
+		options, err = c.client.List(queryPath)
+
+		if err != nil {
+			panic(err)
+		}
+
+		options = append(options, "../")
+		for _, node := range options {
+			result = append(result, prompt.Suggest{queryPath + node, ""})
 		}
 	}
-	return prompt.FilterHasPrefix(suggestions, cur, true)
+
+	filtered := prompt.FilterHasPrefix(result, arg, true)
+	if len(filtered) > 0 {
+		result = filtered
+	}
+	return result
+}
+
+func (c *Completer) relativePathSuggestions(arg string) (result []prompt.Suggest) {
+	if c.client.Pwd == "/" && strings.Count(arg, "/") < 1 {
+		result = c.getRelativeTopLevelSuggestions()
+	} else {
+		li := strings.LastIndex(arg, "/")
+		queryPath := arg[0 : li+1]
+
+		var options []string
+		var err error
+		options, err = c.client.List(c.client.Pwd + queryPath)
+
+		if err != nil {
+			panic(err)
+		}
+
+		options = append(options, "../")
+		for _, node := range options {
+			result = append(result, prompt.Suggest{queryPath + node, ""})
+		}
+	}
+
+	filtered := prompt.FilterHasPrefix(result, arg, true)
+	if len(filtered) > 0 {
+		result = filtered
+	}
+	return result
+}
+
+func isAbsolutePath(path string) bool {
+	return strings.HasPrefix(path, "/")
+}
+
+func isSupportedCommand(p string) bool {
+	words := strings.Split(p, " ")
+	if len(words) < 2 {
+		return false
+	}
+
+	return words[0] == "cd" ||
+		words[0] == "cp" ||
+		words[0] == "rm" ||
+		words[0] == "mv" ||
+		words[0] == "cat" ||
+		words[0] == "ls"
+}
+
+// Complete suggestions for completion
+func (c *Completer) Complete(in prompt.Document) (result []prompt.Suggest) {
+	if isSupportedCommand(in.TextBeforeCursor()) {
+		cur := in.GetWordBeforeCursor()
+		if isAbsolutePath(cur) {
+			result = c.absolutePathSuggestions(cur)
+		} else {
+			result = c.relativePathSuggestions(cur)
+		}
+	}
+
+	return result
 }
 
 // PromptPrefix returns the currently active prompt prefix
 func (c *Completer) PromptPrefix() (string, bool) {
-	var p string
-	parts := strings.Split(c.client.Pwd, "/")
-	if len(parts) > 1 {
-		p = parts[len(parts)-2] + "/"
-	} else {
-		p = parts[0]
-	}
-	return c.client.Name + " " + p + "> ", true
+	return c.client.Name + " " + c.client.Pwd + "> ", true
 }
