@@ -94,8 +94,8 @@ func main() {
 	flag.Parse()
 
 	conf := &client.VaultConfig{
-		Addr: os.Getenv("VAULT_ADDR"),
-		Token: os.Getenv("VAULT_TOKEN"),
+		Addr:      os.Getenv("VAULT_ADDR"),
+		Token:     os.Getenv("VAULT_TOKEN"),
 		StartPath: os.Getenv("VAULT_PATH"),
 	}
 	var err error
