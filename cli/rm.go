@@ -40,7 +40,6 @@ func (cmd *RemoveCommand) Run() error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(cmd.stdout, "Removed "+path)
 	}
 
 	return nil
@@ -52,6 +51,8 @@ func (cmd *RemoveCommand) removeSecret(path string) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Fprintln(cmd.stdout, "Removed "+path)
 
 	return nil
 }

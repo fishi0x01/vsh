@@ -1,6 +1,9 @@
 package cli
 
-import "strings"
+import (
+	"github.com/fishi0x01/vsh/client"
+	"strings"
+)
 
 // Command interface to describe a command structure
 type Command interface {
@@ -15,4 +18,16 @@ func cmdPath(pwd string, arg string) (result string) {
 		result = arg
 	}
 	return result
+}
+
+func runCommandWithTraverseTwoPaths(client *client.Client, source string, target string, f func(string, string) error) error {
+	for _, path := range client.Traverse(source) {
+		target := strings.Replace(path, source, target, 1)
+		err := f(path, target)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

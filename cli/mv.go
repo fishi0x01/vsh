@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/fishi0x01/vsh/client"
 	"io"
-	"strings"
 )
 
 // MoveCommand container for all 'mv' parameters
@@ -38,16 +37,7 @@ func (cmd *MoveCommand) Run() error {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 
-	for _, path := range cmd.client.Traverse(newSrcPwd) {
-		target := strings.Replace(path, newSrcPwd, newTargetPwd, 1)
-		err := cmd.moveSecret(path, target)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintln(cmd.stdout, "Moved "+path+" to "+target)
-	}
-
-	return nil
+	return runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.moveSecret)
 }
 
 func (cmd *MoveCommand) moveSecret(source string, target string) error {
@@ -68,6 +58,8 @@ func (cmd *MoveCommand) moveSecret(source string, target string) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Fprintln(cmd.stdout, "Moved "+source+" to "+target)
 
 	return nil
 }
