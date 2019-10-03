@@ -27,7 +27,7 @@ func (client *Client) lowLevelTraverse(path string) (result []string) {
 			}
 		}
 	} else {
-		result = append(result, "/" + path)
+		result = append(result, "/"+path)
 	}
 
 	return result

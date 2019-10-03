@@ -2,6 +2,7 @@ package client
 
 type PathKind int
 
+// types of paths
 const (
 	BACKEND PathKind = iota
 	NODE
