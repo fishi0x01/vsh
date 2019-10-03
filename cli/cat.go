@@ -45,12 +45,12 @@ func (cmd *CatCommand) Run() error {
 	}
 
 	absPath := cmd.client.Pwd + cmd.Path
-	isFile, err := cmd.client.IsFile(absPath)
+	t, err := cmd.client.GetType(absPath)
 	if err != nil {
 		return err
 	}
 
-	if isFile {
+	if t == client.LEAF {
 		secret, err := cmd.client.Read(absPath)
 		if err != nil {
 			return err

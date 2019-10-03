@@ -6,6 +6,7 @@ import (
 	"github.com/fishi0x01/vsh/log"
 	"io"
 	"path/filepath"
+	"strings"
 )
 
 // CdCommand container for all 'cd' parameters
@@ -46,15 +47,24 @@ func (cmd *CdCommand) Run() error {
 	}
 
 	newPwd := cmd.client.Pwd + cmd.Path
-	isFile, err := cmd.client.IsFile(newPwd)
+	if strings.HasPrefix(cmd.Path, "/") {
+		// absolute path is given
+		newPwd = cmd.Path
+	}
+
+	t, err := cmd.client.GetType(newPwd)
 	if err != nil {
 		return err
 	}
 
-	if isFile {
+	if t == client.LEAF {
 		fmt.Fprintln(cmd.stderr, "cannot cd to '"+newPwd+"' because it is a file")
 		return nil
 	}
-	cmd.client.Pwd = filepath.Clean(cmd.client.Pwd+cmd.Path) + "/"
+	newPwd = filepath.Clean(newPwd) + "/"
+	if newPwd == "//" {
+		newPwd = "/"
+	}
+	cmd.client.Pwd = newPwd
 	return err
 }

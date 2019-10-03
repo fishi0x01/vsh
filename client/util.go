@@ -6,7 +6,12 @@ import (
 )
 
 func (client *Client) getKVVersion(path string) int {
-	mntPath := strings.Split(path, "/")[0] + "/"
+	mntPath := ""
+	if strings.HasPrefix(path, "/") {
+		mntPath = strings.Split(path, "/")[1] + "/"
+	} else {
+		mntPath = strings.Split(path, "/")[0] + "/"
+	}
 	if version, ok := client.KVBackends[mntPath]; ok {
 		return version
 	}
@@ -26,7 +31,11 @@ func (client *Client) kvPath(path string, prefix string) string {
 		}
 		return s[0] + prefix + s[1]
 	default:
-		panic(fmt.Errorf("Unknown KV Version '%v' for path '%s'", v, path))
+		if strings.Contains(path, "/") {
+			panic(fmt.Errorf("Unknown KV Version '%v' for path '%s'", v, path))
+		}
+		// we are in the root path
+		return ""
 	}
 }
 
@@ -36,4 +45,11 @@ func (client *Client) getKVMetaDataPath(path string) string {
 
 func (client *Client) getKVDataPath(path string) string {
 	return client.kvPath(path, "/data/")
+}
+
+func (client *Client) isTopLevelPath(absolutePath string) bool {
+	if strings.Count(absolutePath, "/") < 2 {
+		return true
+	}
+	return false
 }

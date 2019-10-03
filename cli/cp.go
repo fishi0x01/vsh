@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// MoveCommand container for all 'mv' parameters
-type MoveCommand struct {
+// CopyCommand container for all 'cp' parameters
+type CopyCommand struct {
 	name string
 
 	client *client.Client
@@ -19,28 +19,28 @@ type MoveCommand struct {
 	Target string
 }
 
-// NewMoveCommand creates a new MoveCommand parameter container
-func NewMoveCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *MoveCommand {
-	return &MoveCommand{
-		name:   "mv",
+// NewCopyCommand creates a new CopyCommand parameter container
+func NewCopyCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *CopyCommand {
+	return &CopyCommand{
+		name:   "cp",
 		client: c,
 		stdout: stdout,
 		stderr: stderr,
 	}
 }
 
-// GetName returns the MoveCommand's name identifier
-func (cmd *MoveCommand) GetName() string {
+// GetName returns the CopyCommand's name identifier
+func (cmd *CopyCommand) GetName() string {
 	return cmd.name
 }
 
-func (cmd *MoveCommand) validate() error {
-	log.Warn("Missing implementation of 'mv' validation")
+func (cmd *CopyCommand) validate() error {
+	log.Warn("Missing implementation of 'cp' validation")
 	return nil
 }
 
-// Run executes 'mv' with given MoveCommand's parameters
-func (cmd *MoveCommand) Run() error {
+// Run executes 'cp' with given MoveCommand's parameters
+func (cmd *CopyCommand) Run() error {
 	err := cmd.validate()
 
 	if err != nil {
@@ -61,7 +61,7 @@ func (cmd *MoveCommand) Run() error {
 
 	for _, path := range cmd.client.Traverse(newSrcPwd) {
 		target := strings.Replace(path, newSrcPwd, newTargetPwd, 1)
-		err := cmd.moveSecret(path, target)
+		err := cmd.copySecret(path, target)
 		if err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ func (cmd *MoveCommand) Run() error {
 	return nil
 }
 
-func (cmd *MoveCommand) moveSecret(source string, target string) error {
+func (cmd *CopyCommand) copySecret(source string, target string) error {
 	// read
 	secret, err := cmd.client.Read(source)
 	if err != nil {
@@ -80,12 +80,6 @@ func (cmd *MoveCommand) moveSecret(source string, target string) error {
 
 	// write
 	err = cmd.client.Write(target, secret)
-	if err != nil {
-		return err
-	}
-
-	// delete
-	err = cmd.client.Delete(source)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
 	"io"
+	"strings"
 )
 
 // RemoveCommand container for all 'rm' parameters
@@ -44,8 +45,14 @@ func (cmd *RemoveCommand) Run() error {
 		return err
 	}
 
-	for _, path := range cmd.client.Traverse(cmd.client.Pwd + cmd.Path) {
-		err := removeSecret(cmd.client, path)
+	newPwd := cmd.client.Pwd + cmd.Path
+	if strings.HasPrefix(cmd.Path, "/") {
+		// absolute path is given
+		newPwd = cmd.Path
+	}
+
+	for _, path := range cmd.client.Traverse(newPwd) {
+		err := cmd.removeSecret(path)
 		if err != nil {
 			return err
 		}
@@ -55,9 +62,9 @@ func (cmd *RemoveCommand) Run() error {
 	return nil
 }
 
-func removeSecret(client *client.Client, path string) error {
+func (cmd *RemoveCommand) removeSecret(path string) error {
 	// delete
-	err := client.Delete(path)
+	err := cmd.client.Delete(path)
 	if err != nil {
 		return err
 	}

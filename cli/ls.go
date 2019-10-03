@@ -45,18 +45,15 @@ func (cmd *ListCommand) Run() error {
 		return err
 	}
 
-	var result []string
-	if cmd.Path == "" {
-		for k := range cmd.client.KVBackends {
-			result = append(result, k)
-		}
-		result = append(result, ".")
-	} else {
-		result, err = cmd.client.List(cmd.Path)
-		result = append(result, ".", "..")
+	newPwd := cmd.client.Pwd + cmd.Path
+	if strings.HasPrefix(cmd.Path, "/") {
+		// absolute path is given
+		newPwd = cmd.Path
 	}
 
-	fmt.Fprintln(cmd.stdout, strings.Join(result, " "))
+	result, err := cmd.client.List(newPwd)
+
+	fmt.Fprintln(cmd.stdout, strings.Join(result, "  "))
 
 	return err
 }
