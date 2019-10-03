@@ -39,7 +39,7 @@ func (cmd *CopyCommand) validate() error {
 	return nil
 }
 
-// Run executes 'cp' with given MoveCommand's parameters
+// Run executes 'cp' with given CopyCommand's parameters
 func (cmd *CopyCommand) Run() error {
 	err := cmd.validate()
 	if err != nil {
