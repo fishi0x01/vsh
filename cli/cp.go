@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
 	"io"
 	"strings"
 )
@@ -34,18 +33,8 @@ func (cmd *CopyCommand) GetName() string {
 	return cmd.name
 }
 
-func (cmd *CopyCommand) validate() error {
-	log.Warn("Missing implementation of 'cp' validation")
-	return nil
-}
-
 // Run executes 'cp' with given CopyCommand's parameters
 func (cmd *CopyCommand) Run() error {
-	err := cmd.validate()
-	if err != nil {
-		return err
-	}
-
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 

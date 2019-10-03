@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
 	"io"
 	"strings"
 )
@@ -33,18 +32,8 @@ func (cmd *ListCommand) GetName() string {
 	return cmd.name
 }
 
-func (cmd *ListCommand) validate() error {
-	log.Warn("Missing implementation of 'ls' validation")
-	return nil
-}
-
 // Run executes 'ls' with given ListCommand's parameters
 func (cmd *ListCommand) Run() error {
-	err := cmd.validate()
-	if err != nil {
-		return err
-	}
-
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
 	result, err := cmd.client.List(newPwd)
 

@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
 	"io"
 	"strings"
 )
@@ -34,18 +33,8 @@ func (cmd *MoveCommand) GetName() string {
 	return cmd.name
 }
 
-func (cmd *MoveCommand) validate() error {
-	log.Warn("Missing implementation of 'mv' validation")
-	return nil
-}
-
 // Run executes 'mv' with given MoveCommand's parameters
 func (cmd *MoveCommand) Run() error {
-	err := cmd.validate()
-	if err != nil {
-		return err
-	}
-
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 

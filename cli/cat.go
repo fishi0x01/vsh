@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
 	"io"
 )
 
@@ -32,18 +31,8 @@ func (cmd *CatCommand) GetName() string {
 	return cmd.name
 }
 
-func (cmd *CatCommand) validate() error {
-	log.Warn("Missing implementation of 'cat' validation")
-	return nil
-}
-
 // Run executes 'cat' with given CatCommand's parameters
 func (cmd *CatCommand) Run() error {
-	err := cmd.validate()
-	if err != nil {
-		return err
-	}
-
 	absPath := cmdPath(cmd.client.Pwd, cmd.Path)
 	t, err := cmd.client.GetType(absPath)
 	if err != nil {
