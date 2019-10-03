@@ -39,7 +39,7 @@ func (c *Completer) absolutePathSuggestions(arg string) (result []prompt.Suggest
 		result = c.getAbsoluteTopLevelSuggestions()
 	} else {
 		li := strings.LastIndex(arg, "/")
-		queryPath := arg[0:li+1]
+		queryPath := arg[0 : li+1]
 
 		var options []string
 		var err error
@@ -67,7 +67,7 @@ func (c *Completer) relativePathSuggestions(arg string) (result []prompt.Suggest
 		result = c.getRelativeTopLevelSuggestions()
 	} else {
 		li := strings.LastIndex(arg, "/")
-		queryPath := arg[0:li+1]
+		queryPath := arg[0 : li+1]
 
 		var options []string
 		var err error

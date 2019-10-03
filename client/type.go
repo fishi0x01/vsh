@@ -1,5 +1,6 @@
 package client
 
+// type of a path
 type PathKind int
 
 // types of paths
