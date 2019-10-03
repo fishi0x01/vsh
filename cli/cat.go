@@ -44,7 +44,7 @@ func (cmd *CatCommand) Run() error {
 		return err
 	}
 
-	absPath := cmd.client.Pwd + cmd.Path
+	absPath := cmdPath(cmd.client.Pwd, cmd.Path)
 	t, err := cmd.client.GetType(absPath)
 	if err != nil {
 		return err

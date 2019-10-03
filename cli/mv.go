@@ -42,7 +42,6 @@ func (cmd *MoveCommand) validate() error {
 // Run executes 'mv' with given MoveCommand's parameters
 func (cmd *MoveCommand) Run() error {
 	err := cmd.validate()
-
 	if err != nil {
 		return err
 	}
