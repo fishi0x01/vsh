@@ -47,17 +47,8 @@ func (cmd *CopyCommand) Run() error {
 		return err
 	}
 
-	newSrcPwd := cmd.client.Pwd + cmd.Source
-	if strings.HasPrefix(cmd.Source, "/") {
-		// absolute path is given
-		newSrcPwd = cmd.Source
-	}
-
-	newTargetPwd := cmd.client.Pwd + cmd.Target
-	if strings.HasPrefix(cmd.Target, "/") {
-		// absolute path is given
-		newTargetPwd = cmd.Target
-	}
+	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
+	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 
 	for _, path := range cmd.client.Traverse(newSrcPwd) {
 		target := strings.Replace(path, newSrcPwd, newTargetPwd, 1)

@@ -6,7 +6,6 @@ import (
 	"github.com/fishi0x01/vsh/log"
 	"io"
 	"path/filepath"
-	"strings"
 )
 
 // CdCommand container for all 'cd' parameters
@@ -46,11 +45,7 @@ func (cmd *CdCommand) Run() error {
 		return err
 	}
 
-	newPwd := cmd.client.Pwd + cmd.Path
-	if strings.HasPrefix(cmd.Path, "/") {
-		// absolute path is given
-		newPwd = cmd.Path
-	}
+	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
 
 	t, err := cmd.client.GetType(newPwd)
 	if err != nil {
