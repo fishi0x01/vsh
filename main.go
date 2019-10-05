@@ -34,6 +34,12 @@ func newCommands(client *client.Client) *commands {
 	}
 }
 
+var vshVersion = ""
+
+func printVersion() {
+	fmt.Println(vshVersion)
+}
+
 func executor(in string) {
 	// Split the input separate the command and the arguments.
 	in = strings.TrimSpace(in)
@@ -89,9 +95,16 @@ func executor(in string) {
 func main() {
 	log.Init()
 
-	var inputString string
-	flag.StringVar(&inputString, "c", "", "command to run")
+	var cmdString string
+	var hasVersion bool
+	flag.StringVar(&cmdString, "c", "", "command to run")
+	flag.BoolVar(&hasVersion, "version", false, "print vsh version")
 	flag.Parse()
+
+	if hasVersion {
+		printVersion()
+		return
+	}
 
 	conf := &client.VaultConfig{
 		Addr:      os.Getenv("VAULT_ADDR"),
@@ -106,9 +119,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	if inputString != "" {
+	if cmdString != "" {
 		// Run non-interactive mode
-		executor(inputString)
+		executor(cmdString)
 	} else {
 		// Run interactive mode
 		completer := completer.NewCompleter(vaultClient)
