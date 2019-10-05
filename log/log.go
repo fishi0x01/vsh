@@ -22,6 +22,7 @@ func Init() {
 	log.SetFlags(0)
 }
 
+// ToggleVerbose toggles the verbose mode
 func ToggleVerbose() {
 	verbose = !verbose
 }

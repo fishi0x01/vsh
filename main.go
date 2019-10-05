@@ -36,7 +36,7 @@ func newCommands(client *client.Client) *commands {
 
 var (
 	vshVersion = ""
-	verbose = false
+	verbose    = false
 )
 
 func printVersion() {
