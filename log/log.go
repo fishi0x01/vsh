@@ -15,9 +15,15 @@ const (
 	errorLvl
 )
 
+var verbose = false
+
 // Init initializes the logger
 func Init() {
 	log.SetFlags(0)
+}
+
+func ToggleVerbose() {
+	verbose = !verbose
 }
 
 func logger(level uint, f string, args ...interface{}) {
@@ -49,12 +55,16 @@ func logger(level uint, f string, args ...interface{}) {
 
 // Debug writes debug message to log
 func Debug(f string, args ...interface{}) {
-	logger(debugLvl, f, args...)
+	if verbose {
+		logger(debugLvl, f, args...)
+	}
 }
 
 // Info writes info message to log
 func Info(f string, args ...interface{}) {
-	logger(infoLvl, f, args...)
+	if verbose {
+		logger(infoLvl, f, args...)
+	}
 }
 
 // Warn writes warn message to log

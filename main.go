@@ -34,7 +34,10 @@ func newCommands(client *client.Client) *commands {
 	}
 }
 
-var vshVersion = ""
+var (
+	vshVersion = ""
+	verbose = false
+)
 
 func printVersion() {
 	fmt.Println(vshVersion)
@@ -99,11 +102,16 @@ func main() {
 	var hasVersion bool
 	flag.StringVar(&cmdString, "c", "", "command to run")
 	flag.BoolVar(&hasVersion, "version", false, "print vsh version")
+	flag.BoolVar(&verbose, "v", false, "verbose output")
 	flag.Parse()
 
 	if hasVersion {
 		printVersion()
 		return
+	}
+
+	if verbose {
+		log.ToggleVerbose()
 	}
 
 	conf := &client.VaultConfig{
