@@ -122,7 +122,7 @@ func main() {
 	var err error
 	vaultClient, err = client.NewClient(conf)
 	if err != nil {
-		log.Error("Error initializing vault client | Are VAULT_ADDR and VAULT_TOKEN properly set?")
+		log.Error("Error initializing vault client) | Are VAULT_ADDR, VAULT_TOKEN and VAULT_PATH properly set?")
 		log.Error("%v", err)
 		os.Exit(1)
 	}

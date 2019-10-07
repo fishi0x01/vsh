@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"github.com/fishi0x01/vsh/log"
 	"github.com/hashicorp/vault/api"
 	"strconv"
@@ -22,6 +23,30 @@ type VaultConfig struct {
 	StartPath string
 }
 
+func verifyClientPwd(client *Client) (*Client, error) {
+	if client.Pwd == "" {
+		client.Pwd = "/"
+	}
+
+	if !strings.HasSuffix(client.Pwd, "/") {
+		client.Pwd = client.Pwd + "/"
+	}
+
+	if !strings.HasPrefix(client.Pwd, "/") {
+		client.Pwd = "/" + client.Pwd
+	}
+
+	t, err := client.GetType(client.Pwd)
+	if err != nil {
+		return nil, err
+	}
+	if t == LEAF {
+		return nil, errors.New("VAULT_PATH is not a valid directory path")
+	}
+
+	return client, nil
+}
+
 // NewClient creates a new Client Vault wrapper
 func NewClient(conf *VaultConfig) (*Client, error) {
 	vault, err := api.NewClient(&api.Config{
@@ -34,14 +59,14 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 
 	vault.SetToken(conf.Token)
 
-	mnts, err := vault.Sys().ListMounts()
+	mounts, err := vault.Sys().ListMounts()
 	if err != nil {
 		return nil, err
 	}
 
 	var backends = make(map[string]int)
-	for path, mnt := range mnts {
-		if version, ok := mnt.Options["version"]; ok {
+	for path, mount := range mounts {
+		if version, ok := mount.Options["version"]; ok {
 			v, err := strconv.Atoi(version)
 			if err != nil {
 				return nil, err
@@ -51,16 +76,12 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 		}
 	}
 
-	startPath := conf.StartPath
-	if startPath == "" {
-		startPath = "/"
-	}
-
-	if !strings.HasSuffix(startPath, "/") {
-		startPath = startPath + "/"
-	}
-
-	return &Client{Vault: vault, Name: conf.Addr, Pwd: startPath, KVBackends: backends}, nil
+	return verifyClientPwd(&Client{
+		Vault:      vault,
+		Name:       conf.Addr,
+		Pwd:        conf.StartPath,
+		KVBackends: backends,
+	})
 }
 
 // Read returns secret at given path, using given Client
