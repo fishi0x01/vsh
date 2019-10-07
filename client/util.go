@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/hashicorp/vault/api"
 	"strings"
 )
 
@@ -52,4 +53,22 @@ func (client *Client) isTopLevelPath(absolutePath string) bool {
 		return true
 	}
 	return false
+}
+
+func isValidKV2Data(secret *api.Secret) bool {
+	_, exists := secret.Data["data"]
+	return exists
+}
+
+func transformToKV1Secret(secret api.Secret) *api.Secret {
+	secret.Data = secret.Data["data"].(map[string]interface{})
+	return &secret
+}
+
+func transformToKV2Secret(secret api.Secret) *api.Secret {
+	secret.Data = map[string]interface{} {
+		"data": secret.Data,
+	}
+
+	return &secret
 }

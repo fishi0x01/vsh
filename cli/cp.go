@@ -50,10 +50,11 @@ func (cmd *CopyCommand) copySecret(source string, target string) error {
 	// write
 	err = cmd.client.Write(target, secret)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
-	fmt.Fprintln(cmd.stdout, "Moved "+source+" to "+target)
+	fmt.Fprintln(cmd.stdout, "Copied "+source+" to "+target)
 
 	return nil
 }

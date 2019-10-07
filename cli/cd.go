@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/fishi0x01/vsh/client"
 	"io"
-	"path/filepath"
 )
 
 // CdCommand container for all 'cd' parameters
@@ -45,7 +44,7 @@ func (cmd *CdCommand) Run() error {
 		fmt.Fprintln(cmd.stderr, "cannot cd to '"+newPwd+"' because it is a file")
 		return nil
 	}
-	newPwd = filepath.Clean(newPwd) + "/"
+	newPwd = newPwd + "/"
 	if newPwd == "//" {
 		newPwd = "/"
 	}

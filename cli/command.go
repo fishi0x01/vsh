@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/fishi0x01/vsh/client"
+	"path/filepath"
 	"strings"
 )
 
@@ -12,7 +13,7 @@ type Command interface {
 }
 
 func cmdPath(pwd string, arg string) (result string) {
-	result = pwd + arg
+	result =filepath.Clean(pwd + arg)
 	if strings.HasPrefix(arg, "/") {
 		// absolute path is given
 		result = arg

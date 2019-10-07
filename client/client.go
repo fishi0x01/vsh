@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"github.com/fishi0x01/vsh/log"
 	"github.com/hashicorp/vault/api"
 	"strconv"
@@ -60,7 +61,21 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 		startPath = startPath + "/"
 	}
 
-	return &Client{Vault: vault, Name: conf.Addr, Pwd: startPath, KVBackends: backends}, nil
+	if !strings.HasPrefix(startPath, "/") {
+		startPath = "/" + startPath
+	}
+
+	// TODO: verify that startPath is valid
+	client := &Client{Vault: vault, Name: conf.Addr, Pwd: startPath, KVBackends: backends}
+	t, err := client.GetType(startPath)
+	if err != nil {
+		return nil, err
+	}
+	if t == LEAF {
+		return nil, errors.New("VAULT_PATH is not a valid directory path")
+	}
+
+	return client, nil
 }
 
 // Read returns secret at given path, using given Client

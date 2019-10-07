@@ -5,31 +5,48 @@
 
 # vsh
 
-**The project is still in an alpha stage. Expect bugs.**
+vsh is an interactive HashiCorp Vault shell which treats vault secret paths like directories. 
+That way you can do recursive operations on the paths. 
+Both, vault KV v1 and v2 are supported. 
+Further, copying/moving secrets between both versions is supported.
 
-vsh is a simple interactive HashiCorp Vault shell which treats vault secret paths like directories. That way you can do recursive operations on paths. Vault KV v1 and v2 are both supported.
-Commands can also be executed in a non-interacitve way.
+vsh can also act as an executor in a non-interactive way (similar to `bash -c "<cmd>"`).
+
+## Supported commands
+
+```
+mv <from-path> <to-path>
+cp <from-path> <to-path>
+rm <dir-path or filel-path>
+ls <dir-path // optional>
+cd <dir-path>
+cat <file-path>
+```
+
+Unlike unix, `cp` and `rm` always have the `-r` flag implied, i.e., every operation works recursively on the paths.
 
 ## Interactive mode
 
 ```
 export VAULT_ADDR=http://localhost:8080
 export VAULT_TOKEN=root
+export VAULT_PATH=secret/  # This is optional
 ./vsh
-http://localhost:8888 > cd secret/
-http://localhost:8888 secret/>
+http://localhost:8888 /secret/> cd test/
+http://localhost:8888 /secret/test/>
 ```
 
 **Note: in order to query the root `/` the `VAULT_TOKEN` should have permissions to list the available secret backends (`sys/mounts/`).**
 
-**Note: the given token is also used for auto-completion feature, i.e., quite some `List()` queries are done with that token, even if you do not `rm` or `mv` anything.**
+**Note: the given token is used for auto-completion, i.e., quite some `List()` queries are done with that token, even if you do not `rm` or `mv` anything.
+If your token has a limited number of uses, then consider using the non-interactive mode to avoid auto-completion queries.**
 
 ## Non-interactive mode
 
 ```
 export VAULT_ADDR=<addr>
 export VAULT_TOKEN=<token>
-./vsh -c "rm secret/dir/to/remove"
+./vsh -c "rm secret/dir/to/remove/"
 ```
 
 ## Local Development
@@ -38,3 +55,8 @@ Requirements:
 - `golang` v1.12.7
 - `docker` for integration testing
 - `make` for simplified commands
+
+```
+make compile
+make integration-test
+```
