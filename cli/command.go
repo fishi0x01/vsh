@@ -13,7 +13,7 @@ type Command interface {
 }
 
 func cmdPath(pwd string, arg string) (result string) {
-	result =filepath.Clean(pwd + arg)
+	result = filepath.Clean(pwd + arg)
 	if strings.HasPrefix(arg, "/") {
 		// absolute path is given
 		result = arg

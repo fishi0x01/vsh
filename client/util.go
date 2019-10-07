@@ -66,7 +66,7 @@ func transformToKV1Secret(secret api.Secret) *api.Secret {
 }
 
 func transformToKV2Secret(secret api.Secret) *api.Secret {
-	secret.Data = map[string]interface{} {
+	secret.Data = map[string]interface{}{
 		"data": secret.Data,
 	}
 
