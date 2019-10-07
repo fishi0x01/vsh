@@ -5,6 +5,8 @@
 
 # vsh
 
+![vsh usage](https://user-images.githubusercontent.com/10799507/66355982-9872a980-e969-11e9-8ca4-6a2ff215f835.gif)
+
 vsh is an interactive HashiCorp Vault shell which treats vault secret paths like directories. 
 That way you can do recursive operations on the paths. 
 Both, vault KV v1 and v2 are supported. 
@@ -30,16 +32,16 @@ Unlike unix, `cp` and `rm` always have the `-r` flag implied, i.e., every operat
 ```
 export VAULT_ADDR=http://localhost:8080
 export VAULT_TOKEN=root
-export VAULT_PATH=secret/  # This is optional
+export VAULT_PATH=secret/  # VAULT_PATH is optional
 ./vsh
-http://localhost:8888 /secret/> cd test/
-http://localhost:8888 /secret/test/>
+http://localhost:8080 /secret/> 
 ```
 
-**Note: in order to query the root `/` the `VAULT_TOKEN` should have permissions to list the available secret backends (`sys/mounts/`).**
+**Note:** in order to query the root `/` the `VAULT_TOKEN` should have permissions to list the available secret backends (`sys/mounts/`).
+In case you do not have those permissions you can use `VAULT_PATH` to set the start path and avoid queries on `sys/mounts/`.
 
-**Note: the given token is used for auto-completion, i.e., quite some `List()` queries are done with that token, even if you do not `rm` or `mv` anything.
-If your token has a limited number of uses, then consider using the non-interactive mode to avoid auto-completion queries.**
+**Note:** the given token is used for auto-completion, i.e., quite some `List()` queries are done with that token, even if you do not `rm` or `mv` anything.
+If your token has a limited number of uses, then consider using the non-interactive mode to avoid auto-completion queries.
 
 ## Non-interactive mode
 
