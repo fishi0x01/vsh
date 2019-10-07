@@ -114,12 +114,12 @@ func isCommand(p string) bool {
 
 func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 	result = []prompt.Suggest{
-		{Text: "cd", Description: "Change directory"},
-		{Text: "cp", Description: "Copy secret or directory"},
-		{Text: "rm", Description: "Remove secret or directory"},
-		{Text: "mv", Description: "Move secret or directory"},
-		{Text: "cat", Description: "Print secret content"},
-		{Text: "ls", Description: "List secrets and directories"},
+		{Text: "cd", Description: "cd <path>"},
+		{Text: "cp", Description: "cp <from> <to> | -r is implied"},
+		{Text: "rm", Description: "rm <path> | -r is implied"},
+		{Text: "mv", Description: "mv <from> <to>"},
+		{Text: "cat", Description: "cat <path>"},
+		{Text: "ls", Description: "ls <path>"},
 	}
 	filtered := prompt.FilterHasPrefix(result, arg, true)
 	if len(filtered) > 0 {
