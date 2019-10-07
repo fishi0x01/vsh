@@ -94,7 +94,7 @@ func isAbsolutePath(path string) bool {
 	return strings.HasPrefix(path, "/")
 }
 
-func isSupportedCommand(p string) bool {
+func isCommandArgument(p string) bool {
 	words := strings.Split(p, " ")
 	if len(words) < 2 {
 		return false
@@ -108,9 +108,32 @@ func isSupportedCommand(p string) bool {
 		words[0] == "ls"
 }
 
+func isCommand(p string) bool {
+	return len(strings.Split(p, " ")) < 2
+}
+
+func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
+	result = []prompt.Suggest{
+		{Text: "cd", Description: "Change directory"},
+		{Text: "cp", Description: "Copy secret or directory"},
+		{Text: "rm", Description: "Remove secret or directory"},
+		{Text: "mv", Description: "Move secret or directory"},
+		{Text: "cat", Description: "Print secret content"},
+		{Text: "ls", Description: "List secrets and directories"},
+	}
+	filtered := prompt.FilterHasPrefix(result, arg, true)
+	if len(filtered) > 0 {
+		result = filtered
+	}
+	return result
+}
+
 // Complete suggestions for completion
 func (c *Completer) Complete(in prompt.Document) (result []prompt.Suggest) {
-	if isSupportedCommand(in.TextBeforeCursor()) {
+	p := in.TextBeforeCursor()
+	if isCommand(p) {
+		result = c.commandSuggestions(in.GetWordBeforeCursor())
+	} else if isCommandArgument(p) {
 		cur := in.GetWordBeforeCursor()
 		if isAbsolutePath(cur) {
 			result = c.absolutePathSuggestions(cur)

@@ -139,6 +139,7 @@ func main() {
 			prompt.OptionTitle("vsh - interactive vault shell"),
 			prompt.OptionLivePrefix(completer.PromptPrefix),
 			prompt.OptionInputTextColor(prompt.Yellow),
+			prompt.OptionShowCompletionAtStart(),
 		)
 		p.Run()
 	}
