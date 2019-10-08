@@ -32,6 +32,25 @@ func (cmd *ListCommand) GetName() string {
 	return cmd.name
 }
 
+// IsSane returns true if command is sane
+func (cmd *ListCommand) IsSane() bool {
+	return cmd.Path != ""
+}
+
+// Parse given arguments and return status
+func (cmd *ListCommand) Parse(args []string) (success bool) {
+	if len(args) == 2 {
+		cmd.Path = args[1]
+		success = true
+	} else if len(args) == 1 {
+		cmd.Path = cmd.client.Pwd
+		success = true
+	} else {
+		fmt.Println("Usage:\nls <path // optional>")
+	}
+	return success
+}
+
 // Run executes 'ls' with given ListCommand's parameters
 func (cmd *ListCommand) Run() error {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)

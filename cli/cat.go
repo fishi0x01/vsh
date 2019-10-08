@@ -31,6 +31,22 @@ func (cmd *CatCommand) GetName() string {
 	return cmd.name
 }
 
+// IsSane returns true if command is sane
+func (cmd *CatCommand) IsSane() bool {
+	return cmd.Path != ""
+}
+
+// Parse given arguments and return status
+func (cmd *CatCommand) Parse(args []string) (success bool) {
+	if len(args) == 2 {
+		cmd.Path = args[1]
+		success = true
+	} else {
+		fmt.Println("Usage:\ncat <secret>")
+	}
+	return success
+}
+
 // Run executes 'cat' with given CatCommand's parameters
 func (cmd *CatCommand) Run() error {
 	absPath := cmdPath(cmd.client.Pwd, cmd.Path)

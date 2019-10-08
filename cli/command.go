@@ -10,6 +10,8 @@ import (
 type Command interface {
 	Run() error
 	GetName() string
+	IsSane() bool
+	Parse(args []string) bool
 }
 
 func cmdPath(pwd string, arg string) (result string) {

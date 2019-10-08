@@ -31,6 +31,22 @@ func (cmd *CdCommand) GetName() string {
 	return cmd.name
 }
 
+// IsSane returns true if command is sane
+func (cmd *CdCommand) IsSane() bool {
+	return cmd.Path != ""
+}
+
+// Parse given arguments and return status
+func (cmd *CdCommand) Parse(args []string) (success bool) {
+	if len(args) == 2 {
+		cmd.Path = args[1]
+		success = true
+	} else {
+		fmt.Println("Usage:\ncd <path>")
+	}
+	return success
+}
+
 // Run executes 'cd' with given CdCommand's parameters
 func (cmd *CdCommand) Run() error {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
