@@ -32,6 +32,23 @@ func (cmd *CopyCommand) GetName() string {
 	return cmd.name
 }
 
+// IsSane returns true if command is sane
+func (cmd *CopyCommand) IsSane() bool {
+	return cmd.Source != "" && cmd.Target != ""
+}
+
+// Parse given arguments and return status
+func (cmd *CopyCommand) Parse(args []string) (success bool) {
+	if len(args) == 3 {
+		cmd.Source = args[1]
+		cmd.Target = args[2]
+		success = true
+	} else {
+		fmt.Println("Usage:\ncp <from> <to>")
+	}
+	return success
+}
+
 // Run executes 'cp' with given CopyCommand's parameters
 func (cmd *CopyCommand) Run() error {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)

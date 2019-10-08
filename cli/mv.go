@@ -32,6 +32,23 @@ func (cmd *MoveCommand) GetName() string {
 	return cmd.name
 }
 
+// IsSane returns true if command is sane
+func (cmd *MoveCommand) IsSane() bool {
+	return cmd.Source != "" && cmd.Target != ""
+}
+
+// Parse given arguments and return status
+func (cmd *MoveCommand) Parse(args []string) (success bool) {
+	if len(args) == 3 {
+		cmd.Source = args[1]
+		cmd.Target = args[2]
+		success = true
+	} else {
+		fmt.Println("Usage:\nmv <from> <to>")
+	}
+	return success
+}
+
 // Run executes 'mv' with given MoveCommand's parameters
 func (cmd *MoveCommand) Run() error {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)

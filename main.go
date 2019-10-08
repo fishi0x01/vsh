@@ -49,38 +49,27 @@ func executor(in string) {
 	args := strings.Split(in, " ")
 	commands := newCommands(vaultClient)
 	var cmd cli.Command
+	var run bool
 
 	// Check for built-in commands.
 	switch args[0] {
 	case commands.ls.GetName():
-		// 'ls' the current path
-		if len(args) > 1 {
-			commands.ls.Path = args[1]
-		} else {
-			commands.ls.Path = vaultClient.Pwd
-		}
+		run = commands.ls.Parse(args)
 		cmd = commands.ls
 	case commands.cd.GetName():
-		// 'cd' to path
-		commands.cd.Path = args[1]
+		run = commands.cd.Parse(args)
 		cmd = commands.cd
 	case commands.mv.GetName():
-		// 'mv' the current path
-		commands.mv.Source = args[1]
-		commands.mv.Target = args[2]
+		run = commands.mv.Parse(args)
 		cmd = commands.mv
 	case commands.cp.GetName():
-		// 'cp' the current path
-		commands.cp.Source = args[1]
-		commands.cp.Target = args[2]
+		run = commands.cp.Parse(args)
 		cmd = commands.cp
 	case commands.rm.GetName():
-		// 'rm' the current path
-		commands.rm.Path = args[1]
+		run = commands.rm.Parse(args)
 		cmd = commands.rm
 	case commands.cat.GetName():
-		// 'cat' given file
-		commands.cat.Path = args[1]
+		run = commands.cat.Parse(args)
 		cmd = commands.cat
 	case "exit":
 		os.Exit(0)
@@ -92,7 +81,11 @@ func executor(in string) {
 		return
 	}
 
-	cmd.Run()
+	if run {
+		if cmd.IsSane() {
+			cmd.Run()
+		}
+	}
 }
 
 func main() {

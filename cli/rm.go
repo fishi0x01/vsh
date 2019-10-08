@@ -31,6 +31,22 @@ func (cmd *RemoveCommand) GetName() string {
 	return cmd.name
 }
 
+// IsSane returns true if command is sane
+func (cmd *RemoveCommand) IsSane() bool {
+	return cmd.Path != ""
+}
+
+// Parse given arguments and return status
+func (cmd *RemoveCommand) Parse(args []string) (success bool) {
+	if len(args) == 2 {
+		cmd.Path = args[1]
+		success = true
+	} else {
+		fmt.Println("Usage:\nrm <path>")
+	}
+	return success
+}
+
 // Run executes 'rm' with given RemoveCommand's parameters
 func (cmd *RemoveCommand) Run() error {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
