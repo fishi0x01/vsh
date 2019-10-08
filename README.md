@@ -14,6 +14,8 @@ Further, copying/moving secrets between both versions is supported.
 
 vsh can also act as an executor in a non-interactive way (similar to `bash -c "<cmd>"`).
 
+Integration tests are running against vault `1.2.2`.
+
 ## Supported commands
 
 ```
@@ -62,3 +64,11 @@ Requirements:
 make compile
 make integration-test
 ```
+
+## TODOs
+
+- sys/mounts/ permission needed at the moment for auto-completion --> disable auto-completion on top level if permission not given
+- `tree` command
+- currently `mv` behaves a little different from UNIX. `mv /secret/source/a /secret/target/` should yield `/secret/target/a`
+- caching `List()` queries to reduce IO / token usage (?)
+- more integration tests!

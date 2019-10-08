@@ -62,26 +62,46 @@ func executor(in string) {
 		cmd = commands.ls
 	case commands.cd.GetName():
 		// 'cd' to path
-		commands.cd.Path = args[1]
-		cmd = commands.cd
+		if len(args) == 2 {
+			commands.cd.Path = args[1]
+			cmd = commands.cd
+		} else {
+			fmt.Println("Usage:\ncd <path>")
+		}
 	case commands.mv.GetName():
 		// 'mv' the current path
-		commands.mv.Source = args[1]
-		commands.mv.Target = args[2]
-		cmd = commands.mv
+		if len(args) == 3 {
+			commands.mv.Source = args[1]
+			commands.mv.Target = args[2]
+			cmd = commands.mv
+		} else {
+			fmt.Println("Usage:\nmv <from> <to>")
+		}
 	case commands.cp.GetName():
 		// 'cp' the current path
-		commands.cp.Source = args[1]
-		commands.cp.Target = args[2]
-		cmd = commands.cp
+		if len(args) == 3 {
+			commands.cp.Source = args[1]
+			commands.cp.Target = args[2]
+			cmd = commands.cp
+		} else {
+			fmt.Println("Usage:\ncp <from> <to>")
+		}
 	case commands.rm.GetName():
 		// 'rm' the current path
-		commands.rm.Path = args[1]
-		cmd = commands.rm
+		if len(args) == 2 {
+			commands.rm.Path = args[1]
+			cmd = commands.rm
+		} else {
+			fmt.Println("Usage:\nrm <path>")
+		}
 	case commands.cat.GetName():
 		// 'cat' given file
-		commands.cat.Path = args[1]
-		cmd = commands.cat
+		if len(args) == 2 {
+			commands.cat.Path = args[1]
+			cmd = commands.cat
+		} else {
+			fmt.Println("Usage:\ncat <secret>")
+		}
 	case "exit":
 		os.Exit(0)
 	case "":
@@ -92,7 +112,9 @@ func executor(in string) {
 		return
 	}
 
-	cmd.Run()
+	if cmd != nil {
+		cmd.Run()
+	}
 }
 
 func main() {
