@@ -8,7 +8,9 @@ import (
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/completer"
 	"github.com/fishi0x01/vsh/log"
+	"io/ioutil"
 	"os"
+	"os/user"
 	"strings"
 )
 
@@ -88,6 +90,30 @@ func executor(in string) {
 	}
 }
 
+func getVaultToken() (token string) {
+	token = os.Getenv("VAULT_TOKEN")
+	if token == "" {
+		usr, err := user.Current()
+		if err != nil {
+			fmt.Println("Cannot determine current user's home directory to find ~/.vault-token")
+			return token
+		}
+		tokenFile := usr.HomeDir + "/.vault-token"
+
+		if _, err := os.Stat(tokenFile); err == nil {
+			buf, err := ioutil.ReadFile(tokenFile)
+			if err != nil {
+				fmt.Println("Could not read", tokenFile)
+				return token
+			}
+			token = strings.TrimSpace(string(buf))
+		} else {
+			fmt.Println("Could not read ~/.vault-token")
+		}
+	}
+	return token
+}
+
 func main() {
 	log.Init()
 
@@ -107,9 +133,11 @@ func main() {
 		log.ToggleVerbose()
 	}
 
+	token := getVaultToken()
+
 	conf := &client.VaultConfig{
 		Addr:      os.Getenv("VAULT_ADDR"),
-		Token:     os.Getenv("VAULT_TOKEN"),
+		Token:     token,
 		StartPath: os.Getenv("VAULT_PATH"),
 	}
 	var err error
