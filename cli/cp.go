@@ -53,6 +53,13 @@ func (cmd *CopyCommand) Parse(args []string) (success bool) {
 func (cmd *CopyCommand) Run() {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
+
+	t := cmd.client.GetType(newSrcPwd)
+	if t != client.NODE && t != client.LEAF {
+		fmt.Fprintln(cmd.stderr, "Not a valid source path: "+newSrcPwd)
+		return
+	}
+
 	runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.copySecret)
 	return
 }

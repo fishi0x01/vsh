@@ -51,6 +51,12 @@ func (cmd *RemoveCommand) Parse(args []string) (success bool) {
 func (cmd *RemoveCommand) Run() {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
 
+	t := cmd.client.GetType(newPwd)
+	if t != client.NODE && t != client.LEAF {
+		fmt.Fprintln(cmd.stderr, "Not a valid path: "+newPwd)
+		return
+	}
+
 	for _, path := range cmd.client.Traverse(newPwd) {
 		err := cmd.removeSecret(path)
 		if err != nil {

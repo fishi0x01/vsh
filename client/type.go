@@ -24,11 +24,17 @@ func (client *Client) topLevelType(path string) PathKind {
 func (client *Client) lowLevelType(path string) PathKind {
 	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
 	if err != nil {
+		return NONE
+	}
+
+	if s != nil {
 		return NODE
 	}
 
-	if s == nil {
+	s, err = client.Vault.Logical().Read(client.getKVDataPath(path))
+	if err == nil && s != nil {
 		return LEAF
 	}
-	return NODE
+
+	return NONE
 }
