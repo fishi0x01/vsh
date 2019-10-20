@@ -48,22 +48,25 @@ func (cmd *CdCommand) Parse(args []string) (success bool) {
 }
 
 // Run executes 'cd' with given CdCommand's parameters
-func (cmd *CdCommand) Run() error {
+func (cmd *CdCommand) Run() {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
 
-	t, err := cmd.client.GetType(newPwd)
-	if err != nil {
-		return err
+	t := cmd.client.GetType(newPwd)
+
+	if t == client.NONE {
+		fmt.Fprintln(cmd.stderr, "Not a valid directory: "+newPwd)
+		return
 	}
 
 	if t == client.LEAF {
-		fmt.Fprintln(cmd.stderr, "cannot cd to '"+newPwd+"' because it is a file")
-		return nil
+		fmt.Fprintln(cmd.stderr, "Not a valid directory: "+newPwd+" is a file")
+		return
 	}
+
 	newPwd = newPwd + "/"
 	if newPwd == "//" {
 		newPwd = "/"
 	}
 	cmd.client.Pwd = newPwd
-	return err
+	return
 }

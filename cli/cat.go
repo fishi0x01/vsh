@@ -48,17 +48,14 @@ func (cmd *CatCommand) Parse(args []string) (success bool) {
 }
 
 // Run executes 'cat' with given CatCommand's parameters
-func (cmd *CatCommand) Run() error {
+func (cmd *CatCommand) Run() {
 	absPath := cmdPath(cmd.client.Pwd, cmd.Path)
-	t, err := cmd.client.GetType(absPath)
-	if err != nil {
-		return err
-	}
+	t := cmd.client.GetType(absPath)
 
 	if t == client.LEAF {
 		secret, err := cmd.client.Read(absPath)
 		if err != nil {
-			return err
+			return
 		}
 
 		for k, v := range secret.Data {
@@ -76,5 +73,5 @@ func (cmd *CatCommand) Run() error {
 		fmt.Fprintln(cmd.stderr, cmd.client.Pwd+cmd.Path, "is not a file")
 	}
 
-	return err
+	return
 }

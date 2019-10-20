@@ -5,7 +5,7 @@ import (
 )
 
 func (client *Client) topLevelDelete(path string) error {
-	return errors.New(path + " is a backend path and cannot be deleted")
+	return errors.New(path + " is a vault backend and cannot be deleted")
 }
 
 func (client *Client) lowLevelDelete(path string) (err error) {

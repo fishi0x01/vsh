@@ -48,17 +48,23 @@ func (cmd *RemoveCommand) Parse(args []string) (success bool) {
 }
 
 // Run executes 'rm' with given RemoveCommand's parameters
-func (cmd *RemoveCommand) Run() error {
+func (cmd *RemoveCommand) Run() {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
+
+	t := cmd.client.GetType(newPwd)
+	if t != client.NODE && t != client.LEAF {
+		fmt.Fprintln(cmd.stderr, "Not a valid path: "+newPwd)
+		return
+	}
 
 	for _, path := range cmd.client.Traverse(newPwd) {
 		err := cmd.removeSecret(path)
 		if err != nil {
-			return err
+			return
 		}
 	}
 
-	return nil
+	return
 }
 
 func (cmd *RemoveCommand) removeSecret(path string) error {

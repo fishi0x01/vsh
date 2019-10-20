@@ -1,5 +1,9 @@
 package client
 
+import (
+	"errors"
+)
+
 func (client *Client) listTopLevel() (result []string) {
 	for k := range client.KVBackends {
 		result = append(result, k)
@@ -8,6 +12,11 @@ func (client *Client) listTopLevel() (result []string) {
 }
 
 func (client *Client) listLowLevel(path string) (result []string, err error) {
+	t := client.lowLevelType(path)
+	if t != BACKEND && t != NODE {
+		return nil, errors.New("Not a directory: " + path)
+	}
+
 	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
 	if err != nil {
 		return result, err

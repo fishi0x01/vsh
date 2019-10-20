@@ -72,3 +72,8 @@ func transformToKV2Secret(secret api.Secret) *api.Secret {
 
 	return &secret
 }
+
+func normalizedVaultPath(absolutePath string) string {
+	// remove trailing '/'
+	return absolutePath[1:]
+}
