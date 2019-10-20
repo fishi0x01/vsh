@@ -54,12 +54,12 @@ func (cmd *CdCommand) Run() {
 	t := cmd.client.GetType(newPwd)
 
 	if t == client.NONE {
-		fmt.Fprintln(cmd.stderr, "Not a valid directory: " + newPwd)
+		fmt.Fprintln(cmd.stderr, "Not a valid directory: "+newPwd)
 		return
 	}
 
 	if t == client.LEAF {
-		fmt.Fprintln(cmd.stderr, "Not a valid directory: " + newPwd + " is a file")
+		fmt.Fprintln(cmd.stderr, "Not a valid directory: "+newPwd+" is a file")
 		return
 	}
 
