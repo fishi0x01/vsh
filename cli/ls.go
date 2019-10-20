@@ -52,11 +52,15 @@ func (cmd *ListCommand) Parse(args []string) (success bool) {
 }
 
 // Run executes 'ls' with given ListCommand's parameters
-func (cmd *ListCommand) Run() error {
+func (cmd *ListCommand) Run() {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
 	result, err := cmd.client.List(newPwd)
 
-	fmt.Fprintln(cmd.stdout, strings.Join(result, "  "))
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Fprintln(cmd.stdout, strings.Join(result, "  "))
+	}
 
-	return err
+	return
 }

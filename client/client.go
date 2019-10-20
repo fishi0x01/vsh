@@ -36,11 +36,9 @@ func verifyClientPwd(client *Client) (*Client, error) {
 		client.Pwd = "/" + client.Pwd
 	}
 
-	t, err := client.GetType(client.Pwd)
-	if err != nil {
-		return nil, err
-	}
-	if t == LEAF {
+	t := client.GetType(client.Pwd)
+
+	if t != NODE && t != BACKEND {
 		return nil, errors.New("VAULT_PATH is not a valid directory path")
 	}
 
@@ -87,9 +85,9 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 // Read returns secret at given path, using given Client
 func (client *Client) Read(absolutePath string) (secret *api.Secret, err error) {
 	if client.isTopLevelPath(absolutePath) {
-		secret, err = client.topLevelRead(absolutePath[1:])
+		secret, err = client.topLevelRead(normalizedVaultPath(absolutePath))
 	} else {
-		secret, err = client.lowLevelRead(absolutePath[1:])
+		secret, err = client.lowLevelRead(normalizedVaultPath(absolutePath))
 	}
 
 	return secret, err
@@ -98,9 +96,9 @@ func (client *Client) Read(absolutePath string) (secret *api.Secret, err error) 
 // Write writes secret to given path, using given Client
 func (client *Client) Write(absolutePath string, secret *api.Secret) (err error) {
 	if client.isTopLevelPath(absolutePath) {
-		err = client.topLevelWrite(absolutePath[1:])
+		err = client.topLevelWrite(normalizedVaultPath(absolutePath))
 	} else {
-		err = client.lowLevelWrite(absolutePath[1:], secret)
+		err = client.lowLevelWrite(normalizedVaultPath(absolutePath), secret)
 	}
 
 	return err
@@ -109,9 +107,9 @@ func (client *Client) Write(absolutePath string, secret *api.Secret) (err error)
 // Delete deletes secret at given absolutePath, using given client
 func (client *Client) Delete(absolutePath string) (err error) {
 	if client.isTopLevelPath(absolutePath) {
-		err = client.topLevelDelete(absolutePath[1:])
+		err = client.topLevelDelete(normalizedVaultPath(absolutePath))
 	} else {
-		err = client.lowLevelDelete(absolutePath[1:])
+		err = client.lowLevelDelete(normalizedVaultPath(absolutePath))
 	}
 
 	return err
@@ -122,29 +120,29 @@ func (client *Client) List(absolutePath string) (result []string, err error) {
 	if client.isTopLevelPath(absolutePath) {
 		result = client.listTopLevel()
 	} else {
-		result, err = client.listLowLevel(absolutePath[1:])
+		result, err = client.listLowLevel(normalizedVaultPath(absolutePath))
 	}
 
 	return result, err
 }
 
-// GetType returns the file type the given absolutePath points to. Possible return values are BACKEND, NODE or LEAF
-func (client *Client) GetType(absolutePath string) (kind PathKind, err error) {
+// GetType returns the file type the given absolutePath points to. Possible return values are BACKEND, NODE, LEAF or NONE
+func (client *Client) GetType(absolutePath string) (kind PathKind) {
 	if client.isTopLevelPath(absolutePath) {
-		kind, err = client.topLevelType()
+		kind = client.topLevelType(normalizedVaultPath(absolutePath))
 	} else {
-		kind, err = client.lowLevelType(absolutePath[1:])
+		kind = client.lowLevelType(normalizedVaultPath(absolutePath))
 	}
 
-	return kind, err
+	return kind
 }
 
 // Traverse traverses given absolutePath via DFS and returns sub-paths in array
 func (client *Client) Traverse(absolutePath string) (paths []string) {
 	if client.isTopLevelPath(absolutePath) {
-		paths = client.topLevelTraverse(absolutePath[1:])
+		paths = client.topLevelTraverse(normalizedVaultPath(absolutePath))
 	} else {
-		paths = client.lowLevelTraverse(absolutePath[1:])
+		paths = client.lowLevelTraverse(normalizedVaultPath(absolutePath))
 	}
 
 	return paths

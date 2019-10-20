@@ -8,20 +8,27 @@ const (
 	BACKEND PathKind = iota
 	NODE
 	LEAF
+	NONE
 )
 
-func (client *Client) topLevelType() (PathKind, error) {
-	return BACKEND, nil
+func (client *Client) topLevelType(path string) PathKind {
+	if path == "" {
+		return BACKEND
+	} else if _, ok := client.KVBackends[path+"/"]; ok {
+		return BACKEND
+	} else {
+		return NONE
+	}
 }
 
-func (client *Client) lowLevelType(path string) (PathKind, error) {
+func (client *Client) lowLevelType(path string) PathKind {
 	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
 	if err != nil {
-		return NODE, err
+		return NODE
 	}
 
 	if s == nil {
-		return LEAF, nil
+		return LEAF
 	}
-	return NODE, nil
+	return NODE
 }

@@ -8,7 +8,7 @@ import (
 
 // Command interface to describe a command structure
 type Command interface {
-	Run() error
+	Run()
 	GetName() string
 	IsSane() bool
 	Parse(args []string) bool
@@ -23,14 +23,14 @@ func cmdPath(pwd string, arg string) (result string) {
 	return result
 }
 
-func runCommandWithTraverseTwoPaths(client *client.Client, source string, target string, f func(string, string) error) error {
+func runCommandWithTraverseTwoPaths(client *client.Client, source string, target string, f func(string, string) error) {
 	for _, path := range client.Traverse(source) {
 		target := strings.Replace(path, source, target, 1)
 		err := f(path, target)
 		if err != nil {
-			return err
+			return
 		}
 	}
 
-	return nil
+	return
 }

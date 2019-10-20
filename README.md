@@ -40,7 +40,6 @@ http://localhost:8080 /secret/>
 ```
 
 **Note:** in order to query the root `/` the `VAULT_TOKEN` should have permissions to list the available secret backends (`sys/mounts/`).
-In case you do not have those permissions you can use `VAULT_PATH` to set the start path and avoid queries on `sys/mounts/`.
 
 **Note:** the given token is used for auto-completion, i.e., quite some `List()` queries are done with that token, even if you do not `rm` or `mv` anything.
 If your token has a limited number of uses, then consider using the non-interactive mode to avoid auto-completion queries.

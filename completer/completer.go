@@ -74,7 +74,7 @@ func (c *Completer) relativePathSuggestions(arg string) (result []prompt.Suggest
 		options, err = c.client.List(c.client.Pwd + queryPath)
 
 		if err != nil {
-			panic(err)
+			return result
 		}
 
 		options = append(options, "../")
