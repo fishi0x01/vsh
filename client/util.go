@@ -61,10 +61,6 @@ func (client *Client) kvPath(path string, prefix string) string {
 		}
 		return s[0] + prefix + s[1]
 	default:
-		if strings.Contains(path, "/") {
-			panic(fmt.Errorf("Unknown KV Version '%v' for path '%s'", v, path))
-		}
-		// we are in the root path
 		return ""
 	}
 }
