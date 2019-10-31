@@ -1,3 +1,9 @@
+## v0.3.0 (October 31, 2019)
+
+ENHANCEMENTS:
+
+* token list permission on sys/mounts is not mandatory
+
 ## v0.2.0 (October 20, 2019)
 
 ENHANCEMENTS:

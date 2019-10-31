@@ -59,15 +59,12 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	vault.SetToken(conf.Token)
 
 	permissions, err := vault.Sys().CapabilitiesSelf("sys/mounts")
-	if err != nil {
-		return nil, err
-	}
 
 	var mounts map[string]*api.MountOutput
 	if sliceContains(permissions, "list") || sliceContains(permissions, "root") {
 		mounts, err = vault.Sys().ListMounts()
 	} else {
-		fmt.Println("Cannot discover mount backends: Do not have list permission on sys/mounts")
+		fmt.Println("Cannot auto-discover mount backends: Token does not have list permission on sys/mounts")
 	}
 
 	if err != nil {
