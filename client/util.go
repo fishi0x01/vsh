@@ -6,6 +6,32 @@ import (
 	"strings"
 )
 
+func (client *Client) discoverMountBackend(backend string) {
+	if _, ok := client.KVBackends[backend]; !ok {
+		// backend is unknown - check if exists
+		_, err := client.Vault.Help(backend)
+		if err != nil {
+			return
+		}
+
+		// backend exists
+		s, err := client.Vault.Logical().List(backend)
+		if err != nil {
+			return
+		}
+
+		if s == nil {
+			return
+		}
+
+		if s.Warnings != nil {
+			client.KVBackends[backend] = 2
+		} else {
+			client.KVBackends[backend] = 1
+		}
+	}
+}
+
 func (client *Client) getKVVersion(path string) int {
 	mntPath := ""
 	if strings.HasPrefix(path, "/") {
@@ -13,6 +39,9 @@ func (client *Client) getKVVersion(path string) int {
 	} else {
 		mntPath = strings.Split(path, "/")[0] + "/"
 	}
+
+	client.discoverMountBackend(mntPath)
+
 	if version, ok := client.KVBackends[mntPath]; ok {
 		return version
 	}
@@ -76,4 +105,13 @@ func transformToKV2Secret(secret api.Secret) *api.Secret {
 func normalizedVaultPath(absolutePath string) string {
 	// remove trailing '/'
 	return absolutePath[1:]
+}
+
+func sliceContains(arr []string, search string) bool {
+	for _, s := range arr {
+		if s == search {
+			return true
+		}
+	}
+	return false
 }

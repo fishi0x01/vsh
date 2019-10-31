@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	"github.com/fishi0x01/vsh/log"
 	"github.com/hashicorp/vault/api"
 	"strconv"
@@ -57,7 +58,15 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 
 	vault.SetToken(conf.Token)
 
-	mounts, err := vault.Sys().ListMounts()
+	permissions, err := vault.Sys().CapabilitiesSelf("sys/mounts")
+
+	var mounts map[string]*api.MountOutput
+	if sliceContains(permissions, "list") || sliceContains(permissions, "root") {
+		mounts, err = vault.Sys().ListMounts()
+	} else {
+		fmt.Println("Cannot auto-discover mount backends: Token does not have list permission on sys/mounts")
+	}
+
 	if err != nil {
 		return nil, err
 	}
