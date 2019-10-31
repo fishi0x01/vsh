@@ -1,3 +1,9 @@
+## v0.3.1 (October 31, 2019)
+
+BUG FIXES:
+
+* fix top-level path panic ([#17](https://github.com/fishi0x01/vsh/issues/17))
+
 ## v0.3.0 (October 31, 2019)
 
 ENHANCEMENTS:
