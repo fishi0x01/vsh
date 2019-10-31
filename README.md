@@ -14,7 +14,7 @@ Further, copying/moving secrets between both versions is supported.
 
 vsh can also act as an executor in a non-interactive way (similar to `bash -c "<cmd>"`).
 
-Integration tests are running against vault `1.2.2`.
+Integration tests are running against vault `1.2.3`.
 
 ## Supported commands
 
@@ -30,9 +30,6 @@ cat <file-path>
 Unlike unix, `cp` and `rm` always have the `-r` flag implied, i.e., every operation works recursively on the paths.
 
 ## Interactive mode
-
-**Note:** Currently, `vsh` requires `VAULT_TOKEN` to have list permissions on `sys/mounts`. 
-This is needed to query the available backends. 
 
 ```
 export VAULT_ADDR=http://localhost:8080
@@ -53,6 +50,15 @@ export VAULT_TOKEN=<token>
 ./vsh -c "rm secret/dir/to/remove/"
 ```
 
+## Misc
+
+`vsh` attempts to reliably discover all available backends. 
+Ideally, the vault token used by `vsh` has `list` permissions on `sys/mount`. 
+If this is not the case, then `vsh` does not know the available backends beforehand. 
+That means initially there won't be path auto-completion on the top level. 
+However, `vsh` will try with best effort, to reliably determine the kv version of every entered path. 
+
+
 ## Local Development
 
 Requirements:
@@ -67,8 +73,7 @@ make integration-test
 
 ## TODOs
 
-- sys/mounts/ permission needed at the moment for auto-completion --> disable auto-completion on top level if permission not given
 - `tree` command
-- currently `mv` behaves a little different from UNIX. `mv /secret/source/a /secret/target/` should yield `/secret/target/a`
+- currently `mv` and `cp` behave a little different from UNIX. `mv /secret/source/a /secret/target/` should yield `/secret/target/a`
 - caching `List()` queries to reduce IO / token usage (?)
 - more integration tests!
