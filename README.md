@@ -14,7 +14,7 @@ Further, copying/moving secrets between both versions is supported.
 
 vsh can also act as an executor in a non-interactive way (similar to `bash -c "<cmd>"`).
 
-Integration tests are running against vault `1.2.3`.
+Integration tests are running against vault `1.3.1`.
 
 ## Supported commands
 
