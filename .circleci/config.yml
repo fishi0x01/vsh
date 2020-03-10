@@ -9,5 +9,10 @@ jobs:
     working_directory: /home/circleci/.go_workspace/src/github.com/fishi0x01/vsh
     steps:
       - checkout
+      - run: curl -sLO https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
+      - run: tar xvzf go1.12.7.linux-amd64.tar.gz
+      - run: sudo rm -rf /usr/local/go
+      - run: sudo mv go /usr/local/
+      - run: rm go1.12.7.linux-amd64.tar.gz
       - run: make cross-compile
       - run: make integration-test
