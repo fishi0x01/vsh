@@ -8,10 +8,9 @@ import (
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/completer"
 	"github.com/fishi0x01/vsh/log"
-	"io/ioutil"
 	"os"
-	"os/user"
 	"strings"
+	"github.com/hashicorp/vault/command/config"
 )
 
 var vaultClient *client.Client
@@ -90,28 +89,20 @@ func executor(in string) {
 	}
 }
 
-func getVaultToken() (token string) {
+func getVaultToken() (token string, err error) {
 	token = os.Getenv("VAULT_TOKEN")
 	if token == "" {
-		usr, err := user.Current()
-		if err != nil {
-			fmt.Println("Cannot determine current user's home directory to find ~/.vault-token")
-			return token
+		helper, ve := config.DefaultTokenHelper()
+		if ve != nil {
+			err = ve
+			return token, err
 		}
-		tokenFile := usr.HomeDir + "/.vault-token"
-
-		if _, err := os.Stat(tokenFile); err == nil {
-			buf, err := ioutil.ReadFile(tokenFile)
-			if err != nil {
-				fmt.Println("Could not read", tokenFile)
-				return token
-			}
-			token = strings.TrimSpace(string(buf))
-		} else {
-			fmt.Println("Could not read ~/.vault-token")
+		token, ve = helper.Get()
+		if ve != nil {
+			err = ve
 		}
 	}
-	return token
+	return token, err
 }
 
 func main() {
@@ -133,7 +124,12 @@ func main() {
 		log.ToggleVerbose()
 	}
 
-	token := getVaultToken()
+	token, ve := getVaultToken()
+	if ve != nil {
+		log.Error("Error getting vault token")
+		log.Error("%v", ve)
+		return
+	}
 
 	conf := &client.VaultConfig{
 		Addr:      os.Getenv("VAULT_ADDR"),
@@ -143,7 +139,7 @@ func main() {
 	var err error
 	vaultClient, err = client.NewClient(conf)
 	if err != nil {
-		log.Error("Error initializing vault client | Are VAULT_ADDR, VAULT_TOKEN and VAULT_PATH properly set?")
+		log.Error("Error initializing vault client | Is VAULT_ADDR properly set? Do you provide a proper token?")
 		log.Error("%v", err)
 		os.Exit(1)
 	}

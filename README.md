@@ -10,11 +10,11 @@
 `vsh` is an interactive HashiCorp Vault shell which treats vault secret paths like directories. 
 That way you can do recursive operations on the paths. 
 Both, vault KV v1 and v2 are supported. 
-Further, copying/moving secrets between both versions is supported.
+Further, copying/moving secrets between both KV versions is supported.
 
-vsh can also act as an executor in a non-interactive way (similar to `bash -c "<cmd>"`).
+`vsh` can also act as an executor in a non-interactive way (similar to `bash -c "<cmd>"`).
 
-Integration tests are running against vault `1.3.1`.
+Integration tests are running against vault `1.3.3`.
 
 ## Supported commands
 
@@ -28,6 +28,11 @@ cat <file-path>
 ```
 
 Unlike unix, `cp` and `rm` always have the `-r` flag implied, i.e., every operation works recursively on the paths.
+
+## Setting the vault token
+
+In order to get a valid token, `vsh` uses vault's TokenHelper mechanism (`github.com/hashicorp/vault/command/config`).
+That means `vsh` supports setting vault tokens via `~/.vault-token`, `VAULT_TOKEN` and external `token_helper`.
 
 ## Interactive mode
 
@@ -58,7 +63,6 @@ If this is not the case, then `vsh` does not know the available backends beforeh
 That means initially there won't be path auto-completion on the top level. 
 However, `vsh` will try with best effort, to reliably determine the kv version of every entered path. 
 
-
 ## Local Development
 
 Requirements:
@@ -76,4 +80,4 @@ make integration-test
 - `tree` command
 - currently `mv` and `cp` behave a little different from UNIX. `mv /secret/source/a /secret/target/` should yield `/secret/target/a`
 - caching `List()` queries to reduce IO / token usage (?)
-- more integration tests!
+- more tests!

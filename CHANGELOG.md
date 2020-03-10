@@ -1,3 +1,9 @@
+## v0.4.0 (March 10, 2020)
+
+ENHANCEMENTS:
+
+* use TokenHelper mechanism (`github.com/hashicorp/vault/command/config`)
+
 ## v0.3.1 (October 31, 2019)
 
 BUG FIXES:
