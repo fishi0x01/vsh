@@ -8,9 +8,9 @@ import (
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/completer"
 	"github.com/fishi0x01/vsh/log"
+	"github.com/hashicorp/vault/command/config"
 	"os"
 	"strings"
-	"github.com/hashicorp/vault/command/config"
 )
 
 var vaultClient *client.Client
