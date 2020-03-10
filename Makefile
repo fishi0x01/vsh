@@ -22,6 +22,7 @@ compile: clean
 	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_linux_amd64
 
 integration-test:
+	./test/kv2-token-helper.sh
 	./test/kv1-reduced-permissions.sh
 	./test/kv1.sh
 	./test/kv1-to-kv2.sh

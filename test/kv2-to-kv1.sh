@@ -5,7 +5,7 @@ source $(dirname ${0})/util.sh
 export APP_BIN="./build/vsh_linux_amd64"
 export VAULT_PORT=8888
 export VAULT_TOKEN="root"
-export VAULT_VERSION="1.3.1"
+export VAULT_VERSION="1.3.3"
 export VAULT_ADDR="http://localhost:${VAULT_PORT}"
 export VAULT_CONTAINER_NAME="vault-kv2-to-kv1-test"
 export VAULT_TEST_VALUE="test"
