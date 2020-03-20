@@ -44,7 +44,9 @@ export VAULT_PATH=secret/  # VAULT_PATH is optional
 http://localhost:8080 /secret/> 
 ```
 
-**Note:** the given token is used for auto-completion, i.e., quite some `List()` queries are done with that token, even if you do not `rm` or `mv` anything.
+**Note:** the given token is used for auto-completion, i.e., `List()` queries are done with that token, even if you do not `rm` or `mv` anything.
+`vsh` caches `List()` results to reduce the amount of queries. However, after execution of each command the cache is cleared 
+in order to do accurate tab-completion.
 If your token has a limited number of uses, then consider using the non-interactive mode to avoid auto-completion queries.
 
 ## Non-interactive mode
@@ -79,5 +81,3 @@ make integration-test
 
 - `tree` command
 - currently `mv` and `cp` behave a little different from UNIX. `mv /secret/source/a /secret/target/` should yield `/secret/target/a`
-- caching `List()` queries to reduce IO / token usage (?)
-- more tests!

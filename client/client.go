@@ -15,6 +15,7 @@ type Client struct {
 	Name       string
 	Pwd        string
 	KVBackends map[string]int
+	listCache  map[string][]string
 }
 
 // VaultConfig container to keep parameters for Client configuration
@@ -88,6 +89,7 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 		Name:       conf.Addr,
 		Pwd:        conf.StartPath,
 		KVBackends: backends,
+		listCache:  make(map[string][]string),
 	})
 }
 
@@ -126,11 +128,15 @@ func (client *Client) Delete(absolutePath string) (err error) {
 
 // List elements at the given absolutePath, using the given client
 func (client *Client) List(absolutePath string) (result []string, err error) {
+	if val, ok := client.listCache[absolutePath]; ok {
+		return val, nil
+	}
 	if client.isTopLevelPath(absolutePath) {
 		result = client.listTopLevel()
 	} else {
 		result, err = client.listLowLevel(normalizedVaultPath(absolutePath))
 	}
+	client.listCache[absolutePath] = result
 
 	return result, err
 }
@@ -155,4 +161,9 @@ func (client *Client) Traverse(absolutePath string) (paths []string) {
 	}
 
 	return paths
+}
+
+// ClearCache clears the list cache
+func (client *Client) ClearCache() {
+	client.listCache = make(map[string][]string)
 }

@@ -45,6 +45,10 @@ func printVersion() {
 }
 
 func executor(in string) {
+	// Every command can change the vault content
+	// i.e., the cache should be cleared on command execution
+	vaultClient.ClearCache()
+
 	// Split the input separate the command and the arguments.
 	in = strings.TrimSpace(in)
 	args := strings.Split(in, " ")
