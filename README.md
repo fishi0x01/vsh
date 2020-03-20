@@ -12,7 +12,8 @@ That way you can do recursive operations on the paths.
 Both, vault KV v1 and v2 are supported. 
 Further, copying/moving secrets between both KV versions is supported.
 
-`vsh` can also act as an executor in a non-interactive way (similar to `bash -c "<cmd>"`).
+`vsh` also supports a non-interactive mode (similar to `bash -c "<cmd>"`), which 
+makes it easier to integrate with automation.
 
 Integration tests are running against vault `1.3.3`.
 
