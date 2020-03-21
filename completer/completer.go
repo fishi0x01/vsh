@@ -19,17 +19,17 @@ func NewCompleter(client *client.Client) *Completer {
 }
 
 func (c *Completer) getAbsoluteTopLevelSuggestions() []prompt.Suggest {
-	var suggestions = []prompt.Suggest{}
+	var suggestions []prompt.Suggest
 	for k := range c.client.KVBackends {
-		suggestions = append(suggestions, prompt.Suggest{"/" + k, ""})
+		suggestions = append(suggestions, prompt.Suggest{Text: "/" + k})
 	}
 	return suggestions
 }
 
 func (c *Completer) getRelativeTopLevelSuggestions() []prompt.Suggest {
-	var suggestions = []prompt.Suggest{}
+	var suggestions []prompt.Suggest
 	for k := range c.client.KVBackends {
-		suggestions = append(suggestions, prompt.Suggest{k, ""})
+		suggestions = append(suggestions, prompt.Suggest{Text: k})
 	}
 	return suggestions
 }
@@ -51,7 +51,7 @@ func (c *Completer) absolutePathSuggestions(arg string) (result []prompt.Suggest
 
 		options = append(options, "../")
 		for _, node := range options {
-			result = append(result, prompt.Suggest{queryPath + node, ""})
+			result = append(result, prompt.Suggest{Text: queryPath + node})
 		}
 	}
 
@@ -79,7 +79,7 @@ func (c *Completer) relativePathSuggestions(arg string) (result []prompt.Suggest
 
 		options = append(options, "../")
 		for _, node := range options {
-			result = append(result, prompt.Suggest{queryPath + node, ""})
+			result = append(result, prompt.Suggest{Text: queryPath + node})
 		}
 	}
 

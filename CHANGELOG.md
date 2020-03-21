@@ -1,8 +1,14 @@
+## v0.4.1 (March 21, 2020)
+
+ENHANCEMENTS:
+
+* performance: cache `List()` queries ([#23](https://github.com/fishi0x01/vsh/issues/23))
+
 ## v0.4.0 (March 10, 2020)
 
 ENHANCEMENTS:
 
-* use TokenHelper mechanism (`github.com/hashicorp/vault/command/config`)
+* use TokenHelper mechanism ([#20](https://github.com/fishi0x01/vsh/issues/20))
 
 ## v0.3.1 (October 31, 2019)
 
