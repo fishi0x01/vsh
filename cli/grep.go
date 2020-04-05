@@ -20,11 +20,12 @@ type GrepCommand struct {
 	Search string
 }
 
+// Match structure to keep indices of matched terms
 type Match struct {
-	path   string
-	search string
-	key    string
-	value  string
+	path  string
+	term  string
+	key   string
+	value string
 	// sorted slices of indices of match starts
 	keyIndex   []int
 	valueIndex []int
@@ -57,7 +58,7 @@ func (cmd *GrepCommand) Parse(args []string) (success bool) {
 		cmd.Path = args[2]
 		success = true
 	} else {
-		fmt.Println("Usage:\ngrep <search-string> <path>")
+		fmt.Println("Usage:\ngrep <term-string> <path>")
 	}
 	return success
 }
@@ -98,17 +99,11 @@ func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, 
 			if rec, ok := v.(map[string]interface{}); ok {
 				// KV 2
 				for kk, vv := range rec {
-					m := match(path, kk, fmt.Sprintf("%v", vv), search)
-					if m != nil {
-						matches = append(matches, m)
-					}
+					matches = append(matches, match(path, kk, fmt.Sprintf("%v", vv), search)...)
 				}
 			} else {
 				// KV 1
-				m := match(path, k, fmt.Sprintf("%v", v), search)
-				if m != nil {
-					matches = append(matches, m)
-				}
+				matches = append(matches, match(path, k, fmt.Sprintf("%v", v), search)...)
 			}
 		}
 	}
@@ -117,7 +112,7 @@ func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, 
 }
 
 // find all indices for matches in key and value
-func match(path string, k string, v string, substr string) (m *Match) {
+func match(path string, k string, v string, substr string) (m []*Match) {
 	keyIndex := suffixarray.New([]byte(k))
 	keyMatches := keyIndex.Lookup([]byte(substr), -1)
 	sort.Ints(keyMatches)
@@ -127,13 +122,15 @@ func match(path string, k string, v string, substr string) (m *Match) {
 	sort.Ints(valueMatches)
 
 	if len(keyMatches) > 0 || len(valueMatches) > 0 {
-		m = &Match{
-			path:       path,
-			search:     substr,
-			key:        k,
-			value:      v,
-			keyIndex:   keyMatches,
-			valueIndex: valueMatches,
+		m = []*Match{
+			&Match{
+				path:       path,
+				term:       substr,
+				key:        k,
+				value:      v,
+				keyIndex:   keyMatches,
+				valueIndex: valueMatches,
+			},
 		}
 	}
 
@@ -141,32 +138,25 @@ func match(path string, k string, v string, substr string) (m *Match) {
 }
 
 func (match *Match) print(out io.Writer) {
-	matchColor := color.New(color.FgYellow).SprintFunc()
 	fmt.Fprint(out, match.path, "> ")
+	highlightMatches(match.key, match.term, match.keyIndex, out)
+	fmt.Fprintf(out, " : ")
+	highlightMatches(match.value, match.term, match.valueIndex, out)
+	fmt.Fprintf(out, "\n")
+}
 
+func highlightMatches(s string, term string, index []int, out io.Writer) {
+	matchColor := color.New(color.FgYellow).SprintFunc()
 	cur := 0
-	if len(match.keyIndex) > 0 {
-		for _, index := range match.keyIndex {
-			end := index + len(match.search)
-			fmt.Fprint(out, match.key[cur:index])
-			fmt.Fprint(out, matchColor(match.key[index:end]))
+	if len(index) > 0 {
+		for _, next := range index {
+			end := next + len(term)
+			fmt.Fprint(out, s[cur:next])
+			fmt.Fprint(out, matchColor(s[next:end]))
 			cur = end
 		}
-		fmt.Fprint(out, match.key[cur:], " : ")
+		fmt.Fprint(out, s[cur:])
 	} else {
-		fmt.Fprint(out, match.key, " : ")
-	}
-
-	cur = 0
-	if len(match.valueIndex) > 0 {
-		for _, index := range match.valueIndex {
-			end := index + len(match.search)
-			fmt.Fprint(out, match.value[cur:index])
-			fmt.Fprint(out, matchColor(match.value[index:end]))
-			cur = end
-		}
-		fmt.Fprint(out, match.value[cur:], "\n")
-	} else {
-		fmt.Fprint(out, match.value, "\n")
+		fmt.Fprint(out, s)
 	}
 }

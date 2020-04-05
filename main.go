@@ -47,7 +47,6 @@ func printVersion() {
 }
 
 func parseInput(line string) (args []string) {
-	// TODO: allow "" and "\"\""
 	return strings.Split(line, " ")
 }
 

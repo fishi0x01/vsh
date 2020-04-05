@@ -30,7 +30,12 @@ cat <file-path>
 ```
 
 `cp`, `rm` and `grep` command always have the `-r/-R` flag implied, i.e., every operation works recursively on the paths.
-`grep` recursively searches for given term in key and value pairs and does not support regex. 
+
+### grep
+
+`grep` recursively searches the given term in key and value pairs and does not support regex. 
+[SSOT](https://en.wikipedia.org/wiki/Single_source_of_truth) is very much desired, however, in praxis it is probably not always applied consistently.
+ If you are looking for copies or just trying to find the path to a certain term, this command might come in handy. 
 
 ## Setting the vault token
 
