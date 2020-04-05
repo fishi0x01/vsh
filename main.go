@@ -16,23 +16,23 @@ import (
 var vaultClient *client.Client
 
 type commands struct {
-	mv  *cli.MoveCommand
-	cp  *cli.CopyCommand
-	rm  *cli.RemoveCommand
-	ls  *cli.ListCommand
-	cd  *cli.CdCommand
-	cat *cli.CatCommand
+	mv   *cli.MoveCommand
+	cp   *cli.CopyCommand
+	rm   *cli.RemoveCommand
+	ls   *cli.ListCommand
+	cd   *cli.CdCommand
+	cat  *cli.CatCommand
 	grep *cli.GrepCommand
 }
 
 func newCommands(client *client.Client) *commands {
 	return &commands{
-		mv:  cli.NewMoveCommand(client, os.Stdout, os.Stderr),
-		cp:  cli.NewCopyCommand(client, os.Stdout, os.Stderr),
-		rm:  cli.NewRemoveCommand(client, os.Stdout, os.Stderr),
-		ls:  cli.NewListCommand(client, os.Stdout, os.Stderr),
-		cd:  cli.NewCdCommand(client, os.Stdout, os.Stderr),
-		cat: cli.NewCatCommand(client, os.Stdout, os.Stderr),
+		mv:   cli.NewMoveCommand(client, os.Stdout, os.Stderr),
+		cp:   cli.NewCopyCommand(client, os.Stdout, os.Stderr),
+		rm:   cli.NewRemoveCommand(client, os.Stdout, os.Stderr),
+		ls:   cli.NewListCommand(client, os.Stdout, os.Stderr),
+		cd:   cli.NewCdCommand(client, os.Stdout, os.Stderr),
+		cat:  cli.NewCatCommand(client, os.Stdout, os.Stderr),
 		grep: cli.NewGrepCommand(client, os.Stdout, os.Stderr),
 	}
 }

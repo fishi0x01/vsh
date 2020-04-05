@@ -28,7 +28,7 @@ func (client *Client) lowLevelTraverse(path string) (result []string) {
 			}
 		}
 	} else {
-		leaf := strings.ReplaceAll("/" + path, "//", "/")
+		leaf := strings.ReplaceAll("/"+path, "//", "/")
 		result = append(result, leaf)
 	}
 

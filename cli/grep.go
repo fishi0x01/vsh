@@ -21,12 +21,12 @@ type GrepCommand struct {
 }
 
 type Match struct {
-	path string
+	path   string
 	search string
-	key string
-	value string
+	key    string
+	value  string
 	// sorted slices of indices of match starts
-	keyIndex []int
+	keyIndex   []int
 	valueIndex []int
 }
 
@@ -128,11 +128,11 @@ func match(path string, k string, v string, substr string) (m *Match) {
 
 	if len(keyMatches) > 0 || len(valueMatches) > 0 {
 		m = &Match{
-			path: path,
-			search: substr,
-			key: k,
-			value: v,
-			keyIndex: keyMatches,
+			path:       path,
+			search:     substr,
+			key:        k,
+			value:      v,
+			keyIndex:   keyMatches,
 			valueIndex: valueMatches,
 		}
 	}
@@ -147,7 +147,7 @@ func (match *Match) print(out io.Writer) {
 	cur := 0
 	if len(match.keyIndex) > 0 {
 		for _, index := range match.keyIndex {
-			end := index+len(match.search)
+			end := index + len(match.search)
 			fmt.Fprint(out, match.key[cur:index])
 			fmt.Fprint(out, matchColor(match.key[index:end]))
 			cur = end
@@ -160,7 +160,7 @@ func (match *Match) print(out io.Writer) {
 	cur = 0
 	if len(match.valueIndex) > 0 {
 		for _, index := range match.valueIndex {
-			end := index+len(match.search)
+			end := index + len(match.search)
 			fmt.Fprint(out, match.value[cur:index])
 			fmt.Fprint(out, matchColor(match.value[index:end]))
 			cur = end
