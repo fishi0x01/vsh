@@ -15,7 +15,7 @@ Further, copying/moving secrets between both KV versions is supported.
 `vsh` also supports a non-interactive mode (similar to `bash -c "<cmd>"`), which 
 makes it easier to integrate with automation.
 
-Integration tests are running against vault `1.3.3`.
+Integration tests are running against vault `1.3.4`.
 
 ## Supported commands
 
@@ -24,11 +24,18 @@ mv <from-path> <to-path>
 cp <from-path> <to-path>
 rm <dir-path or filel-path>
 ls <dir-path // optional>
+grep <search-term> <path>
 cd <dir-path>
 cat <file-path>
 ```
 
-Unlike unix, `cp` and `rm` always have the `-r` flag implied, i.e., every operation works recursively on the paths.
+`cp`, `rm` and `grep` command always have the `-r/-R` flag implied, i.e., every operation works recursively on the paths.
+
+### grep
+
+`grep` recursively searches the given term in key and value pairs and does not support regex. 
+[SSOT](https://en.wikipedia.org/wiki/Single_source_of_truth) is very much desired, however, in praxis it is probably not always applied consistently.
+ If you are looking for copies or just trying to find the path to a certain term, this command might come in handy. 
 
 ## Setting the vault token
 

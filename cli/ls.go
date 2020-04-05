@@ -59,7 +59,7 @@ func (cmd *ListCommand) Run() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Fprintln(cmd.stdout, strings.Join(result, "  "))
+		fmt.Fprintln(cmd.stdout, strings.Join(result, "\n"))
 	}
 
 	return

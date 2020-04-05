@@ -1,3 +1,15 @@
+## v0.5.0 (April 5, 2020)
+
+ENHANCEMENTS:
+
+* add `grep` command ([#25](https://github.com/fishi0x01/vsh/issues/25))
+* `ls` with new line instead of single line ([#27](https://github.com/fishi0x01/vsh/issues/27))
+
+BUG FIXES:
+
+* remove `//` from paths ([#26](https://github.com/fishi0x01/vsh/issues/26))
+* fix broken tests
+
 ## v0.4.1 (March 21, 2020)
 
 ENHANCEMENTS:

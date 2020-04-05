@@ -16,22 +16,24 @@ import (
 var vaultClient *client.Client
 
 type commands struct {
-	mv  *cli.MoveCommand
-	cp  *cli.CopyCommand
-	rm  *cli.RemoveCommand
-	ls  *cli.ListCommand
-	cd  *cli.CdCommand
-	cat *cli.CatCommand
+	mv   *cli.MoveCommand
+	cp   *cli.CopyCommand
+	rm   *cli.RemoveCommand
+	ls   *cli.ListCommand
+	cd   *cli.CdCommand
+	cat  *cli.CatCommand
+	grep *cli.GrepCommand
 }
 
 func newCommands(client *client.Client) *commands {
 	return &commands{
-		mv:  cli.NewMoveCommand(client, os.Stdout, os.Stderr),
-		cp:  cli.NewCopyCommand(client, os.Stdout, os.Stderr),
-		rm:  cli.NewRemoveCommand(client, os.Stdout, os.Stderr),
-		ls:  cli.NewListCommand(client, os.Stdout, os.Stderr),
-		cd:  cli.NewCdCommand(client, os.Stdout, os.Stderr),
-		cat: cli.NewCatCommand(client, os.Stdout, os.Stderr),
+		mv:   cli.NewMoveCommand(client, os.Stdout, os.Stderr),
+		cp:   cli.NewCopyCommand(client, os.Stdout, os.Stderr),
+		rm:   cli.NewRemoveCommand(client, os.Stdout, os.Stderr),
+		ls:   cli.NewListCommand(client, os.Stdout, os.Stderr),
+		cd:   cli.NewCdCommand(client, os.Stdout, os.Stderr),
+		cat:  cli.NewCatCommand(client, os.Stdout, os.Stderr),
+		grep: cli.NewGrepCommand(client, os.Stdout, os.Stderr),
 	}
 }
 
@@ -44,6 +46,10 @@ func printVersion() {
 	fmt.Println(vshVersion)
 }
 
+func parseInput(line string) (args []string) {
+	return strings.Split(line, " ")
+}
+
 func executor(in string) {
 	// Every command can change the vault content
 	// i.e., the cache should be cleared on command execution
@@ -51,7 +57,7 @@ func executor(in string) {
 
 	// Split the input separate the command and the arguments.
 	in = strings.TrimSpace(in)
-	args := strings.Split(in, " ")
+	args := parseInput(in)
 	commands := newCommands(vaultClient)
 	var cmd cli.Command
 	var run bool
@@ -76,6 +82,9 @@ func executor(in string) {
 	case commands.cat.GetName():
 		run = commands.cat.Parse(args)
 		cmd = commands.cat
+	case commands.grep.GetName():
+		run = commands.grep.Parse(args)
+		cmd = commands.grep
 	case "exit":
 		os.Exit(0)
 	case "":

@@ -104,6 +104,7 @@ func isCommandArgument(p string) bool {
 		words[0] == "cp" ||
 		words[0] == "rm" ||
 		words[0] == "mv" ||
+		words[0] == "grep" ||
 		words[0] == "cat" ||
 		words[0] == "ls"
 }
@@ -118,6 +119,7 @@ func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 		{Text: "cp", Description: "cp <from> <to> | -r is implied"},
 		{Text: "rm", Description: "rm <path> | -r is implied"},
 		{Text: "mv", Description: "mv <from> <to>"},
+		{Text: "grep", Description: "grep <term> <path>"},
 		{Text: "cat", Description: "cat <path>"},
 		{Text: "ls", Description: "ls <path>"},
 	}

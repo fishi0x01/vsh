@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/fishi0x01/vsh/log"
+	"strings"
 )
 
 func (client *Client) topLevelTraverse(path string) (result []string) {
@@ -27,7 +28,8 @@ func (client *Client) lowLevelTraverse(path string) (result []string) {
 			}
 		}
 	} else {
-		result = append(result, "/"+path)
+		leaf := strings.ReplaceAll("/"+path, "//", "/")
+		result = append(result, leaf)
 	}
 
 	return result
