@@ -14,17 +14,17 @@ export VAULT_TEST_VALUE="test"
 { # Try
 
 ## Setup v2 KV
-start_vault ${VAULT_VERSION} ${VAULT_CONTAINER_NAME} ${VAULT_PORT}
+start_vault ${VAULT_VERSION} ${VAULT_CONTAINER_NAME} ${VAULT_PORT} &&
 
-vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a value=${VAULT_TEST_VALUE}"
+vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a value=${VAULT_TEST_VALUE}" &&
 
 ## Run App
-${APP_BIN} -c "mv secret/source/a secret/target2/a"
+${APP_BIN} -c "mv secret/source/a secret/target2/a" &&
 
 ## Verify result
 vault_value_must_be ${VAULT_CONTAINER_NAME} "secret/target2/a" ${VAULT_TEST_VALUE}
 } || { # Catch
-  echo "Error running Tests"
+  echo "Tests failed"
   stop_vault ${VAULT_CONTAINER_NAME}
   exit 1
 }
