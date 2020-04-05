@@ -119,7 +119,7 @@ func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 		{Text: "cp", Description: "cp <from> <to> | -r is implied"},
 		{Text: "rm", Description: "rm <path> | -r is implied"},
 		{Text: "mv", Description: "mv <from> <to>"},
-		{Text: "grep", Description: "grep <string> <path>"},
+		{Text: "grep", Description: "grep <term> <path>"},
 		{Text: "cat", Description: "cat <path>"},
 		{Text: "ls", Description: "ls <path>"},
 	}

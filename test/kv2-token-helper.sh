@@ -4,7 +4,7 @@ source $(dirname ${0})/util.sh
 
 export APP_BIN="./build/vsh_linux_amd64"
 export VAULT_PORT=8888
-export VAULT_VERSION="1.3.3"
+export VAULT_VERSION="1.3.4"
 export VAULT_ADDR="http://localhost:${VAULT_PORT}"
 # Paths are relative to Makefile
 export VAULT_CONFIG_PATH="$(pwd)/test/vault-config"
