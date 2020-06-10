@@ -1,5 +1,3 @@
-.PHONY: test
-
 APP_NAME := vsh
 PLATFORMS := linux darwin
 ARCHS := 386 amd64
