@@ -1,3 +1,9 @@
+## unreleased
+
+BUG FIXES:
+
+* Remove file/dir ambiguity ([#29](https://github.com/fishi0x01/vsh/issues/29))
+
 ## v0.5.0 (April 5, 2020)
 
 ENHANCEMENTS:
