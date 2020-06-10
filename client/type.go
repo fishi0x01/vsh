@@ -23,42 +23,39 @@ func (client *Client) topLevelType(path string) PathKind {
 	}
 }
 
-func (client *Client) lowLevelType(path string) PathKind {
-	is_node := false
-	is_leaf := false
+func (client *Client) lowLevelType(path string) (result PathKind) {
+	result = NONE
+	isNode := false
+	isLeaf := false
 
 	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
-	if err != nil {
-		return NONE
-	}
-
-	if s != nil {
-		is_node = true
+	if err == nil && s != nil {
+		isNode = true
 	}
 
 	s, err = client.Vault.Logical().Read(client.getKVDataPath(path))
 	if err == nil && s != nil {
-		is_leaf = true
+		isLeaf = true
 	}
 
-	if is_leaf && !is_node {
-		return LEAF
+	if isLeaf && !isNode {
+		result = LEAF
 	}
 
-	if is_node && !is_leaf {
-		return NODE
+	if isNode && !isLeaf {
+		result = NODE
 	}
 
-	if is_leaf && is_node {
+	if isLeaf && isNode {
 		// vault namespace path can overlap with a key, e.g.,
 		// secret/a and secret/a/b
 		// --> in that case, we have a leaf and a node when checking secret/a
 		if strings.HasSuffix(path, "/") {
-			return NODE
+			result = NODE
 		} else {
-			return LEAF
+			result = LEAF
 		}
 	}
 
-	return NONE
+	return
 }
