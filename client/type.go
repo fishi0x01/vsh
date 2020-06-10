@@ -1,5 +1,7 @@
 package client
 
+import "strings"
+
 // PathKind describes the type of a path
 type PathKind int
 
@@ -21,20 +23,39 @@ func (client *Client) topLevelType(path string) PathKind {
 	}
 }
 
-func (client *Client) lowLevelType(path string) PathKind {
-	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
-	if err != nil {
-		return NONE
-	}
+func (client *Client) lowLevelType(path string) (result PathKind) {
+	result = NONE
+	isNode := false
+	isLeaf := false
 
-	if s != nil {
-		return NODE
+	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
+	if err == nil && s != nil {
+		isNode = true
 	}
 
 	s, err = client.Vault.Logical().Read(client.getKVDataPath(path))
 	if err == nil && s != nil {
-		return LEAF
+		isLeaf = true
 	}
 
-	return NONE
+	if isLeaf && !isNode {
+		result = LEAF
+	}
+
+	if isNode && !isLeaf {
+		result = NODE
+	}
+
+	if isLeaf && isNode {
+		// vault namespace path can overlap with a key, e.g.,
+		// secret/a and secret/a/b
+		// --> in that case, we have a leaf and a node when checking secret/a
+		if strings.HasSuffix(path, "/") {
+			result = NODE
+		} else {
+			result = LEAF
+		}
+	}
+
+	return
 }

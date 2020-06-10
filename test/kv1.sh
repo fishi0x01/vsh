@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 source $(dirname ${0})/util.sh
 
@@ -22,6 +23,10 @@ vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/b value=${VAULT_T
 vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/x value=${VAULT_TEST_VALUE}" &&
 vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/c/d value=${VAULT_TEST_VALUE}" &&
 vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/c/e value=${VAULT_TEST_VALUE}" &&
+vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/y value=${VAULT_TEST_VALUE}" &&
+vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/y/a value=${VAULT_TEST_VALUE}" &&
+vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/z value=${VAULT_TEST_VALUE}" &&
+vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/z/a value=${VAULT_TEST_VALUE}" &&
 
 vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/remove/x value=${VAULT_TEST_VALUE}" &&
 vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/remove/y/z value=${VAULT_TEST_VALUE}" &&
@@ -32,12 +37,16 @@ value_must_be $(${APP_BIN} -c "grep ${VAULT_TEST_VALUE} secret/source" | wc -l) 
 ${APP_BIN} -c "mv secret/source/x secret/target2/x" &&
 ${APP_BIN} -c "mv secret/source/ secret/target/" &&
 ${APP_BIN} -c "rm secret/remove" &&
+${APP_BIN} -c "rm secret/y" &&
+${APP_BIN} -c "rm secret/z/" &&
 value_must_be $(${APP_BIN} -c "ls secret/target" | wc -l) "3" &&
 value_must_be $(${APP_BIN} -c "grep ${VAULT_TEST_VALUE} secret/target" | wc -l) "4" &&
 
 ## Verify result
 vault_value_must_be ${VAULT_CONTAINER_NAME} "secret/target2/x" ${VAULT_TEST_VALUE} &&
-vault_value_must_be ${VAULT_CONTAINER_NAME} "secret/target/a" ${VAULT_TEST_VALUE}
+vault_value_must_be ${VAULT_CONTAINER_NAME} "secret/target/a" ${VAULT_TEST_VALUE} &&
+vault_value_must_be ${VAULT_CONTAINER_NAME} "secret/y/a" ${VAULT_TEST_VALUE} &&
+vault_value_must_be ${VAULT_CONTAINER_NAME} "secret/z" ${VAULT_TEST_VALUE}
 } || { # Catch
   echo "Tests failed"
   stop_vault ${VAULT_CONTAINER_NAME}
