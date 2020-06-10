@@ -15,7 +15,14 @@ type Command interface {
 }
 
 func cmdPath(pwd string, arg string) (result string) {
+	strings.HasSuffix(arg, "/")
 	result = filepath.Clean(pwd + arg)
+
+	if strings.HasSuffix(arg, "/") {
+		// filepath.Clean removes "/" suffix, but we need it to distinguish path from file
+		result = result + "/"
+	}
+
 	if strings.HasPrefix(arg, "/") {
 		// absolute path is given
 		result = arg
