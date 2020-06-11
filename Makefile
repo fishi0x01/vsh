@@ -1,18 +1,15 @@
 APP_NAME := vsh
 PLATFORMS := linux darwin
 ARCHS := 386 amd64
-BRANCH := $(shell git branch | grep \* | cut -d ' ' -f2)
-TAG := $(shell git tag -l --points-at HEAD)
-VERSION := $(shell [ -n "$(TAG)" ] && echo -n "$(TAG)" || echo -n "$(BRANCH)-SNAPSHOT")
+VERSION := $(shell git describe --tags --always --dirty)
 
 cross-compile: clean
 	mkdir -p ./build/
 	for GOOS in $(PLATFORMS); do \
-	  for GOARCH in $(ARCHS); do \
-	  	export GOOS=$$GOOS; \
-		export GOARCH=$$GOARCH; \
-	    go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$${GOOS}_$${GOARCH}; \
-	  done \
+		for GOARCH in $(ARCHS); do \
+			GOOS=$$GOOS GOARCH=$$GOARCH \
+				go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$${GOOS}_$${GOARCH}; \
+		done \
 	done
 	ls build/
 
