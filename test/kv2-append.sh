@@ -4,9 +4,7 @@ set -e
 
 # shellcheck source=test/util.sh
 source "$(dirname ${0})/util.sh"
-UNAME=$(uname | tr '[:upper:]' '[:lower:]')
 
-export APP_BIN="./build/vsh_${UNAME}_amd64"
 export VAULT_PORT=8888
 export VAULT_TOKEN="root"
 export VAULT_VERSION="1.3.4"
@@ -196,7 +194,7 @@ testCase6b() {
 { # Try
 
 ## Setup v2 KV
-start_vault "${VAULT_VERSION}" "${VAULT_CONTAINER_NAME}" "${VAULT_PORT}"
+start_vault "${VAULT_VERSION}" "${VAULT_CONTAINER_NAME}" "${VAULT_PORT}" &&
 testCase1 &&
 testCase2 &&
 testCase3 &&

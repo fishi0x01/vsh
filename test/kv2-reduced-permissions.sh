@@ -3,7 +3,6 @@ set -x
 
 source $(dirname ${0})/util.sh
 
-export APP_BIN="./build/vsh_linux_amd64"
 export VAULT_PORT=8888
 export VAULT_TOKEN="root"
 export VAULT_VERSION="1.3.4"
