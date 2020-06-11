@@ -1,8 +1,6 @@
 #!/bin/bash
-# set -x
+set -x
 set -e
-
-make cross-compile
 
 # shellcheck source=test/util.sh
 source "$(dirname ${0})/util.sh"
