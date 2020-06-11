@@ -1,9 +1,10 @@
 package completer
 
 import (
+	"strings"
+
 	"github.com/c-bata/go-prompt"
 	"github.com/fishi0x01/vsh/client"
-	"strings"
 )
 
 // Completer struct for tab completion
@@ -106,6 +107,7 @@ func isCommandArgument(p string) bool {
 		words[0] == "mv" ||
 		words[0] == "grep" ||
 		words[0] == "cat" ||
+		words[0] == "append" ||
 		words[0] == "ls"
 }
 
@@ -117,6 +119,7 @@ func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 	result = []prompt.Suggest{
 		{Text: "cd", Description: "cd <path>"},
 		{Text: "cp", Description: "cp <from> <to> | -r is implied"},
+		{Text: "append", Description: "append <from> <to> [-f|--force] | [-s|--skip] | [-r|--rename] | -s is default"},
 		{Text: "rm", Description: "rm <path> | -r is implied"},
 		{Text: "mv", Description: "mv <from> <to>"},
 		{Text: "grep", Description: "grep <term> <path>"},

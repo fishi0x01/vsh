@@ -20,15 +20,20 @@ vault_exec() {
   docker exec ${1} ${2} &> /dev/null
 }
 
-# Input: <container-name> <path> <value>
-vault_value_must_be() {
-  vault_val=$(docker exec ${1} vault kv get -field=value ${2})
-  if [ "$vault_val" = "$3" ]; then
+# Input: <container-name> <path> <key> <value>
+vault_filed_must_be() {
+  vault_val=$(docker exec "${1}" vault kv get -field="${2}" "${3}")
+  if [ "$vault_val" = "$4" ]; then
     return 0
   else
-    echo "Error: $vault_val != $3"
+    echo "Error: $vault_val (got) != $4 (expected)"
     return 1
   fi
+}
+
+# Input: <container-name> <path> <value>
+vault_value_must_be() {
+  vault_filed_must_be "${1}" "value" "${2}" "${3}"
 }
 
 # Input: <given> <wanted>

@@ -2,8 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"github.com/fishi0x01/vsh/client"
 	"io"
+
+	"github.com/fishi0x01/vsh/client"
 )
 
 // CopyCommand container for all 'cp' parameters
@@ -49,7 +50,7 @@ func (cmd *CopyCommand) Parse(args []string) (success bool) {
 	return success
 }
 
-// Run executes 'cp' with given CopyCommand's parameters
+// Run executes 'append' with given CopyCommand's parameters
 func (cmd *CopyCommand) Run() {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
