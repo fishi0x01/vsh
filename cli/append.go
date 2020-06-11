@@ -11,13 +11,18 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
+// AppendMode defines behaviour in case existing secrets are in conflict
 type AppendMode string
 
 const (
-	ModeSkip      AppendMode = "skip"
+	// ModeSkip do not append secret on conflict
+	ModeSkip AppendMode = "skip"
+	// ModeOverwrite overwrite existing secret on conflict
 	ModeOverwrite AppendMode = "overwrite"
-	ModeRename    AppendMode = "rename"
-	ModeInvalid   AppendMode = "invalid"
+	// ModeRename keep existing secret and create a new key on conflict
+	ModeRename AppendMode = "rename"
+	// ModeInvalid denotes invalid mode
+	ModeInvalid AppendMode = "invalid"
 )
 
 // AppendCommand container for all 'append' parameters
