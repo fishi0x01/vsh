@@ -42,19 +42,19 @@ By default, `append` does not overwrite secrets if the `<to-secret>` already con
 The default behavior can be explicitly set using flag: `-s` or `--skip`. Example:
 
 ```bash
-> ls /secret/from
+> cat /secret/from
 
 fruit=apple
 vegetable=tomato
 
-> ls /secret/to
+> cat /secret/to
 
 fruit=pear
 tree=oak
 
 > append /secret/from /secret/to
 
-> ls /secret/to
+> cat /secret/to
 
 fruit=pear
 vegetable=tomato
@@ -64,19 +64,19 @@ tree=oak
 Setting flag `-f` or `--force` will cause the conflicting keys from the `<to-secret>` to be overwritten with keys from the `<from-secret`>. Example:
 
 ```bash
-> ls /secret/from
+> cat /secret/from
 
 fruit=apple
 vegetable=tomato
 
-> ls /secret/to
+> cat /secret/to
 
 fruit=pear
 tree=oak
 
 > append /secret/from /secret/to
 
-> ls /secret/to
+> cat /secret/to
 
 fruit=apple
 vegetable=tomato
@@ -86,19 +86,19 @@ tree=oak
 Setting flag `-r` or `--rename` will cause the conflicting keys from the `<to-secret>` to be kept as they are. Instead the keys from the `<from-secret`> will be stored under a renamed key. Example:
 
 ```bash
-> ls /secret/from
+> cat /secret/from
 
 fruit=apple
 vegetable=tomato
 
-> ls /secret/to
+> cat /secret/to
 
 fruit=pear
 tree=oak
 
 > append /secret/from /secret/to
 
-> ls /secret/to
+> cat /secret/to
 
 fruit=pear
 fruit_1=apple
