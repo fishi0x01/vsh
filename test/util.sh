@@ -24,7 +24,7 @@ vault_exec() {
 }
 
 # Input: <container-name> <path> <key> <value>
-vault_filed_must_be() {
+vault_field_must_be() {
   vault_val=$(docker exec "${1}" vault kv get -field="${2}" "${3}")
   if [ "$vault_val" = "$4" ]; then
     return 0
@@ -36,7 +36,7 @@ vault_filed_must_be() {
 
 # Input: <container-name> <path> <value>
 vault_value_must_be() {
-  vault_filed_must_be "${1}" "value" "${2}" "${3}"
+  vault_field_must_be "${1}" "value" "${2}" "${3}"
 }
 
 # Input: <given> <wanted>

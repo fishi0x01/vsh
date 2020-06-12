@@ -24,7 +24,7 @@ testCase1() {
   echo "=== TEST: Append value to not existing destination" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a value1=A" &&
   ${APP_BIN} -c "append /secret/source/a /secret/target/a" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "value1" "/secret/target/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "value1" "/secret/target/a" "A" &&
   echo "PASSED" &&
   cleanup
 }
@@ -35,15 +35,15 @@ testCase2() {
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a key1=A" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/target/dest key2=B" &&
   # Check initial-state
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/target/dest" "B" &&
   # Do append
   ${APP_BIN} -c "append /secret/source/a /secret/target/dest" &&
   # Sources must remain!
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/source/a" "A" &&
   # Merged secret must have correct values
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/target/dest" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/target/dest" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/target/dest" "B" &&
   echo "PASSED" &&
   cleanup
 }
@@ -56,23 +56,23 @@ testCase3() {
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/c key3=C" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/target/dest key0=O" &&
   # Check initial-state
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/source/b" "B" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key3" "/secret/source/c" "C" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key0" "/secret/target/dest" "O" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/source/b" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key3" "/secret/source/c" "C" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key0" "/secret/target/dest" "O" &&
   # Do append
   ${APP_BIN} -c "append /secret/source/a /secret/target/dest" &&
   ${APP_BIN} -c "append /secret/source/b /secret/target/dest" &&
   ${APP_BIN} -c "append /secret/source/c /secret/target/dest" &&
   # Sources must remain!
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/source/b" "B" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key3" "/secret/source/c" "C" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/source/b" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key3" "/secret/source/c" "C" &&
   # Merged secret must have all values
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key0" "/secret/target/dest" "O" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/target/dest" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/target/dest" "B" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key3" "/secret/target/dest" "C" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key0" "/secret/target/dest" "O" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key1" "/secret/target/dest" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key2" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key3" "/secret/target/dest" "C" &&
   echo "PASSED" &&
   cleanup
 }
@@ -83,14 +83,14 @@ testCase4a() {
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a key=A" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/target/dest key=B" &&
   # Check initial-state
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
   # Do append
   ${APP_BIN} -c "append /secret/source/a /secret/target/dest" &&
   # Sources must remain!
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
   # Merged secret must have all values
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
   echo "PASSED" &&
   cleanup
 }
@@ -101,14 +101,14 @@ testCase4b() {
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a key=A" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/target/dest key=B" &&
   # Check initial-state
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
   # Do append
   ${APP_BIN} -c "append /secret/source/a /secret/target/dest -s" &&
   # Sources must remain!
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
   # Merged secret must have all values
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
   echo "PASSED" &&
   cleanup
 }
@@ -119,14 +119,14 @@ testCase4c() {
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a key=A" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/target/dest key=B" &&
   # Check initial-state
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
   # Do append
   ${APP_BIN} -c "append /secret/source/a /secret/target/dest --skip" &&
   # Sources must remain!
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
   # Merged secret must have all values
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
   echo "PASSED" &&
   cleanup
 }
@@ -137,14 +137,14 @@ testCase5() {
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a key=A" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/target/dest key=B" &&
   # Check initial-state
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
   # Do append
   ${APP_BIN} -c "append /secret/source/a /secret/target/dest --force" &&
   # Sources must remain!
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
   # Merged secret must have all values
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "A" &&
   echo "PASSED" &&
   cleanup
 }
@@ -155,15 +155,15 @@ testCase6a() {
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a key=A" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/target/dest key=B" &&
   # Check initial-state
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
   # Do append
   ${APP_BIN} -c "append /secret/source/a /secret/target/dest --rename" &&
   # Sources must remain!
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
   # Merged secret must have all values
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key_1" "/secret/target/dest" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key_1" "/secret/target/dest" "A" &&
   echo "PASSED" &&
   cleanup
 }
@@ -174,19 +174,19 @@ testCase6b() {
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/source/a key=A" &&
   vault_exec ${VAULT_CONTAINER_NAME} "vault kv put secret/target/dest key=B key_1=B1 key_2=B2" &&
   # Check initial-state
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key_1" "/secret/target/dest" "B1" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key_2" "/secret/target/dest" "B2" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key_1" "/secret/target/dest" "B1" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key_2" "/secret/target/dest" "B2" &&
   # Do append
   ${APP_BIN} -c "append /secret/source/a /secret/target/dest --rename" &&
   # Sources must remain!
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/source/a" "A" &&
   # Merged secret must have all values
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key_1" "/secret/target/dest" "B1" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key_2" "/secret/target/dest" "B2" &&
-  vault_filed_must_be ${VAULT_CONTAINER_NAME} "key_3" "/secret/target/dest" "A" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key" "/secret/target/dest" "B" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key_1" "/secret/target/dest" "B1" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key_2" "/secret/target/dest" "B2" &&
+  vault_field_must_be ${VAULT_CONTAINER_NAME} "key_3" "/secret/target/dest" "A" &&
   echo "PASSED" &&
   cleanup
 }
