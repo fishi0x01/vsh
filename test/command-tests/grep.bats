@@ -5,7 +5,7 @@ load ../bin/plugins/bats-assert/load
 @test "vault-${VAULT_VERSION} ${KV_BACKEND} 'grep'" {
   #######################################
   echo "==== case: grep term on '${KV_BACKEND}/' ===="
-  run ${APP_BIN} -c "grep test ${KV_BACKEND}/"
+  run ${APP_BIN} -c "grep value ${KV_BACKEND}/"
   assert_success
   assert_line --partial "/${KV_BACKEND}/src/dev/1"
   assert_line --partial "/${KV_BACKEND}/src/dev/2"

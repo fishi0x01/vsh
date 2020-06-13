@@ -5,7 +5,6 @@ export KV_VERSION="${KV_VERSION:-"2"}"
 export VAULT_VERSION=${VAULT_VERSION:-"1.3.4"}
 export VAULT_CONTAINER_NAME="vsh-integration-test-vault"
 export VAULT_HOST_PORT=${VAULT_HOST_PORT:-"8888"}
-export VAULT_TEST_VALUE="test"
 
 export VAULT_TOKEN="root"
 export VAULT_ADDR="http://localhost:${VAULT_HOST_PORT}"
@@ -28,16 +27,16 @@ setup() {
     vault_exec "vault secrets enable -version=2 -path=KV2 kv"
     for kv_backend in "${KV_BACKENDS[@]}"
     do
-        vault_exec "vault kv put ${kv_backend}/src/dev/1 value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/dev/2 value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/dev/3 value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/staging/all value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/staging/all/v1 value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/staging/all/v2 value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/prod/all value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/tooling value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/tooling/v1 value=${VAULT_TEST_VALUE}"
-        vault_exec "vault kv put ${kv_backend}/src/tooling/v2 value=${VAULT_TEST_VALUE}"
+        vault_exec "vault kv put ${kv_backend}/src/dev/1 value=1 fruit=apple"
+        vault_exec "vault kv put ${kv_backend}/src/dev/2 value=2 fruit=banana"
+        vault_exec "vault kv put ${kv_backend}/src/dev/3 value=3 fruit=berry"
+        vault_exec "vault kv put ${kv_backend}/src/staging/all value=all tree=palm"
+        vault_exec "vault kv put ${kv_backend}/src/staging/all/v1 value=v1 tree=oak"
+        vault_exec "vault kv put ${kv_backend}/src/staging/all/v2 value=v2 tree=bonsai"
+        vault_exec "vault kv put ${kv_backend}/src/prod/all value=all example=test"
+        vault_exec "vault kv put ${kv_backend}/src/tooling value=tooling drink=beer key=A"
+        vault_exec "vault kv put ${kv_backend}/src/tooling/v1 value=v1 drink=juice key=B"
+        vault_exec "vault kv put ${kv_backend}/src/tooling/v2 value=v2 drink=water key=C"
     done
 }
 

@@ -1,3 +1,0 @@
-# Paths are relative to Makefile
-
-token_helper = "./test/token-helper.sh"

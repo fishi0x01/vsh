@@ -7,7 +7,7 @@ load ../bin/plugins/bats-assert/load
   echo "==== case: cat file ===="
   run ${APP_BIN} -c "cat ${KV_BACKEND}/src/dev/1"
   assert_success
-  assert_line "value = ${VAULT_TEST_VALUE}"
+  assert_line "value = 1"
 
   #######################################
   echo "==== case: cat directory ===="

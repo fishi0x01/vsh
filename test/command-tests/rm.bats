@@ -7,7 +7,7 @@ load ../bin/plugins/bats-assert/load
   echo "==== case: remove single file ===="
   run get_vault_value "value" "${KV_BACKEND}/src/prod/all"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "all"
 
   run ${APP_BIN} -c "rm ${KV_BACKEND}/src/prod/all"
   assert_success
@@ -21,15 +21,15 @@ load ../bin/plugins/bats-assert/load
   echo "==== case: remove single directory ===="
   run get_vault_value "value" "${KV_BACKEND}/src/dev/1"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "1"
 
   run get_vault_value "value" "${KV_BACKEND}/src/dev/2"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "2"
 
   run get_vault_value "value" "${KV_BACKEND}/src/dev/3"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "3"
 
   run ${APP_BIN} -c "rm ${KV_BACKEND}/src/dev"
   assert_success
@@ -51,11 +51,11 @@ load ../bin/plugins/bats-assert/load
   echo "==== case: remove ambigious directory ===="
   run get_vault_value "value" "${KV_BACKEND}/src/staging/all/v1"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "v1"
 
   run get_vault_value "value" "${KV_BACKEND}/src/staging/all/v2"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "v2"
 
   run ${APP_BIN} -c "rm ${KV_BACKEND}/src/staging/all/"
   assert_success
@@ -72,13 +72,13 @@ load ../bin/plugins/bats-assert/load
   echo "ensure the ambigious file still exists"
   run get_vault_value "value" "${KV_BACKEND}/src/staging/all"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "all"
 
   #######################################
   echo "==== case: remove ambigious file ===="
   run get_vault_value "value" "${KV_BACKEND}/src/tooling"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "tooling"
 
   run ${APP_BIN} -c "rm ${KV_BACKEND}/src/tooling"
   assert_success
@@ -91,9 +91,9 @@ load ../bin/plugins/bats-assert/load
   echo "ensure the ambigious directory still exists"
   run get_vault_value "value" "${KV_BACKEND}/src/tooling/v1"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "v1"
 
   run get_vault_value "value" "${KV_BACKEND}/src/tooling/v2"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"  
+  assert_output "v2"  
 }

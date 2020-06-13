@@ -11,7 +11,10 @@ load ../bin/plugins/bats-assert/load
   echo "ensure the file got moved to destination"
   run get_vault_value "value" "KV2/dest/prod/all"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "all"
+  run get_vault_value "example" "KV2/dest/prod/all"
+  assert_success
+  assert_output "test"
 
   echo "ensure the src file got removed"
   run get_vault_value "value" "KV1/src/prod/all"
@@ -26,15 +29,15 @@ load ../bin/plugins/bats-assert/load
   echo "ensure the directory got moved to destination"
   run get_vault_value "value" "KV2/dest/dev/1"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "1"
 
   run get_vault_value "value" "KV2/dest/dev/2"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "2"
 
   run get_vault_value "value" "KV2/dest/dev/3"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "3"
 
   echo "ensure the src directory got removed"
   run get_vault_value "value" "KV1/src/dev/1"
@@ -57,7 +60,10 @@ load ../bin/plugins/bats-assert/load
   echo "ensure the file got moved to destination"
   run get_vault_value "value" "KV1/dest/prod/all"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "all"
+  run get_vault_value "example" "KV1/dest/prod/all"
+  assert_success
+  assert_output "test"
 
   echo "ensure the src file got removed"
   run get_vault_value "value" "KV2/src/prod/all"
@@ -72,15 +78,15 @@ load ../bin/plugins/bats-assert/load
   echo "ensure the directory got moved to destination"
   run get_vault_value "value" "KV1/dest/dev/1"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "1"
 
   run get_vault_value "value" "KV1/dest/dev/2"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "2"
 
   run get_vault_value "value" "KV1/dest/dev/3"
   assert_success
-  assert_output "${VAULT_TEST_VALUE}"
+  assert_output "3"
 
   echo "ensure the src directory got removed"
   run get_vault_value "value" "KV2/src/dev/1"
