@@ -1,4 +1,5 @@
 ### Status
+[![Latest release](https://img.shields.io/github/release/fishi0x01/vsh.svg)](https://github.com/fishi0x01/vsh/releases/latest)
 ![CI](https://github.com/fishi0x01/vsh/workflows/CI/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fishi0x01/vsh)](https://goreportcard.com/report/github.com/fishi0x01/vsh)
 [![Code Climate](https://codeclimate.com/github/fishi0x01/vsh/badges/gpa.svg)](https://codeclimate.com/github/fishi0x01/vsh)
@@ -15,7 +16,8 @@ Further, copying/moving secrets between both KV versions is supported.
 `vsh` also supports a non-interactive mode (similar to `bash -c "<cmd>"`), which
 makes it easier to integrate with automation.
 
-Integration tests are running against vault `1.3.4`.
+Commands are tested against KV1 and KV2 backends. 
+Further, the integration tests are running against vault `1.0.0` and `1.4.2`, i.e., there is a good chance that any version between will also be compatible.
 
 ## Supported commands
 
@@ -151,13 +153,13 @@ However, `vsh` will try with best effort, to reliably determine the kv version o
 ## Local Development
 
 Requirements:
-- `golang` v1.12.7
+- `golang` (compiled and tested with `v1.13.12`)
 - `docker` for integration testing
 - `make` for simplified commands
 
 ```
 make compile
-make integration-test
+make integration-tests
 ```
 
 ## TODOs

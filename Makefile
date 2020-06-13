@@ -16,15 +16,17 @@ cross-compile: clean
 compile: clean
 	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_linux_amd64
 
-integration-test:
-	./test/kv2-append.sh
-	./test/kv2.sh
-	./test/kv2-token-helper.sh
-	./test/kv1-reduced-permissions.sh
-	./test/kv1.sh
-	./test/kv1-to-kv2.sh
-	./test/kv2-reduced-permissions.sh
-	./test/kv2-to-kv1.sh
+get-bats:
+	rm -rf test/bin/
+	mkdir -p test/bin/core
+	mkdir -p test/bin/plugins/bats-assert
+	mkdir -p test/bin/plugins/bats-support
+	curl -sL https://github.com/bats-core/bats-core/archive/v1.2.0.tar.gz | tar xvz --strip 1 -C test/bin/core
+	curl -sL https://github.com/bats-core/bats-assert/archive/v2.0.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-assert 
+	curl -sL https://github.com/bats-core/bats-support/archive/v0.3.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-support 
+
+integration-tests:
+	test/run.sh
 
 clean:
 	rm ./build/* || true
