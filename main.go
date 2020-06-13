@@ -3,37 +3,40 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/c-bata/go-prompt"
 	"github.com/fishi0x01/vsh/cli"
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/completer"
 	"github.com/fishi0x01/vsh/log"
 	"github.com/hashicorp/vault/command/config"
-	"os"
-	"strings"
 )
 
 var vaultClient *client.Client
 
 type commands struct {
-	mv   *cli.MoveCommand
-	cp   *cli.CopyCommand
-	rm   *cli.RemoveCommand
-	ls   *cli.ListCommand
-	cd   *cli.CdCommand
-	cat  *cli.CatCommand
-	grep *cli.GrepCommand
+	mv     *cli.MoveCommand
+	cp     *cli.CopyCommand
+	append *cli.AppendCommand
+	rm     *cli.RemoveCommand
+	ls     *cli.ListCommand
+	cd     *cli.CdCommand
+	cat    *cli.CatCommand
+	grep   *cli.GrepCommand
 }
 
 func newCommands(client *client.Client) *commands {
 	return &commands{
-		mv:   cli.NewMoveCommand(client, os.Stdout, os.Stderr),
-		cp:   cli.NewCopyCommand(client, os.Stdout, os.Stderr),
-		rm:   cli.NewRemoveCommand(client, os.Stdout, os.Stderr),
-		ls:   cli.NewListCommand(client, os.Stdout, os.Stderr),
-		cd:   cli.NewCdCommand(client, os.Stdout, os.Stderr),
-		cat:  cli.NewCatCommand(client, os.Stdout, os.Stderr),
-		grep: cli.NewGrepCommand(client, os.Stdout, os.Stderr),
+		mv:     cli.NewMoveCommand(client, os.Stdout, os.Stderr),
+		cp:     cli.NewCopyCommand(client, os.Stdout, os.Stderr),
+		append: cli.NewAppendCommand(client, os.Stdout, os.Stderr),
+		rm:     cli.NewRemoveCommand(client, os.Stdout, os.Stderr),
+		ls:     cli.NewListCommand(client, os.Stdout, os.Stderr),
+		cd:     cli.NewCdCommand(client, os.Stdout, os.Stderr),
+		cat:    cli.NewCatCommand(client, os.Stdout, os.Stderr),
+		grep:   cli.NewGrepCommand(client, os.Stdout, os.Stderr),
 	}
 }
 
@@ -74,6 +77,9 @@ func executor(in string) {
 	case commands.mv.GetName():
 		run = commands.mv.Parse(args)
 		cmd = commands.mv
+	case commands.append.GetName():
+		run = commands.append.Parse(args)
+		cmd = commands.append
 	case commands.cp.GetName():
 		run = commands.cp.Parse(args)
 		cmd = commands.cp
