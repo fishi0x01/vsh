@@ -1,8 +1,12 @@
-## unreleased
+## v0.6.0 (June 13, 2020)
+
+ENHANCEMENTS:
+
+* add `append` command ([#30](https://github.com/fishi0x01/vsh/issues/30)) - Thank you [vikin91](https://github.com/vikin91)
 
 BUG FIXES:
 
-* Remove file/dir ambiguity ([#29](https://github.com/fishi0x01/vsh/issues/29))
+* Remove file/dir ambiguity for `rm` ([#29](https://github.com/fishi0x01/vsh/issues/29))
 
 ## v0.5.0 (April 5, 2020)
 

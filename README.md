@@ -8,16 +8,14 @@
 
 ![vsh usage](https://user-images.githubusercontent.com/10799507/66355982-9872a980-e969-11e9-8ca4-6a2ff215f835.gif)
 
-`vsh` is an interactive HashiCorp Vault shell which treats vault secret paths like directories.
-That way you can do recursive operations on the paths.
-Both, vault KV v1 and v2 are supported.
-Further, copying/moving secrets between both KV versions is supported.
+`vsh` is an interactive [HashiCorp Vault](https://www.vaultproject.io/) shell which treats paths and keys like directories and files.
+Key features are:
 
-`vsh` also supports a non-interactive mode (similar to `bash -c "<cmd>"`), which
-makes it easier to integrate with automation.
-
-Commands are tested against KV1 and KV2 backends. 
-Further, the integration tests are running against vault `1.0.0` and `1.4.2`, i.e., there is a good chance that any version between will also be compatible.
+- recursive operations on paths with `cp`, `mv` or `rm`
+- term search with `grep`
+- transparency towards differences between KV1 and KV2, i.e., you can freely move/copy secrets between both
+- non-interactive mode for automation (`vsh -c "<cmd>"`)
+- merging keys with different strategies through `append`
 
 ## Supported commands
 
@@ -32,11 +30,11 @@ cd <dir-path>
 cat <file-path>
 ```
 
-`cp`, `rm` and `grep` command always have the `-r/-R` flag implied, i.e., every operation works recursively on the paths.
+`cp`, `rm` and `grep` command always have the `-r/-R` flag implied, i.e., every operation works recursively.
 
 ### append
 
-Append operation read secrets from the `<from-secret>` and adds it to the `<to-secret>`.
+Append operation reads secrets from `<from-secret>` and merges it to `<to-secret>`.
 The `<to-secret>` will be created with a placeholder value if it does not exists.
 Both `<from-secret>` and `<to-secret>` must be leaves (path cannot end with `/`).
 
@@ -142,6 +140,11 @@ export VAULT_TOKEN=<token>
 ./vsh -c "rm secret/dir/to/remove/"
 ```
 
+## Stability
+
+Every command has integration tests against KV1 and KV2. 
+Every test is run against vault `1.0.0` and `1.4.2`, i.e., versions in between should also be compatible.
+
 ## Misc
 
 `vsh` attempts to reliably discover all available backends.
@@ -162,7 +165,7 @@ make compile
 make integration-tests
 ```
 
-## TODOs
+## Potential TODOs
 
 - `tree` command
 - currently `mv` and `cp` behave a little different from UNIX. `mv /secret/source/a /secret/target/` should yield `/secret/target/a`
