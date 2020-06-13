@@ -1,3 +1,4 @@
 .idea/
 *.swp
 build/
+bats-tests/bin
