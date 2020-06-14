@@ -76,6 +76,33 @@ load ../bin/plugins/bats-assert/load
   assert_output --partial "${NO_VALUE_FOUND}"
 
   #######################################
+  echo "==== case: move single directory with dest trailing '/' ===="
+  run ${APP_BIN} -c "mv ${KV_BACKEND}/dest/dev.copy ${KV_BACKEND}/dest/dev/"
+  assert_success
+
+  echo "ensure the directory got moved to destination"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/1"
+  assert_success
+  assert_output "1"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/2"
+  assert_success
+  assert_output "2"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/3"
+  assert_success
+  assert_output "3"
+
+  echo "ensure the src directory got removed"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/1"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/2"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/3"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+
+  #######################################
   echo "==== TODO case: move ambigious file ===="
 
   #######################################
