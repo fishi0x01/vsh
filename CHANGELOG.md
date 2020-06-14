@@ -1,3 +1,10 @@
+## v0.6.1 (June 15, 2020)
+
+BUG FIXES:
+
+* Properly handle suffix '/' in source path ([#39](https://github.com/fishi0x01/vsh/pull/39))
+
+
 ## v0.6.0 (June 13, 2020)
 
 ENHANCEMENTS:
