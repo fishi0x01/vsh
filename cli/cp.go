@@ -2,8 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"github.com/fishi0x01/vsh/client"
 	"io"
+
+	"github.com/fishi0x01/vsh/client"
 )
 
 // CopyCommand container for all 'cp' parameters

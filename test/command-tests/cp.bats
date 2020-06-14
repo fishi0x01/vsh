@@ -33,11 +33,9 @@ load ../bin/plugins/bats-assert/load
   run get_vault_value "value" "${KV_BACKEND}/dest/dev/1"
   assert_success
   assert_output "1"
-
   run get_vault_value "value" "${KV_BACKEND}/dest/dev/2"
   assert_success
   assert_output "2"
-
   run get_vault_value "value" "${KV_BACKEND}/dest/dev/3"
   assert_success
   assert_output "3"
@@ -46,11 +44,9 @@ load ../bin/plugins/bats-assert/load
   run get_vault_value "value" "${KV_BACKEND}/src/dev/1"
   assert_success
   assert_output "1"
-
   run get_vault_value "value" "${KV_BACKEND}/src/dev/2"
   assert_success
   assert_output "2"
-
   run get_vault_value "value" "${KV_BACKEND}/src/dev/3"
   assert_success
   assert_output "3"
@@ -64,11 +60,9 @@ load ../bin/plugins/bats-assert/load
   run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/1"
   assert_success
   assert_output "1"
-
   run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/2"
   assert_success
   assert_output "2"
-
   run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/3"
   assert_success
   assert_output "3"
@@ -77,11 +71,9 @@ load ../bin/plugins/bats-assert/load
   run get_vault_value "value" "${KV_BACKEND}/src/dev/1"
   assert_success
   assert_output "1"
-
   run get_vault_value "value" "${KV_BACKEND}/src/dev/2"
   assert_success
   assert_output "2"
-
   run get_vault_value "value" "${KV_BACKEND}/src/dev/3"
   assert_success
   assert_output "3"

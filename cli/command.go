@@ -1,9 +1,10 @@
 package cli
 
 import (
-	"github.com/fishi0x01/vsh/client"
 	"path/filepath"
 	"strings"
+
+	"github.com/fishi0x01/vsh/client"
 )
 
 // Command interface to describe a command structure
@@ -31,6 +32,7 @@ func cmdPath(pwd string, arg string) (result string) {
 }
 
 func runCommandWithTraverseTwoPaths(client *client.Client, source string, target string, f func(string, string) error) {
+	source = filepath.Clean(source) // remove potential trailing '/'
 	for _, path := range client.Traverse(source) {
 		target := strings.Replace(path, source, target, 1)
 		err := f(path, target)
