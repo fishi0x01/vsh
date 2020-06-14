@@ -106,7 +106,7 @@ load ../bin/plugins/bats-assert/load
   assert_output "3"
 
   ######################################
-  echo "==== case: copy single directory with dsrc and est trailing '/' ===="
+  echo "==== case: copy single directory with src and dest trailing '/' ===="
   run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev/ ${KV_BACKEND}/dest/dev.copy3/"
   assert_success
 
