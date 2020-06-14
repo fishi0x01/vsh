@@ -22,7 +22,7 @@ load ../bin/plugins/bats-assert/load
   assert_output --partial "${NO_VALUE_FOUND}"
 
   #######################################
-  echo "==== case: move single directory ===="
+  echo "==== case: move single directory without trailing '/' ===="
   run ${APP_BIN} -c "mv ${KV_BACKEND}/src/dev ${KV_BACKEND}/dest/dev"
   assert_success
 
@@ -30,11 +30,9 @@ load ../bin/plugins/bats-assert/load
   run get_vault_value "value" "${KV_BACKEND}/dest/dev/1"
   assert_success
   assert_output "1"
-
   run get_vault_value "value" "${KV_BACKEND}/dest/dev/2"
   assert_success
   assert_output "2"
-
   run get_vault_value "value" "${KV_BACKEND}/dest/dev/3"
   assert_success
   assert_output "3"
@@ -43,12 +41,37 @@ load ../bin/plugins/bats-assert/load
   run get_vault_value "value" "${KV_BACKEND}/src/dev/1"
   assert_success
   assert_output --partial "${NO_VALUE_FOUND}"
-
   run get_vault_value "value" "${KV_BACKEND}/src/dev/2"
   assert_success
   assert_output --partial "${NO_VALUE_FOUND}"
-
   run get_vault_value "value" "${KV_BACKEND}/src/dev/3"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+
+  #######################################
+  echo "==== case: move single directory with trailing '/' ===="
+  run ${APP_BIN} -c "mv ${KV_BACKEND}/dest/dev/ ${KV_BACKEND}/dest/dev.copy"
+  assert_success
+
+  echo "ensure the directory got moved to destination"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/1"
+  assert_success
+  assert_output "1"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/2"
+  assert_success
+  assert_output "2"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/3"
+  assert_success
+  assert_output "3"
+
+  echo "ensure the src directory got removed"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/1"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/2"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/3"
   assert_success
   assert_output --partial "${NO_VALUE_FOUND}"
 

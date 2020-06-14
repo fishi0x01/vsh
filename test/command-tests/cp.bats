@@ -25,7 +25,7 @@ load ../bin/plugins/bats-assert/load
   assert_output "test"
 
   #######################################
-  echo "==== case: copy single directory ===="
+  echo "==== case: copy single directory without trailing '/' ===="
   run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev ${KV_BACKEND}/dest/dev"
   assert_success
 
@@ -39,6 +39,37 @@ load ../bin/plugins/bats-assert/load
   assert_output "2"
 
   run get_vault_value "value" "${KV_BACKEND}/dest/dev/3"
+  assert_success
+  assert_output "3"
+
+  echo "ensure the src directory still exists"
+  run get_vault_value "value" "${KV_BACKEND}/src/dev/1"
+  assert_success
+  assert_output "1"
+
+  run get_vault_value "value" "${KV_BACKEND}/src/dev/2"
+  assert_success
+  assert_output "2"
+
+  run get_vault_value "value" "${KV_BACKEND}/src/dev/3"
+  assert_success
+  assert_output "3"
+
+  #######################################
+  echo "==== case: copy single directory with trailing '/' ===="
+  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev/ ${KV_BACKEND}/dest/dev.copy"
+  assert_success
+
+  echo "ensure the directory got copied to destination"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/1"
+  assert_success
+  assert_output "1"
+
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/2"
+  assert_success
+  assert_output "2"
+
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev.copy/3"
   assert_success
   assert_output "3"
 
