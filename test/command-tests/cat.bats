@@ -14,4 +14,10 @@ load ../bin/plugins/bats-assert/load
   run ${APP_BIN} -c "cat ${KV_BACKEND}/src/dev"
   assert_success
   assert_output --partial "is not a file"
+
+  #######################################
+  echo "==== case: cat ambigious file ===="
+  run ${APP_BIN} -c "cat ${KV_BACKEND}/src/tooling"
+  assert_success
+  assert_output "value = tooling"
 }

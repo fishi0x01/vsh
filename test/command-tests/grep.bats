@@ -13,10 +13,17 @@ load ../bin/plugins/bats-assert/load
   assert_line --partial "/${KV_BACKEND}/src/prod/all"
 
   #######################################
-  echo "==== TODO case: grep term on directory with reduced permissions ===="
+  echo "==== case: grep term on ambigious directory ===="
+  run ${APP_BIN} -c "grep juice ${KV_BACKEND}/src/tooling/"
+  assert_line --partial "/${KV_BACKEND}/src/tooling/v1"
 
   #######################################
-  echo "==== TODO case: grep term on ambigious directory ===="
+  echo "==== case: grep term on ambigious file ===="
+  run ${APP_BIN} -c "grep beer ${KV_BACKEND}/src/tooling"
+  assert_line --partial "/${KV_BACKEND}/src/tooling"
+
+  #######################################
+  echo "==== TODO case: grep term on directory with reduced permissions ===="
 
   #######################################
   echo "==== TODO case: grep term on '/' ===="

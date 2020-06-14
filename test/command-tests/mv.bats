@@ -103,8 +103,51 @@ load ../bin/plugins/bats-assert/load
   assert_output --partial "${NO_VALUE_FOUND}"
 
   #######################################
-  echo "==== TODO case: move ambigious file ===="
+  echo "==== case: move ambigious directory ===="
+  run ${APP_BIN} -c "mv ${KV_BACKEND}/src/staging/all/ ${KV_BACKEND}/dest/staging/all/"
+  assert_success
+
+  echo "ensure the directory got moved"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging/all/v1"
+  assert_success
+  assert_output "v1"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging/all/v2"
+  assert_success
+  assert_output "v2"
+
+  echo "ensure the source directory got removed"
+  run get_vault_value "value" "${KV_BACKEND}/src/staging/all/v1"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+  run get_vault_value "value" "${KV_BACKEND}/src/staging/all/v2"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+
+  echo "ensure the ambigious file still exists"
+  run get_vault_value "value" "${KV_BACKEND}/src/staging/all"
+  assert_success
+  assert_output "all"
 
   #######################################
-  echo "==== TODO case: move ambigious directory ===="
+  echo "==== case: move ambigious file ===="
+  run ${APP_BIN} -c "mv ${KV_BACKEND}/src/tooling ${KV_BACKEND}/dest/tooling"
+  assert_success
+
+  echo "ensure the file got moved"
+  run get_vault_value "value" "${KV_BACKEND}/dest/tooling"
+  assert_success
+  assert_output "tooling"
+
+  echo "ensure the source file got removed"
+  run get_vault_value "value" "${KV_BACKEND}/src/tooling"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+
+  echo "ensure the ambigious directory still exists"
+  run get_vault_value "value" "${KV_BACKEND}/src/tooling/v1"
+  assert_success
+  assert_output "v1"
+  run get_vault_value "value" "${KV_BACKEND}/src/tooling/v2"
+  assert_success
+  assert_output "v2"
 }
