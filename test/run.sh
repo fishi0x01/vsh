@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e # required to fail test suite when a single test fails
-set -x
 
 VAULT_VERSIONS=("1.0.0" "1.4.2")
 KV_BACKENDS=("KV1" "KV2")
