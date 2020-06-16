@@ -8,13 +8,22 @@ export VAULT_HOST_PORT=${VAULT_HOST_PORT:-"8888"}
 export VAULT_TOKEN="root"
 export VAULT_ADDR="http://localhost:${VAULT_HOST_PORT}"
 
-export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export DIR
 export APP_BIN="${DIR}/../../build/vsh_linux_amd64"
 export NO_VALUE_FOUND="No value found at"
 
 setup() {
-    docker run --name=${VAULT_CONTAINER_NAME} -d -p ${VAULT_HOST_PORT}:8200 --cap-add=IPC_LOCK -e "VAULT_ADDR=http://127.0.0.1:8200" -e "VAULT_TOKEN=root" -e "VAULT_DEV_ROOT_TOKEN_ID=root" -e "VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200" vault:${VAULT_VERSION} &> /dev/null
-    docker cp $DIR/reduced-policy.hcl ${VAULT_CONTAINER_NAME}:.
+    docker run -d \
+        --name=${VAULT_CONTAINER_NAME} \
+        -p "${VAULT_HOST_PORT}:8200" \
+        --cap-add=IPC_LOCK \
+        -e "VAULT_ADDR=http://127.0.0.1:8200" \
+        -e "VAULT_TOKEN=root" \
+        -e "VAULT_DEV_ROOT_TOKEN_ID=root" \
+        -e "VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200" \
+        "vault:${VAULT_VERSION}" &> /dev/null
+    docker cp "$DIR/reduced-policy.hcl" ${VAULT_CONTAINER_NAME}:.
     # need some time for GH Actions CI
     sleep 3
     vault_exec "vault secrets disable secret"
@@ -48,5 +57,5 @@ vault_exec() {
 }
 
 get_vault_value() {
-  echo $(docker exec ${VAULT_CONTAINER_NAME} vault kv get -field=${1} ${2})
+  docker exec ${VAULT_CONTAINER_NAME} vault kv get -field="${1}" "${2}"
 }
