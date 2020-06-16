@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
-	"github.com/fishi0x01/vsh/client"
 	"io"
+
+	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // MoveCommand container for all 'mv' parameters
@@ -56,7 +58,7 @@ func (cmd *MoveCommand) Run() {
 
 	t := cmd.client.GetType(newSrcPwd)
 	if t != client.NODE && t != client.LEAF {
-		fmt.Fprintln(cmd.stderr, "Not a valid source path: "+newSrcPwd)
+		log.Error("Invalid source path: %s", newSrcPwd)
 		return
 	}
 
@@ -83,7 +85,7 @@ func (cmd *MoveCommand) moveSecret(source string, target string) error {
 		return err
 	}
 
-	fmt.Fprintln(cmd.stdout, "Moved "+source+" to "+target)
+	log.Info("Moved %s to %s", source, target)
 
 	return nil
 }

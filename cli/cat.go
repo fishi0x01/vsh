@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
-	"github.com/fishi0x01/vsh/client"
 	"io"
+
+	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // CatCommand container for all 'cat' parameters
@@ -70,7 +72,7 @@ func (cmd *CatCommand) Run() {
 			}
 		}
 	} else {
-		fmt.Fprintln(cmd.stderr, cmd.client.Pwd+cmd.Path, "is not a file")
+		log.Error("%s%s is not a file", cmd.client.Pwd, cmd.Path)
 	}
 
 	return

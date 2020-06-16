@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
-	"github.com/fishi0x01/vsh/client"
 	"io"
+
+	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // RemoveCommand container for all 'rm' parameters
@@ -62,7 +64,7 @@ func (cmd *RemoveCommand) Run() {
 			}
 		}
 	default:
-		fmt.Fprintln(cmd.stderr, "Not a valid path: "+newPwd)
+		log.Error("Invalid path: %s", newPwd)
 	}
 }
 
@@ -73,7 +75,7 @@ func (cmd *RemoveCommand) removeSecret(path string) error {
 		return err
 	}
 
-	fmt.Fprintln(cmd.stdout, "Removed "+path)
+	log.Info("Removed %s", path)
 
 	return nil
 }

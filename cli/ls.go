@@ -2,9 +2,11 @@ package cli
 
 import (
 	"fmt"
-	"github.com/fishi0x01/vsh/client"
 	"io"
 	"strings"
+
+	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // ListCommand container for 'ls' parameters
@@ -57,7 +59,7 @@ func (cmd *ListCommand) Run() {
 	result, err := cmd.client.List(newPwd)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Error("%w", err)
 	} else {
 		fmt.Fprintln(cmd.stdout, strings.Join(result, "\n"))
 	}

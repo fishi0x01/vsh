@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // CopyCommand container for all 'cp' parameters
@@ -57,7 +58,7 @@ func (cmd *CopyCommand) Run() {
 
 	t := cmd.client.GetType(newSrcPwd)
 	if t != client.NODE && t != client.LEAF {
-		fmt.Fprintln(cmd.stderr, "Not a valid source path: "+newSrcPwd)
+		log.Error("Invalid source path: %s", newSrcPwd)
 		return
 	}
 
@@ -79,7 +80,7 @@ func (cmd *CopyCommand) copySecret(source string, target string) error {
 		return err
 	}
 
-	fmt.Fprintln(cmd.stdout, "Copied "+source+" to "+target)
+	log.Info("Copied %s to %s", source, target)
 
 	return nil
 }
