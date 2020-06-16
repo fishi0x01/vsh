@@ -7,9 +7,7 @@ KV_BACKENDS=("KV1" "KV2")
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export DIR
-BATS_OS="$(command -v bats)" || true # allow to fail
-BATS_DEFAULT="${DIR}/bin/core/bin/bats"
-BATS="${BATS_OS:-${BATS_DEFAULT}}"
+BATS="${DIR}/bin/core/bin/bats"
 
 for vault_version in "${VAULT_VERSIONS[@]}"
 do
