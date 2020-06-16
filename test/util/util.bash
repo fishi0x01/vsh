@@ -58,5 +58,5 @@ vault_exec() {
 }
 
 get_vault_value() {
-  docker exec ${VAULT_CONTAINER_NAME} vault kv get -field="${1}" "${2}"
+    docker exec ${VAULT_CONTAINER_NAME} vault kv get -field="${1}" "${2}" || true
 }
