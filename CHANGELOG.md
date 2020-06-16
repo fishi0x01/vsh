@@ -1,3 +1,9 @@
+## Not released yet
+
+ENHANCEMENTS:
+
+* Allow separation of command params with multiple whitespaces ([#34](https://github.com/fishi0x01/vsh/pull/40)) - Thank you [vikin91](https://github.com/vikin91)
+
 ## v0.6.1 (June 15, 2020)
 
 BUG FIXES:
