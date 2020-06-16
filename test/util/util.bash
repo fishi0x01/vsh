@@ -10,7 +10,8 @@ export VAULT_ADDR="http://localhost:${VAULT_HOST_PORT}"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export DIR
-export APP_BIN="${DIR}/../../build/vsh_linux_amd64"
+UNAME=$(uname | tr '[:upper:]' '[:lower:]')
+export APP_BIN="${DIR}/../../build/vsh_${UNAME}_amd64"
 export NO_VALUE_FOUND="No value found at"
 
 setup() {
