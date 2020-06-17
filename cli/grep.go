@@ -2,11 +2,13 @@ package cli
 
 import (
 	"fmt"
-	"github.com/fatih/color"
-	"github.com/fishi0x01/vsh/client"
 	"index/suffixarray"
 	"io"
 	"sort"
+
+	"github.com/fatih/color"
+	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // GrepCommand container for all 'grep' parameters
@@ -69,7 +71,7 @@ func (cmd *GrepCommand) Run() {
 
 	t := cmd.client.GetType(path)
 	if t != client.NODE && t != client.LEAF {
-		fmt.Fprintln(cmd.stderr, "Not a valid path: "+path)
+		log.Error("Invalid path: %s", path)
 		return
 	}
 

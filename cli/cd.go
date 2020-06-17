@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
-	"github.com/fishi0x01/vsh/client"
 	"io"
+
+	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // CdCommand container for all 'cd' parameters
@@ -54,12 +56,12 @@ func (cmd *CdCommand) Run() {
 	t := cmd.client.GetType(newPwd)
 
 	if t == client.NONE {
-		fmt.Fprintln(cmd.stderr, "Not a valid directory: "+newPwd)
+		log.Error("Invalid directory: %s", newPwd)
 		return
 	}
 
 	if t == client.LEAF {
-		fmt.Fprintln(cmd.stderr, "Not a valid directory: "+newPwd+" is a file")
+		log.Error("Invalid directory: %s is a file", newPwd)
 		return
 	}
 

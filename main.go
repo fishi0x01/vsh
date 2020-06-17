@@ -98,7 +98,7 @@ func executor(in string) {
 		fmt.Fprint(os.Stdout, "")
 		return
 	default:
-		fmt.Fprintln(os.Stderr, "Unknown command '"+args[0]+"'")
+		log.Error("Unknown command '%s'", args[0])
 		return
 	}
 
