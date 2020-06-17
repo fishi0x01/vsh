@@ -106,7 +106,7 @@ load ../bin/plugins/bats-assert/load
   assert_output "3"
 
   ######################################
-  echo "==== case: copy single directory with dsrc and est trailing '/' ===="
+  echo "==== case: copy single directory with src and dest trailing '/' ===="
   run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev/ ${KV_BACKEND}/dest/dev.copy3/"
   assert_success
 
@@ -133,8 +133,52 @@ load ../bin/plugins/bats-assert/load
   assert_output "3"
 
   #######################################
-  echo "==== TODO case: copy ambigious file ===="
+  echo "==== case: copy ambigious directory ===="
+  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/staging/all/ ${KV_BACKEND}/dest/staging/all/"
+  assert_success
+
+  echo "ensure the directory got copied"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging/all/v1"
+  assert_success
+  assert_output "v1"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging/all/v2"
+  assert_success
+  assert_output "v2"
+
+  echo "ensure the source directory still exists"
+  run get_vault_value "value" "${KV_BACKEND}/src/staging/all/v1"
+  assert_success
+  assert_output "v1"
+  run get_vault_value "value" "${KV_BACKEND}/src/staging/all/v2"
+  assert_success
+  assert_output "v2"
+
+  echo "ensure the ambigious file still exists"
+  run get_vault_value "value" "${KV_BACKEND}/src/staging/all"
+  assert_success
+  assert_output "all"
 
   #######################################
-  echo "==== TODO case: copy ambigious directory ===="
+  echo "==== case: copy ambigious file ===="
+  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/tooling ${KV_BACKEND}/dest/tooling"
+  assert_success
+
+  echo "ensure the file got copied"
+  run get_vault_value "value" "${KV_BACKEND}/dest/tooling"
+  assert_success
+  assert_output "tooling"
+
+  echo "ensure the source file still exists"
+  run get_vault_value "value" "${KV_BACKEND}/src/tooling"
+  assert_success
+  assert_output "tooling"
+
+  echo "ensure the ambigious directory still exists"
+  run get_vault_value "value" "${KV_BACKEND}/src/tooling/v1"
+  assert_success
+  assert_output "v1"
+
+  run get_vault_value "value" "${KV_BACKEND}/src/tooling/v2"
+  assert_success
+  assert_output "v2"
 }

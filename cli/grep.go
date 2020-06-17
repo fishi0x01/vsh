@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"index/suffixarray"
 	"io"
+	"path/filepath"
 	"sort"
 
 	"github.com/fatih/color"
@@ -68,15 +69,22 @@ func (cmd *GrepCommand) Parse(args []string) (success bool) {
 // Run executes 'grep' with given RemoveCommand's parameters
 func (cmd *GrepCommand) Run() {
 	path := cmdPath(cmd.client.Pwd, cmd.Path)
+	filePaths := []string{}
 
-	t := cmd.client.GetType(path)
-	if t != client.NODE && t != client.LEAF {
+	switch t := cmd.client.GetType(path); t {
+	case client.LEAF:
+		filePaths = append(filePaths, filepath.Clean(path))
+	case client.NODE:
+		for _, traversedPath := range cmd.client.Traverse(path) {
+			filePaths = append(filePaths, traversedPath)
+		}
+	default:
 		log.Error("Invalid path: %s", path)
 		return
 	}
 
-	for _, path := range cmd.client.Traverse(path) {
-		matches, err := cmd.grepFile(cmd.Search, path)
+	for _, curPath := range filePaths {
+		matches, err := cmd.grepFile(cmd.Search, curPath)
 		if err != nil {
 			return
 		}
@@ -84,8 +92,6 @@ func (cmd *GrepCommand) Run() {
 			match.print(cmd.stdout)
 		}
 	}
-
-	return
 }
 
 func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, err error) {
@@ -125,7 +131,7 @@ func match(path string, k string, v string, substr string) (m []*Match) {
 
 	if len(keyMatches) > 0 || len(valueMatches) > 0 {
 		m = []*Match{
-			&Match{
+			{
 				path:       path,
 				term:       substr,
 				key:        k,
@@ -142,7 +148,7 @@ func match(path string, k string, v string, substr string) (m []*Match) {
 func (match *Match) print(out io.Writer) {
 	fmt.Fprint(out, match.path, "> ")
 	highlightMatches(match.key, match.term, match.keyIndex, out)
-	fmt.Fprintf(out, " : ")
+	fmt.Fprintf(out, " = ")
 	highlightMatches(match.value, match.term, match.valueIndex, out)
 	fmt.Fprintf(out, "\n")
 }

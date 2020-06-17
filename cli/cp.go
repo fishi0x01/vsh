@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
@@ -56,14 +57,14 @@ func (cmd *CopyCommand) Run() {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 
-	t := cmd.client.GetType(newSrcPwd)
-	if t != client.NODE && t != client.LEAF {
+	switch t := cmd.client.GetType(newSrcPwd); t {
+	case client.LEAF:
+		cmd.copySecret(filepath.Clean(newSrcPwd), newTargetPwd)
+	case client.NODE:
+		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.copySecret)
+	default:
 		log.Error("Invalid source path: %s", newSrcPwd)
-		return
 	}
-
-	runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.copySecret)
-	return
 }
 
 func (cmd *CopyCommand) copySecret(source string, target string) error {
