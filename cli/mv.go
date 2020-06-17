@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	"io"
-    "path/filepath"
+	"path/filepath"
 
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
