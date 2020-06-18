@@ -117,6 +117,14 @@ tree=oak
 In order to get a valid token, `vsh` uses vault's TokenHelper mechanism (`github.com/hashicorp/vault/command/config`).
 That means `vsh` supports setting vault tokens via `~/.vault-token`, `VAULT_TOKEN` and external `token_helper`.
 
+## Secret Backend Discovery
+
+`vsh` attempts to reliably discover all available backends.
+Ideally, the vault token used by `vsh` has `list` permissions on `sys/mount`.
+If this is not the case, then `vsh` does not know the available backends beforehand.
+That means initially there won't be path auto-completion on the top (backend) level.
+However, `vsh` will try with best effort to reliably determine the kv version of every entered path.
+
 ## Interactive mode
 
 ```
@@ -144,14 +152,6 @@ export VAULT_TOKEN=<token>
 
 Every command has integration tests against KV1 and KV2. 
 Every test is run against vault `1.0.0` and `1.4.2`, i.e., versions in between should also be compatible.
-
-## Misc
-
-`vsh` attempts to reliably discover all available backends.
-Ideally, the vault token used by `vsh` has `list` permissions on `sys/mount`.
-If this is not the case, then `vsh` does not know the available backends beforehand.
-That means initially there won't be path auto-completion on the top level.
-However, `vsh` will try with best effort, to reliably determine the kv version of every entered path.
 
 ## Local Development
 

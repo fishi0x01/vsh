@@ -1,9 +1,19 @@
+## v0.6.2 (June 18, 2020)
+
+ENHANCEMENTS:
+
+* Allow separation of command params with multiple whitespaces ([#40](https://github.com/fishi0x01/vsh/pull/40)) - Thank you [vikin91](https://github.com/vikin91)
+* Unify verbose behavior ([#41](https://github.com/fishi0x01/vsh/pull/41)) - Thank you [vikin91](https://github.com/vikin91)
+
+BUG FIXES:
+
+* Properly handle ambigious files ([#37](https://github.com/fishi0x01/vsh/pull/37))
+
 ## v0.6.1 (June 15, 2020)
 
 BUG FIXES:
 
 * Properly handle suffix '/' in source path ([#39](https://github.com/fishi0x01/vsh/pull/39))
-
 
 ## v0.6.0 (June 13, 2020)
 
