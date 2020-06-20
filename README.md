@@ -168,4 +168,3 @@ make integration-tests
 ## Potential TODOs
 
 - `tree` command
-- currently `mv` and `cp` behave a little different from UNIX. `mv /secret/source/a /secret/target/` should yield `/secret/target/a`

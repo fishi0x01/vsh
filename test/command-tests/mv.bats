@@ -150,4 +150,67 @@ load ../bin/plugins/bats-assert/load
   run get_vault_value "value" "${KV_BACKEND}/src/tooling/v2"
   assert_success
   assert_output "v2"
+
+  #######################################
+  echo "==== case: move file into existing target directory ===="
+  run ${APP_BIN} -c "mv ${KV_BACKEND}/src/staging/all ${KV_BACKEND}/dest/dev"
+  assert_success
+
+  echo "ensure the file got moved"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/all"
+  assert_success
+  assert_output "all"
+
+  echo "ensure the source file got removed"
+  run get_vault_value "value" "${KV_BACKEND}/src/staging/all"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+
+  #######################################
+  echo "==== case: move directory into existing target directory ===="
+  run ${APP_BIN} -c "mv ${KV_BACKEND}/dest/dev/ ${KV_BACKEND}/dest/staging"
+  assert_success
+
+  echo "ensure the direcotry got moved"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging/dev/1"
+  assert_success
+  assert_output "1"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging/dev/2"
+  assert_success
+  assert_output "2"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging/dev/3"
+  assert_success
+  assert_output "3"
+
+  echo "ensure the source directory got removed"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/1"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/2"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+  run get_vault_value "value" "${KV_BACKEND}/dest/dev/3"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+
+  #######################################
+  echo "==== case: move all files in directory into existing target directory using '*' ===="
+  run ${APP_BIN} -c "mv ${KV_BACKEND}/src/tooling/* ${KV_BACKEND}/dest/tooling"
+  assert_success
+
+  echo "ensure the files got moved"
+  run get_vault_value "value" "${KV_BACKEND}/dest/tooling/v1"
+  assert_success
+  assert_output "v1"
+  run get_vault_value "value" "${KV_BACKEND}/dest/tooling/v2"
+  assert_success
+  assert_output "v2"
+
+  echo "ensure the source files got removed"
+  run get_vault_value "value" "${KV_BACKEND}/src/tooling/v1"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+  run get_vault_value "value" "${KV_BACKEND}/src/tooling/v2"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
 }
