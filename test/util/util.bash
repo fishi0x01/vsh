@@ -46,6 +46,8 @@ setup() {
         vault_exec "vault kv put ${kv_backend}/src/tooling value=tooling drink=beer key=A"
         vault_exec "vault kv put ${kv_backend}/src/tooling/v1 value=v1 drink=juice key=B"
         vault_exec "vault kv put ${kv_backend}/src/tooling/v2 value=v2 drink=water key=C"
+        vault_exec "vault kv put ${kv_backend}/src/ambivalence/1 value=1 fruit=apple"
+        vault_exec "vault kv put ${kv_backend}/src/ambivalence/1/a value=2 fruit=banana"
     done
 }
 
