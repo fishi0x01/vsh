@@ -151,7 +151,7 @@ export VAULT_TOKEN=<token>
 ## Stability
 
 Every command has integration tests against KV1 and KV2. 
-Every test is run against vault `1.0.0` and `1.4.2`, i.e., versions in between should also be compatible.
+Every test is run against vault `1.0.0` and `1.5.0`, i.e., versions in between should also be compatible.
 
 ## Local Development
 
