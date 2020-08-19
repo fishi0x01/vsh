@@ -24,12 +24,15 @@ setup() {
         -e "VAULT_DEV_ROOT_TOKEN_ID=root" \
         -e "VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200" \
         "vault:${VAULT_VERSION}" &> /dev/null
-    docker cp "$DIR/reduced-policy.hcl" ${VAULT_CONTAINER_NAME}:.
+    docker cp "$DIR/policy-no-root.hcl" ${VAULT_CONTAINER_NAME}:.
+    docker cp "$DIR/policy-delete-only.hcl" ${VAULT_CONTAINER_NAME}:.
     # need some time for GH Actions CI
     sleep 3
     vault_exec "vault secrets disable secret"
-    vault_exec "vault policy write reduced-access reduced-policy.hcl"
-    vault_exec "vault token create -id=reduced -policy=reduced-access"
+    vault_exec "vault policy write no-root policy-no-root.hcl"
+    vault_exec "vault token create -id=no-root -policy=no-root"
+    vault_exec "vault policy write delete-only policy-delete-only.hcl"
+    vault_exec "vault token create -id=delete-only -policy=delete-only"
 
     KV_BACKENDS=("KV1" "KV2")
     vault_exec "vault secrets enable -version=1 -path=KV1 kv"
@@ -48,6 +51,10 @@ setup() {
         vault_exec "vault kv put ${kv_backend}/src/tooling/v2 value=v2 drink=water key=C"
         vault_exec "vault kv put ${kv_backend}/src/ambivalence/1 value=1 fruit=apple"
         vault_exec "vault kv put ${kv_backend}/src/ambivalence/1/a value=2 fruit=banana"
+        vault_exec "vault kv put ${kv_backend}/src/a/foo value=1"
+        vault_exec "vault kv put ${kv_backend}/src/a/foo/bar value=2"
+        vault_exec "vault kv put ${kv_backend}/src/b/foo value=1"
+        vault_exec "vault kv put ${kv_backend}/src/b/foo/bar value=2"
     done
 }
 

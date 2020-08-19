@@ -115,4 +115,26 @@ load ../bin/plugins/bats-assert/load
   run get_vault_value "value" "${KV_BACKEND}/src/ambivalence/1"
   assert_success
   assert_output "1"
+
+  #######################################
+  echo "==== case: remove ambigious file without read permissions ===="
+  run get_vault_value "value" "${KV_BACKEND}/src/a/foo"
+  assert_success
+  assert_output "1"
+  run get_vault_value "value" "${KV_BACKEND}/src/a/foo/bar"
+  assert_success
+  assert_output "2"
+
+  run bash -c "VAULT_TOKEN=delete-only ${APP_BIN} -c 'rm ${KV_BACKEND}/src/a/foo'"
+  assert_success
+
+  echo "ensure file deletion"
+  run get_vault_value "value" "${KV_BACKEND}/src/a/foo"
+  assert_success
+  assert_output --partial "${NO_VALUE_FOUND}"
+
+  echo "ensure that the ambigious directory still exists"
+  run get_vault_value "value" "${KV_BACKEND}/src/a/foo/bar"
+  assert_success
+  assert_output "2"
 }
