@@ -1,3 +1,9 @@
+## v0.6.3 (September 22, 2020)
+
+BUG FIXES:
+
+* Properly handle ambiguous files without read permission [#46](https://github.com/fishi0x01/vsh/pull/46) - Thank you for detailed report [agaudreault-jive](https://github.com/agaudreault-jive)
+
 ## v0.6.2 (June 18, 2020)
 
 ENHANCEMENTS:
@@ -7,7 +13,7 @@ ENHANCEMENTS:
 
 BUG FIXES:
 
-* Properly handle ambigious files ([#37](https://github.com/fishi0x01/vsh/pull/37))
+* Properly handle ambiguous files ([#37](https://github.com/fishi0x01/vsh/pull/37))
 
 ## v0.6.1 (June 15, 2020)
 

@@ -18,6 +18,14 @@ load ../bin/plugins/bats-assert/load
   assert_output --partial "${NO_VALUE_FOUND}"
 
   #######################################
+  echo "==== case: remove non-existing file ===="
+  run ${APP_BIN} -c "rm ${KV_BACKEND}/src/does/not/exist"
+  assert_success
+
+  echo "ensure proper error message"
+  assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
+
+  #######################################
   echo "==== case: remove single directory ===="
   run get_vault_value "value" "${KV_BACKEND}/src/dev/1"
   assert_success

@@ -124,7 +124,7 @@ func (cmd *AppendCommand) Run() {
 
 	src := cmd.client.GetType(newSrcPwd)
 	if src != client.LEAF {
-		log.Error("Invalid source - must be a leaf: " + newSrcPwd)
+		log.NotAValidPath(newSrcPwd)
 		return
 	}
 

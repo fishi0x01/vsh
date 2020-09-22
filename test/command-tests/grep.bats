@@ -13,6 +13,14 @@ load ../bin/plugins/bats-assert/load
   assert_line --partial "/${KV_BACKEND}/src/prod/all"
 
   #######################################
+  echo "==== case: grep non-existing file ===="
+  run ${APP_BIN} -c "grep test ${KV_BACKEND}/src/does/not/exist"
+  assert_success
+
+  echo "ensure proper error message"
+  assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
+
+  #######################################
   echo "==== case: grep term on ambigious directory ===="
   run ${APP_BIN} -c "grep juice ${KV_BACKEND}/src/tooling/"
   assert_line --partial "/${KV_BACKEND}/src/tooling/v1"

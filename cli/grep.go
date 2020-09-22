@@ -79,7 +79,7 @@ func (cmd *GrepCommand) Run() {
 			filePaths = append(filePaths, traversedPath)
 		}
 	default:
-		log.Error("Invalid path: %s", path)
+		log.NotAValidPath(path)
 		return
 	}
 
@@ -92,6 +92,7 @@ func (cmd *GrepCommand) Run() {
 			match.print(cmd.stdout)
 		}
 	}
+	return
 }
 
 func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, err error) {

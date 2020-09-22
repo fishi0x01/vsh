@@ -59,7 +59,7 @@ func (cmd *ListCommand) Run() {
 	result, err := cmd.client.List(newPwd)
 
 	if err != nil {
-		log.Error("%w", err)
+		log.NotAValidPath(newPwd)
 	} else {
 		fmt.Fprintln(cmd.stdout, strings.Join(result, "\n"))
 	}

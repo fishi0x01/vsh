@@ -72,8 +72,7 @@ func (cmd *CatCommand) Run() {
 			}
 		}
 	} else {
-		log.Error("%s%s is not a file", cmd.client.Pwd, cmd.Path)
+		log.NotAValidPath(absPath)
 	}
-
 	return
 }

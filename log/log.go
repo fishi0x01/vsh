@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	au "github.com/logrusorgru/aurora"
 	"log"
 	"path/filepath"
@@ -76,4 +77,16 @@ func Warn(f string, args ...interface{}) {
 // Error writes error message to log
 func Error(f string, args ...interface{}) {
 	logger(errorLvl, f, args...)
+}
+
+// NotAValidPath prints not a valid path message
+func NotAValidPath(f string) {
+	message := au.Red(au.Sprintf("Not a valid path for operation: %s\n", f))
+	fmt.Printf(au.Sprintf(message))
+}
+
+// NotAValidCommand prints not a valid command
+func NotAValidCommand(c string) {
+	message := au.Red(au.Sprintf("Not a valid command: %s\n", c))
+	fmt.Printf(au.Sprintf(message))
 }

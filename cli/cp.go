@@ -63,7 +63,7 @@ func (cmd *CopyCommand) Run() {
 	case client.NODE:
 		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.copySecret)
 	default:
-		log.Error("Invalid source path: %s", newSrcPwd)
+		log.NotAValidPath(newSrcPwd)
 	}
 }
 

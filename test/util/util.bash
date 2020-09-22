@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export VAULT_VERSION=${VAULT_VERSION:-"1.3.4"}
-export KV_BACKEND=${KV_BACKEND:-"KV2"}
+export VAULT_VERSION=${VAULT_VERSION}
+export KV_BACKEND=${KV_BACKEND}
 export VAULT_CONTAINER_NAME="vsh-integration-test-vault"
 export VAULT_HOST_PORT=${VAULT_HOST_PORT:-"8888"}
 

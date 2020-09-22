@@ -25,6 +25,14 @@ load ../bin/plugins/bats-assert/load
   assert_output "test"
 
   #######################################
+  echo "==== case: copy non-existing file ===="
+  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/does/not/exist ${KV_BACKEND}/dest/a"
+  assert_success
+
+  echo "ensure proper error message"
+  assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
+
+  #######################################
   echo "==== case: copy single directory without trailing '/' ===="
   run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev ${KV_BACKEND}/dest/dev"
   assert_success

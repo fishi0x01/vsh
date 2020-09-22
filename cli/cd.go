@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
@@ -56,18 +57,17 @@ func (cmd *CdCommand) Run() {
 	t := cmd.client.GetType(newPwd)
 
 	if t == client.NONE {
-		log.Error("Invalid directory: %s", newPwd)
+		log.NotAValidPath(newPwd)
 		return
 	}
 
 	if t == client.LEAF {
-		log.Error("Invalid directory: %s is a file", newPwd)
+		log.NotAValidPath(newPwd)
 		return
 	}
 
-	newPwd = newPwd + "/"
-	if newPwd == "//" {
-		newPwd = "/"
+	if !strings.HasSuffix(newPwd, "/") {
+		newPwd = newPwd + "/"
 	}
 	cmd.client.Pwd = newPwd
 	return

@@ -22,6 +22,14 @@ load ../bin/plugins/bats-assert/load
   assert_output --partial "${NO_VALUE_FOUND}"
 
   #######################################
+  echo "==== case: move non-existing file ===="
+  run ${APP_BIN} -c "mv ${KV_BACKEND}/src/does/not/exist ${KV_BACKEND}/src/aa"
+  assert_success
+
+  echo "ensure proper error message"
+  assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
+
+  #######################################
   echo "==== case: move single directory without trailing '/' ===="
   run ${APP_BIN} -c "mv ${KV_BACKEND}/src/dev ${KV_BACKEND}/dest/dev"
   assert_success
