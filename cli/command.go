@@ -16,7 +16,6 @@ type Command interface {
 }
 
 func cmdPath(pwd string, arg string) (result string) {
-	strings.HasSuffix(arg, "/")
 	result = filepath.Clean(pwd + arg)
 
 	if strings.HasSuffix(arg, "/") {

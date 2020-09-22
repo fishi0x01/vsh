@@ -10,10 +10,18 @@ load ../bin/plugins/bats-assert/load
   assert_line "value = 1"
 
   #######################################
+  echo "==== case: cat non-existing file ===="
+  run ${APP_BIN} -c "cat ${KV_BACKEND}/src/does/not/exist"
+  assert_success
+
+  echo "ensure proper error message"
+  assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
+
+  #######################################
   echo "==== case: cat directory ===="
   run ${APP_BIN} -c "cat ${KV_BACKEND}/src/dev"
   assert_success
-  assert_output --partial "is not a file"
+  assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/dev"
 
   #######################################
   echo "==== case: cat ambigious file ===="
@@ -27,5 +35,5 @@ load ../bin/plugins/bats-assert/load
   echo "==== case: cat ambigious directory ===="
   run ${APP_BIN} -c "cat ${KV_BACKEND}/src/tooling/"
   assert_success
-  assert_output --partial "is not a file"
+  assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/tooling/"
 }

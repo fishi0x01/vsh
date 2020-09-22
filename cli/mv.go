@@ -63,8 +63,9 @@ func (cmd *MoveCommand) Run() {
 	case client.NODE:
 		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.moveSecret)
 	default:
-		log.Error("Invalid source path: %s", newSrcPwd)
+		log.NotAValidPath(newSrcPwd)
 	}
+	return
 }
 
 func (cmd *MoveCommand) moveSecret(source string, target string) error {

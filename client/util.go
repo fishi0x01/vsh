@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"github.com/hashicorp/vault/api"
 	"strings"
 )
@@ -56,8 +55,8 @@ func (client *Client) kvPath(path string, prefix string) string {
 	case 2:
 		// https://www.vaultproject.io/docs/secrets/kv/kv-v2.html#acl-rules
 		s := strings.SplitN(path, "/", 2)
-		if len(s) != 2 {
-			panic(fmt.Errorf("Could not properly split path '%s'", path))
+		if len(s) == 1 {
+			return s[0] + prefix
 		}
 		return s[0] + prefix + s[1]
 	default:

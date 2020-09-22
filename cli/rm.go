@@ -64,8 +64,9 @@ func (cmd *RemoveCommand) Run() {
 			}
 		}
 	default:
-		log.Error("Invalid path: %s", newPwd)
+		log.NotAValidPath(newPwd)
 	}
+	return
 }
 
 func (cmd *RemoveCommand) removeSecret(path string) error {

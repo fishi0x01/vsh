@@ -1,6 +1,9 @@
 package client
 
-import "strings"
+import (
+	"path/filepath"
+	"strings"
+)
 
 // PathKind describes the type of a path
 type PathKind int
@@ -23,39 +26,60 @@ func (client *Client) topLevelType(path string) PathKind {
 	}
 }
 
+var cachedPath = ""
+var cachedDirFiles = make(map[string]int)
+
+func (client *Client) isAmbiguous(path string) (result bool) {
+	// get current directory content
+	if cachedPath != path {
+		pathTrim := strings.TrimSuffix(path, "/")
+		cachedDirFiles = make(map[string]int)
+		s, err := client.Vault.Logical().List(client.getKVMetaDataPath(filepath.Dir(pathTrim)))
+		if err == nil && s != nil {
+			if keysInterface, ok := s.Data["keys"]; ok {
+				for _, valInterface := range keysInterface.([]interface{}) {
+					val := valInterface.(string)
+					cachedDirFiles[val] = 1
+				}
+			}
+		}
+		cachedPath = path
+	}
+
+	// check if path exists as file and directory
+	result = false
+	if _, ok := cachedDirFiles[filepath.Base(path)]; ok {
+		if _, ok := cachedDirFiles[filepath.Base(path)+"/"]; ok {
+			result = true
+		}
+	}
+	return result
+}
+
 func (client *Client) lowLevelType(path string) (result PathKind) {
-	result = NONE
-	isNode := false
-	isLeaf := false
-
-	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
-	if err == nil && s != nil {
-		isNode = true
-	}
-
-	s, err = client.Vault.Logical().Read(client.getKVDataPath(path))
-	if err == nil && s != nil {
-		isLeaf = true
-	}
-
-	if isLeaf && !isNode {
-		result = LEAF
-	}
-
-	if isNode && !isLeaf {
-		result = NODE
-	}
-
-	if isLeaf && isNode {
-		// vault namespace path can overlap with a key, e.g.,
-		// secret/a and secret/a/b
-		// --> in that case, we have a leaf and a node when checking secret/a
+	if client.isAmbiguous(path) {
 		if strings.HasSuffix(path, "/") {
 			result = NODE
 		} else {
 			result = LEAF
 		}
+	} else {
+		hasNode := false
+		s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path + "/"))
+		if err == nil && s != nil {
+			if _, ok := s.Data["keys"]; ok {
+				hasNode = true
+			}
+		}
+		if hasNode {
+			result = NODE
+		} else {
+			if _, ok := cachedDirFiles[filepath.Base(path)]; ok {
+				result = LEAF
+			} else {
+				result = NONE
+			}
+		}
 	}
-
-	return
+	return result
 }

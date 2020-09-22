@@ -148,10 +148,18 @@ export VAULT_TOKEN=<token>
 ./vsh -c "rm secret/dir/to/remove/"
 ```
 
+## Permission requirements
+
+`vsh` requires `List` permission on the operated paths. 
+This is necessary to determine if a path points to a node or leaf in the path tree. 
+Further, it is needed to gather auto-completion data.
+
+For operations like `cp` or `mv`, `vsh` additionally requires `Read` and `Write` permissions on the operated paths.
+
 ## Stability
 
 Every command has integration tests against KV1 and KV2. 
-Every test is run against vault `1.0.0` and `1.4.2`, i.e., versions in between should also be compatible.
+Every test is run against vault `1.0.0` and `1.5.3`, i.e., versions in between should also be compatible.
 
 ## Local Development
 

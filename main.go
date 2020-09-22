@@ -66,6 +66,11 @@ func executor(in string) {
 	var cmd cli.Command
 	var run bool
 
+	if len(args) == 0 {
+		fmt.Fprint(os.Stdout, "")
+		return
+	}
+
 	// Check for built-in commands.
 	switch args[0] {
 	case commands.ls.GetName():
@@ -94,11 +99,8 @@ func executor(in string) {
 		cmd = commands.grep
 	case "exit":
 		os.Exit(0)
-	case "":
-		fmt.Fprint(os.Stdout, "")
-		return
 	default:
-		log.Error("Unknown command '%s'", args[0])
+		log.NotAValidCommand(args[0])
 		return
 	}
 
