@@ -54,6 +54,8 @@ func parseInput(line string) (args []string) {
 	return strings.Fields(line)
 }
 
+var completerInstance *completer.Completer
+
 func executor(in string) {
 	// Every command can change the vault content
 	// i.e., the cache should be cleared on command execution
@@ -97,6 +99,8 @@ func executor(in string) {
 	case commands.grep.GetName():
 		run = commands.grep.Parse(args)
 		cmd = commands.grep
+	case "toggle-auto-completion":
+		completerInstance.TogglePathCompletion()
 	case "exit":
 		os.Exit(0)
 	default:
@@ -132,8 +136,10 @@ func main() {
 
 	var cmdString string
 	var hasVersion bool
+	var disableAutoCompletion bool
 	flag.StringVar(&cmdString, "c", "", "command to run")
 	flag.BoolVar(&hasVersion, "version", false, "print vsh version")
+	flag.BoolVar(&disableAutoCompletion, "disable-auto-completion", false, "disable auto-completion on paths")
 	flag.BoolVar(&verbose, "v", false, "verbose output")
 	flag.Parse()
 
@@ -171,12 +177,12 @@ func main() {
 		executor(cmdString)
 	} else {
 		// Run interactive mode
-		completer := completer.NewCompleter(vaultClient)
+		completerInstance = completer.NewCompleter(vaultClient, disableAutoCompletion)
 		p := prompt.New(
 			executor,
-			completer.Complete,
+			completerInstance.Complete,
 			prompt.OptionTitle("vsh - interactive vault shell"),
-			prompt.OptionLivePrefix(completer.PromptPrefix),
+			prompt.OptionLivePrefix(completerInstance.PromptPrefix),
 			prompt.OptionInputTextColor(prompt.Yellow),
 			prompt.OptionShowCompletionAtStart(),
 		)

@@ -1,6 +1,7 @@
 package completer
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
@@ -9,14 +10,22 @@ import (
 
 // Completer struct for tab completion
 type Completer struct {
-	client *client.Client
+	pathCompletionToggle bool
+	client               *client.Client
 }
 
 // NewCompleter creates a new Completer with given client
-func NewCompleter(client *client.Client) *Completer {
+func NewCompleter(client *client.Client, disableAutoCompletion bool) *Completer {
 	return &Completer{
-		client: client,
+		pathCompletionToggle: !disableAutoCompletion,
+		client:               client,
 	}
+}
+
+// TogglePathCompletion enable/disable path auto-completion
+func (c *Completer) TogglePathCompletion() {
+	c.pathCompletionToggle = !c.pathCompletionToggle
+	fmt.Printf("Use path auto-completion: %t\n", c.pathCompletionToggle)
 }
 
 func (c *Completer) getAbsoluteTopLevelSuggestions() []prompt.Suggest {
@@ -108,7 +117,8 @@ func isCommandArgument(p string) bool {
 		words[0] == "grep" ||
 		words[0] == "cat" ||
 		words[0] == "append" ||
-		words[0] == "ls"
+		words[0] == "ls" ||
+		words[0] == "toggle-auto-completion"
 }
 
 func isCommand(p string) bool {
@@ -125,6 +135,7 @@ func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 		{Text: "grep", Description: "grep <term> <path>"},
 		{Text: "cat", Description: "cat <path>"},
 		{Text: "ls", Description: "ls <path>"},
+		{Text: "toggle-auto-completion", Description: "toggle path auto-completion on/off"},
 	}
 	filtered := prompt.FilterHasPrefix(result, arg, true)
 	if len(filtered) > 0 {
@@ -138,7 +149,7 @@ func (c *Completer) Complete(in prompt.Document) (result []prompt.Suggest) {
 	p := in.TextBeforeCursor()
 	if isCommand(p) {
 		result = c.commandSuggestions(in.GetWordBeforeCursor())
-	} else if isCommandArgument(p) {
+	} else if isCommandArgument(p) && c.pathCompletionToggle {
 		cur := in.GetWordBeforeCursor()
 		if isAbsolutePath(cur) {
 			result = c.absolutePathSuggestions(cur)

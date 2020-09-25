@@ -140,6 +140,24 @@ http://localhost:8080 /secret/>
 in order to do accurate tab-completion.
 If your token has a limited number of uses, then consider using the non-interactive mode to avoid auto-completion queries.
 
+### Toggle auto-completion
+
+To reduce the number of queries against vault, you can disable path auto-completion in 2 ways:
+
+1. Disable at start time:
+```
+./vsh --disable-auto-completion
+```
+
+2. Toggle inside interactive mode:
+```
+./vsh
+http://localhost:8080 /secret/> toggle-auto-completion
+Use path auto-completion: false
+http://localhost:8080 /secret/> toggle-auto-completion
+Use path auto-completion: true
+```
+
 ## Non-interactive mode
 
 ```
@@ -150,15 +168,15 @@ export VAULT_TOKEN=<token>
 
 ## Permission requirements
 
-`vsh` requires `List` permission on the operated paths. 
-This is necessary to determine if a path points to a node or leaf in the path tree. 
+`vsh` requires `List` permission on the operated paths.
+This is necessary to determine if a path points to a node or leaf in the path tree.
 Further, it is needed to gather auto-completion data.
 
 For operations like `cp` or `mv`, `vsh` additionally requires `Read` and `Write` permissions on the operated paths.
 
 ## Stability
 
-Every command has integration tests against KV1 and KV2. 
+Every command has integration tests against KV1 and KV2.
 Every test is run against vault `1.0.0` and `1.5.3`, i.e., versions in between should also be compatible.
 
 ## Local Development
