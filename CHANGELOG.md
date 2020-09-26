@@ -1,3 +1,9 @@
+## v0.7.0 (September 26, 2020)
+
+ENHANCEMENTS:
+
+* Add option to disable path auto-completion ([#48](https://github.com/fishi0x01/vsh/pull/48))
+
 ## v0.6.3 (September 22, 2020)
 
 BUG FIXES:

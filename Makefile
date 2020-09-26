@@ -22,11 +22,14 @@ get-bats:
 	mkdir -p test/bin/plugins/bats-assert
 	mkdir -p test/bin/plugins/bats-support
 	curl -sL https://github.com/bats-core/bats-core/archive/v1.2.0.tar.gz | tar xvz --strip 1 -C test/bin/core
-	curl -sL https://github.com/bats-core/bats-assert/archive/v2.0.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-assert 
-	curl -sL https://github.com/bats-core/bats-support/archive/v0.3.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-support 
+	curl -sL https://github.com/bats-core/bats-assert/archive/v2.0.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-assert
+	curl -sL https://github.com/bats-core/bats-support/archive/v0.3.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-support
 
 integration-tests:
 	test/run.sh
+
+local-vault-test-instance:
+	bash -c ". test/util/util.bash && setup"
 
 clean:
 	rm ./build/* || true
