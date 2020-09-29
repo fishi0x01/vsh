@@ -1,6 +1,6 @@
-load ../util/util
-load ../bin/plugins/bats-support/load
-load ../bin/plugins/bats-assert/load
+load ../../util/util
+load ../../bin/plugins/bats-support/load
+load ../../bin/plugins/bats-assert/load
 
 @test "vault-${VAULT_VERSION} KV migrations with 'append'" {
   #######################################
