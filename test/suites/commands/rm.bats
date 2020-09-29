@@ -1,6 +1,6 @@
-load ../util/util
-load ../bin/plugins/bats-support/load
-load ../bin/plugins/bats-assert/load
+load ../../util/util
+load ../../bin/plugins/bats-support/load
+load ../../bin/plugins/bats-assert/load
 
 @test "vault-${VAULT_VERSION} ${KV_BACKEND} 'rm'" {
   #######################################
@@ -56,7 +56,7 @@ load ../bin/plugins/bats-assert/load
   assert_output --partial "${NO_VALUE_FOUND}"
 
   #######################################
-  echo "==== case: remove ambigious directory ===="
+  echo "==== case: remove ambiguous directory ===="
   run get_vault_value "value" "${KV_BACKEND}/src/staging/all/v1"
   assert_success
   assert_output "v1"
@@ -77,13 +77,13 @@ load ../bin/plugins/bats-assert/load
   assert_success
   assert_output --partial "${NO_VALUE_FOUND}"
 
-  echo "ensure the ambigious file still exists"
+  echo "ensure the ambiguous file still exists"
   run get_vault_value "value" "${KV_BACKEND}/src/staging/all"
   assert_success
   assert_output "all"
 
   #######################################
-  echo "==== case: remove ambigious file ===="
+  echo "==== case: remove ambiguous file ===="
   run get_vault_value "value" "${KV_BACKEND}/src/tooling"
   assert_success
   assert_output "tooling"
@@ -96,17 +96,17 @@ load ../bin/plugins/bats-assert/load
   assert_success
   assert_output --partial "${NO_VALUE_FOUND}"
 
-  echo "ensure the ambigious directory still exists"
+  echo "ensure the ambiguous directory still exists"
   run get_vault_value "value" "${KV_BACKEND}/src/tooling/v1"
   assert_success
   assert_output "v1"
 
   run get_vault_value "value" "${KV_BACKEND}/src/tooling/v2"
   assert_success
-  assert_output "v2" 
+  assert_output "v2"
 
   #######################################
-  echo "==== case: remove ambigious directory ===="
+  echo "==== case: remove ambiguous directory ===="
   run get_vault_value "value" "${KV_BACKEND}/src/ambivalence/1"
   assert_success
   assert_output "1"
@@ -119,13 +119,13 @@ load ../bin/plugins/bats-assert/load
   assert_success
   assert_output --partial "${NO_VALUE_FOUND}"
 
-  echo "ensure the ambigious file still exists"
+  echo "ensure the ambiguous file still exists"
   run get_vault_value "value" "${KV_BACKEND}/src/ambivalence/1"
   assert_success
   assert_output "1"
 
   #######################################
-  echo "==== case: remove ambigious file without read permissions ===="
+  echo "==== case: remove ambiguous file without read permissions ===="
   run get_vault_value "value" "${KV_BACKEND}/src/a/foo"
   assert_success
   assert_output "1"
@@ -141,7 +141,7 @@ load ../bin/plugins/bats-assert/load
   assert_success
   assert_output --partial "${NO_VALUE_FOUND}"
 
-  echo "ensure that the ambigious directory still exists"
+  echo "ensure that the ambiguous directory still exists"
   run get_vault_value "value" "${KV_BACKEND}/src/a/foo/bar"
   assert_success
   assert_output "2"
