@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"io"
 	"path/filepath"
 
 	"github.com/fishi0x01/vsh/client"
@@ -14,19 +13,15 @@ type MoveCommand struct {
 	name string
 
 	client *client.Client
-	stderr io.Writer
-	stdout io.Writer
 	Source string
 	Target string
 }
 
 // NewMoveCommand creates a new MoveCommand parameter container
-func NewMoveCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *MoveCommand {
+func NewMoveCommand(c *client.Client) *MoveCommand {
 	return &MoveCommand{
 		name:   "mv",
 		client: c,
-		stdout: stdout,
-		stderr: stderr,
 	}
 }
 
@@ -40,10 +35,14 @@ func (cmd *MoveCommand) IsSane() bool {
 	return cmd.Source != "" && cmd.Target != ""
 }
 
+// PrintUsage print command usage
+func (cmd *MoveCommand) PrintUsage() {
+	log.UserInfo("Usage:\nmv <from> <to>")
+}
+
 // Parse given arguments and return status
 func (cmd *MoveCommand) Parse(args []string) error {
 	if len(args) != 3 {
-		fmt.Println("Usage:\nmv <from> <to>")
 		return fmt.Errorf("cannot parse arguments")
 	}
 	cmd.Source = args[1]
@@ -62,7 +61,7 @@ func (cmd *MoveCommand) Run() int {
 	case client.NODE:
 		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.moveSecret)
 	default:
-		log.NotAValidPath(newSrcPwd)
+		log.UserError("Not a valid path for operation: %s", newSrcPwd)
 		return 1
 	}
 
@@ -88,7 +87,7 @@ func (cmd *MoveCommand) moveSecret(source string, target string) error {
 		return err
 	}
 
-	log.Info("Moved %s to %s", source, target)
+	log.UserDebug("Moved %s to %s", source, target)
 
 	return nil
 }

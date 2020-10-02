@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"github.com/fishi0x01/vsh/log"
 )
 
 func (client *Client) listTopLevel() (result []string) {
@@ -19,6 +20,7 @@ func (client *Client) listLowLevel(path string) (result []string, err error) {
 
 	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
 	if err != nil {
+		log.AppTrace("%+v", err)
 		return result, err
 	}
 

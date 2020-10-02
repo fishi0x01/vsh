@@ -14,6 +14,7 @@ export APP_BIN="${DIR}/../../build/vsh_${UNAME}_amd64"
 export NO_VALUE_FOUND="No value found at"
 
 setup() {
+    rm -f vsh_trace.log
     docker run -d \
         --name=${VAULT_CONTAINER_NAME} \
         -p "${VAULT_HOST_PORT}:8200" \

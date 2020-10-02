@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"github.com/fishi0x01/vsh/log"
 	"github.com/hashicorp/vault/api"
 )
 
@@ -23,5 +24,8 @@ func (client *Client) lowLevelWrite(path string, secret *api.Secret) (err error)
 	}
 
 	_, err = client.Vault.Logical().Write(client.getKVDataPath(path), secret.Data)
+	if err != nil {
+		log.AppTrace("%+v", err)
+	}
 	return err
 }

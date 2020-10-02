@@ -65,10 +65,11 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	if sliceContains(permissions, "list") || sliceContains(permissions, "root") {
 		mounts, err = vault.Sys().ListMounts()
 	} else {
-		log.Debug("Cannot auto-discover mount backends: Token does not have list permission on sys/mounts")
+		log.UserDebug("Cannot auto-discover mount backends: Token does not have list permission on sys/mounts")
 	}
 
 	if err != nil {
+		log.AppTrace("%+v", err)
 		return nil, err
 	}
 
@@ -80,7 +81,7 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 				return nil, err
 			}
 			backends[path] = v
-			log.Debug("Found KV backend '%v' with version '%v'", path, v)
+			log.UserDebug("Found KV backend '%v' with version '%v'", path, v)
 		}
 	}
 

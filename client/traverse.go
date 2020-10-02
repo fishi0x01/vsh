@@ -16,7 +16,7 @@ func (client *Client) topLevelTraverse(path string) (result []string) {
 func (client *Client) lowLevelTraverse(path string) (result []string) {
 	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
 	if err != nil {
-		log.Error("Error traversing path: %v", err)
+		log.AppTrace("%+v", err)
 		return nil
 	}
 

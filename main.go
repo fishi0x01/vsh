@@ -29,20 +29,20 @@ type commands struct {
 
 func newCommands(client *client.Client) *commands {
 	return &commands{
-		mv:     cli.NewMoveCommand(client, os.Stdout, os.Stderr),
-		cp:     cli.NewCopyCommand(client, os.Stdout, os.Stderr),
-		append: cli.NewAppendCommand(client, os.Stdout, os.Stderr),
-		rm:     cli.NewRemoveCommand(client, os.Stdout, os.Stderr),
-		ls:     cli.NewListCommand(client, os.Stdout, os.Stderr),
-		cd:     cli.NewCdCommand(client, os.Stdout, os.Stderr),
-		cat:    cli.NewCatCommand(client, os.Stdout, os.Stderr),
+		mv:     cli.NewMoveCommand(client),
+		cp:     cli.NewCopyCommand(client),
+		append: cli.NewAppendCommand(client),
+		rm:     cli.NewRemoveCommand(client),
+		ls:     cli.NewListCommand(client),
+		cd:     cli.NewCdCommand(client),
+		cat:    cli.NewCatCommand(client),
 		grep:   cli.NewGrepCommand(client, os.Stdout, os.Stderr),
 	}
 }
 
 var (
 	vshVersion    = ""
-	verbose       = false
+	verbosity     = "INFO"
 	isInteractive = true
 )
 
@@ -89,6 +89,10 @@ func executor(in string) {
 		cmd, err = getCommand(args, commands)
 	}
 
+	if err != nil && cmd != nil {
+		cmd.PrintUsage()
+	}
+
 	if err != nil && !isInteractive {
 		os.Exit(1)
 	}
@@ -128,7 +132,7 @@ func getCommand(args []string, commands *commands) (cmd cli.Command, err error) 
 		err = commands.grep.Parse(args)
 		cmd = commands.grep
 	default:
-		log.NotAValidCommand(args[0])
+		log.UserError("Not a valid command: %s", args[0])
 		return nil, fmt.Errorf("not a valid command")
 	}
 	return cmd, err
@@ -151,30 +155,30 @@ func getVaultToken() (token string, err error) {
 }
 
 func main() {
-	log.Init()
-
 	var cmdString string
 	var hasVersion bool
 	var disableAutoCompletion bool
 	flag.StringVar(&cmdString, "c", "", "command to run")
 	flag.BoolVar(&hasVersion, "version", false, "print vsh version")
 	flag.BoolVar(&disableAutoCompletion, "disable-auto-completion", false, "disable auto-completion on paths")
-	flag.BoolVar(&verbose, "v", false, "verbose output")
+	flag.StringVar(&verbosity, "v", "INFO", "DEBUG | INFO | WARN | ERROR - debug option creates vsh_trace.log")
 	flag.Parse()
+
+	var err error
+	err = log.Init(verbosity)
+	if err != nil {
+		os.Exit(1)
+	}
 
 	if hasVersion {
 		printVersion()
 		return
 	}
 
-	if verbose {
-		log.ToggleVerbose()
-	}
-
 	token, ve := getVaultToken()
 	if ve != nil {
-		log.Error("Error getting vault token")
-		log.Error("%v", ve)
+		log.AppError("Error getting vault token")
+		log.AppError("%v", ve)
 		return
 	}
 
@@ -183,11 +187,11 @@ func main() {
 		Token:     token,
 		StartPath: os.Getenv("VAULT_PATH"),
 	}
-	var err error
+
 	vaultClient, err = client.NewClient(conf)
 	if err != nil {
-		log.Error("Error initializing vault client | Is VAULT_ADDR properly set? Do you provide a proper token?")
-		log.Error("%v", err)
+		log.UserError("Error initializing vault client | Is VAULT_ADDR properly set? Do you provide a proper token?")
+		log.UserError("%v", err)
 		os.Exit(1)
 	}
 

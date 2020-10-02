@@ -2,8 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"io"
-
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
 )
@@ -13,18 +11,14 @@ type CatCommand struct {
 	name string
 
 	client *client.Client
-	stderr io.Writer
-	stdout io.Writer
 	Path   string
 }
 
 // NewCatCommand creates a new CatCommand parameter container
-func NewCatCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *CatCommand {
+func NewCatCommand(c *client.Client) *CatCommand {
 	return &CatCommand{
 		name:   "cat",
 		client: c,
-		stderr: stderr,
-		stdout: stdout,
 	}
 }
 
@@ -38,10 +32,14 @@ func (cmd *CatCommand) IsSane() bool {
 	return cmd.Path != ""
 }
 
+// PrintUsage print command usage
+func (cmd *CatCommand) PrintUsage() {
+	log.UserInfo("Usage:\ncat <secret>")
+}
+
 // Parse given arguments and return status
 func (cmd *CatCommand) Parse(args []string) error {
 	if len(args) != 2 {
-		fmt.Println("Usage:\ncat <secret>")
 		return fmt.Errorf("cannot parse arguments")
 	}
 	cmd.Path = args[1]
@@ -63,15 +61,15 @@ func (cmd *CatCommand) Run() int {
 			if rec, ok := v.(map[string]interface{}); ok {
 				// KV 2
 				for kk, vv := range rec {
-					fmt.Fprintln(cmd.stdout, kk, "=", vv)
+					log.UserInfo("%s = %s", kk, vv)
 				}
 			} else {
 				// KV 1
-				fmt.Fprintln(cmd.stdout, k, "=", v)
+				log.UserInfo("%s = %s", k, v)
 			}
 		}
 	} else {
-		log.NotAValidPath(absPath)
+		log.UserError("Not a valid path for operation: %s", absPath)
 		return 1
 	}
 	return 0
