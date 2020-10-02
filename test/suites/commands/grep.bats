@@ -15,7 +15,7 @@ load ../../bin/plugins/bats-assert/load
   #######################################
   echo "==== case: grep non-existing file ===="
   run ${APP_BIN} -c "grep test ${KV_BACKEND}/src/does/not/exist"
-  assert_success
+  assert_failure 1
 
   echo "ensure proper error message"
   assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"

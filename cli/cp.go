@@ -41,19 +41,18 @@ func (cmd *CopyCommand) IsSane() bool {
 }
 
 // Parse given arguments and return status
-func (cmd *CopyCommand) Parse(args []string) (success bool) {
-	if len(args) == 3 {
-		cmd.Source = args[1]
-		cmd.Target = args[2]
-		success = true
-	} else {
+func (cmd *CopyCommand) Parse(args []string) error {
+	if len(args) != 3 {
 		fmt.Println("Usage:\ncp <from> <to>")
+		return fmt.Errorf("cannot parse arguments")
 	}
-	return success
+	cmd.Source = args[1]
+	cmd.Target = args[2]
+	return nil
 }
 
 // Run executes 'cp' with given CopyCommand's parameters
-func (cmd *CopyCommand) Run() {
+func (cmd *CopyCommand) Run() int {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 
@@ -64,7 +63,10 @@ func (cmd *CopyCommand) Run() {
 		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.copySecret)
 	default:
 		log.NotAValidPath(newSrcPwd)
+		return 1
 	}
+
+	return 0
 }
 
 func (cmd *CopyCommand) copySecret(source string, target string) error {

@@ -109,29 +109,31 @@ func (cmd *AppendCommand) tryParse(args []string) (success bool) {
 }
 
 // Parse parses the arguments and returns true on success; otherwise it prints usage and returns false
-func (cmd *AppendCommand) Parse(args []string) (success bool) {
-	success = cmd.tryParse(args)
+func (cmd *AppendCommand) Parse(args []string) error {
+	success := cmd.tryParse(args)
 	if !success {
 		printUsage()
+		return fmt.Errorf("cannot parse arguments")
 	}
-	return success
+	return nil
 }
 
 // Run executes 'append' with given AppendCommand's parameters
-func (cmd *AppendCommand) Run() {
+func (cmd *AppendCommand) Run() int {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 
 	src := cmd.client.GetType(newSrcPwd)
 	if src != client.LEAF {
 		log.NotAValidPath(newSrcPwd)
-		return
+		return 1
 	}
 
 	if err := cmd.mergeSecrets(newSrcPwd, newTargetPwd); err != nil {
 		log.Error("Append failed: " + err.Error())
+		return 1
 	}
-	return
+	return 0
 }
 
 func (cmd *AppendCommand) createDummySecret(target string) error {

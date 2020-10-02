@@ -39,25 +39,24 @@ func (cmd *CatCommand) IsSane() bool {
 }
 
 // Parse given arguments and return status
-func (cmd *CatCommand) Parse(args []string) (success bool) {
-	if len(args) == 2 {
-		cmd.Path = args[1]
-		success = true
-	} else {
+func (cmd *CatCommand) Parse(args []string) error {
+	if len(args) != 2 {
 		fmt.Println("Usage:\ncat <secret>")
+		return fmt.Errorf("cannot parse arguments")
 	}
-	return success
+	cmd.Path = args[1]
+	return nil
 }
 
 // Run executes 'cat' with given CatCommand's parameters
-func (cmd *CatCommand) Run() {
+func (cmd *CatCommand) Run() int {
 	absPath := cmdPath(cmd.client.Pwd, cmd.Path)
 	t := cmd.client.GetType(absPath)
 
 	if t == client.LEAF {
 		secret, err := cmd.client.Read(absPath)
 		if err != nil {
-			return
+			return 1
 		}
 
 		for k, v := range secret.Data {
@@ -73,6 +72,7 @@ func (cmd *CatCommand) Run() {
 		}
 	} else {
 		log.NotAValidPath(absPath)
+		return 1
 	}
-	return
+	return 0
 }

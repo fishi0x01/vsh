@@ -9,10 +9,10 @@ import (
 
 // Command interface to describe a command structure
 type Command interface {
-	Run()
+	Run() int
 	GetName() string
 	IsSane() bool
-	Parse(args []string) bool
+	Parse(args []string) error
 }
 
 func cmdPath(pwd string, arg string) (result string) {

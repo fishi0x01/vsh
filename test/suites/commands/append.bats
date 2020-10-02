@@ -27,7 +27,7 @@ load ../../bin/plugins/bats-assert/load
   #######################################
   echo "==== case: append to non-existing file ===="
   run ${APP_BIN} -c "append ${KV_BACKEND}/src/does/not/exist ${KV_BACKEND}/src/aa"
-  assert_success
+  assert_failure 1
 
   echo "ensure proper error message"
   assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"

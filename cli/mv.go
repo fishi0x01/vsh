@@ -41,19 +41,18 @@ func (cmd *MoveCommand) IsSane() bool {
 }
 
 // Parse given arguments and return status
-func (cmd *MoveCommand) Parse(args []string) (success bool) {
-	if len(args) == 3 {
-		cmd.Source = args[1]
-		cmd.Target = args[2]
-		success = true
-	} else {
+func (cmd *MoveCommand) Parse(args []string) error {
+	if len(args) != 3 {
 		fmt.Println("Usage:\nmv <from> <to>")
+		return fmt.Errorf("cannot parse arguments")
 	}
-	return success
+	cmd.Source = args[1]
+	cmd.Target = args[2]
+	return nil
 }
 
 // Run executes 'mv' with given MoveCommand's parameters
-func (cmd *MoveCommand) Run() {
+func (cmd *MoveCommand) Run() int {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
 	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
 
@@ -64,8 +63,10 @@ func (cmd *MoveCommand) Run() {
 		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.moveSecret)
 	default:
 		log.NotAValidPath(newSrcPwd)
+		return 1
 	}
-	return
+
+	return 0
 }
 
 func (cmd *MoveCommand) moveSecret(source string, target string) error {

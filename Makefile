@@ -14,7 +14,7 @@ cross-compile: clean
 	ls build/
 
 compile: clean
-	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_linux_amd64
+	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$(shell uname | tr '[:upper:]' '[:lower:]')_amd64
 
 get-bats:
 	rm -rf test/bin/

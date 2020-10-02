@@ -21,5 +21,5 @@ load ../../bin/plugins/bats-assert/load
   #######################################
   echo "==== case: cd to non-existing dir ===="
   run ${APP_BIN} -c "cd ${KV_BACKEND}/src/does/not/exist"
-  assert_success
+  assert_failure 1
 }
