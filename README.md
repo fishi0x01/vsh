@@ -179,7 +179,7 @@ Working on vault secrets can be critical, making quality and correct behavior a 
 That being said, `vsh` is still a small open source project, meaning we cannot make any guarantees.
 However, we put strong emphasis on [TDD](https://en.wikipedia.org/wiki/Test-driven_development).
 Every PR is tested with an extensive [suite](test/suites) of integration tests.
-Most tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.5.3`, i.e., versions in between should also be compatible.
+Most tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.5.4`, i.e., versions in between should also be compatible.
 
 ## Local Development
 
@@ -193,3 +193,7 @@ make compile
 make get-bats
 make integration-tests
 ```
+
+## Debugging
+
+The `-v` option enables verbose mode, which also creates a `vsh_trace.log` file to log any error object from the vault API.

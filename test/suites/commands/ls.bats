@@ -28,7 +28,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: list backends with reduced permissions ===="
-  run bash -c "VAULT_TOKEN=no-root ${APP_BIN} -v -c 'ls /'"
+  run bash -c "VAULT_TOKEN=no-root ${APP_BIN} -v DEBUG -c 'ls /'"
   assert_success
   assert_output --partial "Cannot auto-discover mount backends"
 

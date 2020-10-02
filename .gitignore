@@ -2,3 +2,5 @@
 *.swp
 build/
 test/bin
+vsh_trace.log
+

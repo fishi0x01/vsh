@@ -54,10 +54,14 @@ func (cmd *GrepCommand) IsSane() bool {
 	return cmd.Path != "" && cmd.Search != ""
 }
 
+// PrintUsage print command usage
+func (cmd *GrepCommand) PrintUsage() {
+	log.UserInfo("Usage:\ngrep <term-string> <path>")
+}
+
 // Parse given arguments and return status
 func (cmd *GrepCommand) Parse(args []string) error {
 	if len(args) != 3 {
-		fmt.Println("Usage:\ngrep <term-string> <path>")
 		return fmt.Errorf("cannot parse arguments")
 	}
 	cmd.Search = args[1]
@@ -68,7 +72,7 @@ func (cmd *GrepCommand) Parse(args []string) error {
 // Run executes 'grep' with given RemoveCommand's parameters
 func (cmd *GrepCommand) Run() int {
 	path := cmdPath(cmd.client.Pwd, cmd.Path)
-	filePaths := []string{}
+	var filePaths []string
 
 	switch t := cmd.client.GetType(path); t {
 	case client.LEAF:
@@ -78,7 +82,7 @@ func (cmd *GrepCommand) Run() int {
 			filePaths = append(filePaths, traversedPath)
 		}
 	default:
-		log.NotAValidPath(path)
+		log.UserError("Not a valid path for operation: %s", path)
 		return 1
 	}
 

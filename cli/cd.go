@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/fishi0x01/vsh/client"
@@ -14,18 +13,14 @@ type CdCommand struct {
 	name string
 
 	client *client.Client
-	stderr io.Writer
-	stdout io.Writer
 	Path   string
 }
 
 // NewCdCommand creates a new CdCommand parameter container
-func NewCdCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *CdCommand {
+func NewCdCommand(c *client.Client) *CdCommand {
 	return &CdCommand{
 		name:   "cd",
 		client: c,
-		stdout: stdout,
-		stderr: stderr,
 	}
 }
 
@@ -39,10 +34,14 @@ func (cmd *CdCommand) IsSane() bool {
 	return cmd.Path != ""
 }
 
+// PrintUsage print command usage
+func (cmd *CdCommand) PrintUsage() {
+	log.UserInfo("Usage:\ncd <path>")
+}
+
 // Parse given arguments and return status
 func (cmd *CdCommand) Parse(args []string) error {
 	if len(args) != 2 {
-		fmt.Println("Usage:\ncd <path>")
 		return fmt.Errorf("cannot parse arguments")
 	}
 	cmd.Path = args[1]
@@ -56,12 +55,12 @@ func (cmd *CdCommand) Run() int {
 	t := cmd.client.GetType(newPwd)
 
 	if t == client.NONE {
-		log.NotAValidPath(newPwd)
+		log.UserError("Not a valid path for operation: %s", newPwd)
 		return 1
 	}
 
 	if t == client.LEAF {
-		log.NotAValidPath(newPwd)
+		log.UserError("Not a valid path for operation: %s", newPwd)
 		return 1
 	}
 

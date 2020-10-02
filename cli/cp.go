@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"io"
 	"path/filepath"
 
 	"github.com/fishi0x01/vsh/client"
@@ -14,19 +13,15 @@ type CopyCommand struct {
 	name string
 
 	client *client.Client
-	stderr io.Writer
-	stdout io.Writer
 	Source string
 	Target string
 }
 
 // NewCopyCommand creates a new CopyCommand parameter container
-func NewCopyCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *CopyCommand {
+func NewCopyCommand(c *client.Client) *CopyCommand {
 	return &CopyCommand{
 		name:   "cp",
 		client: c,
-		stdout: stdout,
-		stderr: stderr,
 	}
 }
 
@@ -40,10 +35,14 @@ func (cmd *CopyCommand) IsSane() bool {
 	return cmd.Source != "" && cmd.Target != ""
 }
 
+// PrintUsage print command usage
+func (cmd *CopyCommand) PrintUsage() {
+	log.UserInfo("Usage:\ncp <from> <to>")
+}
+
 // Parse given arguments and return status
 func (cmd *CopyCommand) Parse(args []string) error {
 	if len(args) != 3 {
-		fmt.Println("Usage:\ncp <from> <to>")
 		return fmt.Errorf("cannot parse arguments")
 	}
 	cmd.Source = args[1]
@@ -62,7 +61,7 @@ func (cmd *CopyCommand) Run() int {
 	case client.NODE:
 		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.copySecret)
 	default:
-		log.NotAValidPath(newSrcPwd)
+		log.UserError("Not a valid path for operation: %s", newSrcPwd)
 		return 1
 	}
 
@@ -83,7 +82,7 @@ func (cmd *CopyCommand) copySecret(source string, target string) error {
 		return err
 	}
 
-	log.Info("Copied %s to %s", source, target)
+	log.UserDebug("Copied %s to %s", source, target)
 
 	return nil
 }

@@ -1,7 +1,7 @@
 package completer
 
 import (
-	"fmt"
+	"github.com/fishi0x01/vsh/log"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
@@ -25,7 +25,7 @@ func NewCompleter(client *client.Client, disableAutoCompletion bool) *Completer 
 // TogglePathCompletion enable/disable path auto-completion
 func (c *Completer) TogglePathCompletion() {
 	c.pathCompletionToggle = !c.pathCompletionToggle
-	fmt.Printf("Use path auto-completion: %t\n", c.pathCompletionToggle)
+	log.UserInfo("Use path auto-completion: %t", c.pathCompletionToggle)
 }
 
 func (c *Completer) getAbsoluteTopLevelSuggestions() []prompt.Suggest {

@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"io"
 	"strconv"
 	"strings"
 
@@ -30,20 +29,16 @@ type AppendCommand struct {
 	name string
 
 	client *client.Client
-	stderr io.Writer
-	stdout io.Writer
 	Source string
 	Target string
 	Mode   AppendMode
 }
 
 // NewAppendCommand creates a new AppendCommand parameter container
-func NewAppendCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *AppendCommand {
+func NewAppendCommand(c *client.Client) *AppendCommand {
 	return &AppendCommand{
 		name:   "append",
 		client: c,
-		stdout: stdout,
-		stderr: stderr,
 		Mode:   ModeSkip,
 	}
 }
@@ -56,10 +51,6 @@ func (cmd *AppendCommand) GetName() string {
 // IsSane returns true if command is sane
 func (cmd *AppendCommand) IsSane() bool {
 	return cmd.Source != "" && cmd.Target != "" && cmd.Mode != ModeInvalid
-}
-
-func printUsage() {
-	fmt.Println("Usage:\nappend <from> <to> [-f|--force|-r|--rename|-s|--skip]")
 }
 
 func isFlag(flag string) bool {
@@ -108,11 +99,15 @@ func (cmd *AppendCommand) tryParse(args []string) (success bool) {
 	return false
 }
 
+// PrintUsage print command usage
+func (cmd *AppendCommand) PrintUsage() {
+	log.UserInfo("Usage:\nappend <from> <to> [-f|--force|-r|--rename|-s|--skip]")
+}
+
 // Parse parses the arguments and returns true on success; otherwise it prints usage and returns false
 func (cmd *AppendCommand) Parse(args []string) error {
 	success := cmd.tryParse(args)
 	if !success {
-		printUsage()
 		return fmt.Errorf("cannot parse arguments")
 	}
 	return nil
@@ -125,12 +120,12 @@ func (cmd *AppendCommand) Run() int {
 
 	src := cmd.client.GetType(newSrcPwd)
 	if src != client.LEAF {
-		log.NotAValidPath(newSrcPwd)
+		log.UserError("Not a valid path for operation: %s", newSrcPwd)
 		return 1
 	}
 
 	if err := cmd.mergeSecrets(newSrcPwd, newTargetPwd); err != nil {
-		log.Error("Append failed: " + err.Error())
+		log.AppError("Append failed: " + err.Error())
 		return 1
 	}
 	return 0
@@ -193,9 +188,9 @@ func (cmd *AppendCommand) mergeSecrets(source string, target string) error {
 		fmt.Println(err)
 		return err
 	}
-	log.Info("Appended values from %s to %s", source, target)
+	log.UserDebug("Appended values from %s to %s", source, target)
 	if len(skippedKeys) > 0 {
-		log.Info("Handled conflicting keys according to the '%s' strategy. Keys: %s", onConflict, strings.Join(skippedKeys, ", "))
+		log.UserDebug("Handled conflicting keys according to the '%s' strategy. Keys: %s", onConflict, strings.Join(skippedKeys, ", "))
 	}
 	return nil
 }

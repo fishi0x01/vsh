@@ -2,8 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"io"
-
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
 )
@@ -13,18 +11,14 @@ type RemoveCommand struct {
 	name string
 
 	client *client.Client
-	stderr io.Writer
-	stdout io.Writer
 	Path   string
 }
 
 // NewRemoveCommand creates a new RemoveCommand parameter container
-func NewRemoveCommand(c *client.Client, stdout io.Writer, stderr io.Writer) *RemoveCommand {
+func NewRemoveCommand(c *client.Client) *RemoveCommand {
 	return &RemoveCommand{
 		name:   "rm",
 		client: c,
-		stdout: stdout,
-		stderr: stderr,
 	}
 }
 
@@ -38,10 +32,14 @@ func (cmd *RemoveCommand) IsSane() bool {
 	return cmd.Path != ""
 }
 
+// PrintUsage print command usage
+func (cmd *RemoveCommand) PrintUsage() {
+	log.UserInfo("Usage:\nrm <path>")
+}
+
 // Parse given arguments and return status
 func (cmd *RemoveCommand) Parse(args []string) error {
 	if len(args) != 2 {
-		fmt.Println("Usage:\nrm <path>")
 		return fmt.Errorf("cannot parse arguments")
 	}
 	cmd.Path = args[1]
@@ -63,7 +61,7 @@ func (cmd *RemoveCommand) Run() int {
 			}
 		}
 	default:
-		log.NotAValidPath(newPwd)
+		log.UserError("Not a valid path for operation: %s", newPwd)
 		return 1
 	}
 
@@ -77,7 +75,7 @@ func (cmd *RemoveCommand) removeSecret(path string) error {
 		return err
 	}
 
-	log.Info("Removed %s", path)
+	log.UserDebug("Removed %s", path)
 
 	return nil
 }

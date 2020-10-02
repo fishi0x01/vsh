@@ -1,8 +1,9 @@
-## v0.7.1 (TBD)
+## v0.7.1 (October 2, 2020)
 
 BUG FIXES:
 
-* Proper return codes [#51](https://github.com/fishi0x01/vsh/pull/51)
+* Proper return codes ([#51](https://github.com/fishi0x01/vsh/pull/51))
+* Proper logging ([#52](https://github.com/fishi0x01/vsh/pull/52))
 
 ## v0.7.0 (September 26, 2020)
 

@@ -12,6 +12,7 @@ type Command interface {
 	Run() int
 	GetName() string
 	IsSane() bool
+	PrintUsage()
 	Parse(args []string) error
 }
 
