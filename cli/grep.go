@@ -55,19 +55,18 @@ func (cmd *GrepCommand) IsSane() bool {
 }
 
 // Parse given arguments and return status
-func (cmd *GrepCommand) Parse(args []string) (success bool) {
-	if len(args) == 3 {
-		cmd.Search = args[1]
-		cmd.Path = args[2]
-		success = true
-	} else {
+func (cmd *GrepCommand) Parse(args []string) error {
+	if len(args) != 3 {
 		fmt.Println("Usage:\ngrep <term-string> <path>")
+		return fmt.Errorf("cannot parse arguments")
 	}
-	return success
+	cmd.Search = args[1]
+	cmd.Path = args[2]
+	return nil
 }
 
 // Run executes 'grep' with given RemoveCommand's parameters
-func (cmd *GrepCommand) Run() {
+func (cmd *GrepCommand) Run() int {
 	path := cmdPath(cmd.client.Pwd, cmd.Path)
 	filePaths := []string{}
 
@@ -80,19 +79,19 @@ func (cmd *GrepCommand) Run() {
 		}
 	default:
 		log.NotAValidPath(path)
-		return
+		return 1
 	}
 
 	for _, curPath := range filePaths {
 		matches, err := cmd.grepFile(cmd.Search, curPath)
 		if err != nil {
-			return
+			return 1
 		}
 		for _, match := range matches {
 			match.print(cmd.stdout)
 		}
 	}
-	return
+	return 0
 }
 
 func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, err error) {

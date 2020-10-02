@@ -40,35 +40,34 @@ func (cmd *CdCommand) IsSane() bool {
 }
 
 // Parse given arguments and return status
-func (cmd *CdCommand) Parse(args []string) (success bool) {
-	if len(args) == 2 {
-		cmd.Path = args[1]
-		success = true
-	} else {
+func (cmd *CdCommand) Parse(args []string) error {
+	if len(args) != 2 {
 		fmt.Println("Usage:\ncd <path>")
+		return fmt.Errorf("cannot parse arguments")
 	}
-	return success
+	cmd.Path = args[1]
+	return nil
 }
 
 // Run executes 'cd' with given CdCommand's parameters
-func (cmd *CdCommand) Run() {
+func (cmd *CdCommand) Run() int {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
 
 	t := cmd.client.GetType(newPwd)
 
 	if t == client.NONE {
 		log.NotAValidPath(newPwd)
-		return
+		return 1
 	}
 
 	if t == client.LEAF {
 		log.NotAValidPath(newPwd)
-		return
+		return 1
 	}
 
 	if !strings.HasSuffix(newPwd, "/") {
 		newPwd = newPwd + "/"
 	}
 	cmd.client.Pwd = newPwd
-	return
+	return 0
 }

@@ -39,18 +39,17 @@ func (cmd *RemoveCommand) IsSane() bool {
 }
 
 // Parse given arguments and return status
-func (cmd *RemoveCommand) Parse(args []string) (success bool) {
-	if len(args) == 2 {
-		cmd.Path = args[1]
-		success = true
-	} else {
+func (cmd *RemoveCommand) Parse(args []string) error {
+	if len(args) != 2 {
 		fmt.Println("Usage:\nrm <path>")
+		return fmt.Errorf("cannot parse arguments")
 	}
-	return success
+	cmd.Path = args[1]
+	return nil
 }
 
 // Run executes 'rm' with given RemoveCommand's parameters
-func (cmd *RemoveCommand) Run() {
+func (cmd *RemoveCommand) Run() int {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
 
 	switch t := cmd.client.GetType(newPwd); t {
@@ -60,13 +59,15 @@ func (cmd *RemoveCommand) Run() {
 		for _, path := range cmd.client.Traverse(newPwd) {
 			err := cmd.removeSecret(path)
 			if err != nil {
-				return
+				return 1
 			}
 		}
 	default:
 		log.NotAValidPath(newPwd)
+		return 1
 	}
-	return
+
+	return 0
 }
 
 func (cmd *RemoveCommand) removeSecret(path string) error {

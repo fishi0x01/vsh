@@ -41,8 +41,9 @@ func newCommands(client *client.Client) *commands {
 }
 
 var (
-	vshVersion = ""
-	verbose    = false
+	vshVersion    = ""
+	verbose       = false
+	isInteractive = true
 )
 
 func printVersion() {
@@ -66,53 +67,71 @@ func executor(in string) {
 	args := parseInput(in)
 	commands := newCommands(vaultClient)
 	var cmd cli.Command
-	var run bool
+	var err error
 
+	// edge cases
 	if len(args) == 0 {
 		fmt.Fprint(os.Stdout, "")
+		if !isInteractive {
+			os.Exit(1)
+		}
 		return
 	}
 
-	// Check for built-in commands.
+	// parse command
 	switch args[0] {
-	case commands.ls.GetName():
-		run = commands.ls.Parse(args)
-		cmd = commands.ls
-	case commands.cd.GetName():
-		run = commands.cd.Parse(args)
-		cmd = commands.cd
-	case commands.mv.GetName():
-		run = commands.mv.Parse(args)
-		cmd = commands.mv
-	case commands.append.GetName():
-		run = commands.append.Parse(args)
-		cmd = commands.append
-	case commands.cp.GetName():
-		run = commands.cp.Parse(args)
-		cmd = commands.cp
-	case commands.rm.GetName():
-		run = commands.rm.Parse(args)
-		cmd = commands.rm
-	case commands.cat.GetName():
-		run = commands.cat.Parse(args)
-		cmd = commands.cat
-	case commands.grep.GetName():
-		run = commands.grep.Parse(args)
-		cmd = commands.grep
 	case "toggle-auto-completion":
 		completerInstance.TogglePathCompletion()
+		return
 	case "exit":
 		os.Exit(0)
 	default:
-		log.NotAValidCommand(args[0])
-		return
+		cmd, err = getCommand(args, commands)
 	}
 
-	if run {
-		if cmd.IsSane() {
-			cmd.Run()
+	if err != nil && !isInteractive {
+		os.Exit(1)
+	}
+
+	if err == nil && cmd.IsSane() {
+		ret := cmd.Run()
+		if !isInteractive {
+			os.Exit(ret)
 		}
 	}
+}
+
+func getCommand(args []string, commands *commands) (cmd cli.Command, err error) {
+	switch args[0] {
+	case commands.ls.GetName():
+		err = commands.ls.Parse(args)
+		cmd = commands.ls
+	case commands.cd.GetName():
+		err = commands.cd.Parse(args)
+		cmd = commands.cd
+	case commands.mv.GetName():
+		err = commands.mv.Parse(args)
+		cmd = commands.mv
+	case commands.append.GetName():
+		err = commands.append.Parse(args)
+		cmd = commands.append
+	case commands.cp.GetName():
+		err = commands.cp.Parse(args)
+		cmd = commands.cp
+	case commands.rm.GetName():
+		err = commands.rm.Parse(args)
+		cmd = commands.rm
+	case commands.cat.GetName():
+		err = commands.cat.Parse(args)
+		cmd = commands.cat
+	case commands.grep.GetName():
+		err = commands.grep.Parse(args)
+		cmd = commands.grep
+	default:
+		log.NotAValidCommand(args[0])
+		return nil, fmt.Errorf("not a valid command")
+	}
+	return cmd, err
 }
 
 func getVaultToken() (token string, err error) {
@@ -174,6 +193,7 @@ func main() {
 
 	if cmdString != "" {
 		// Run non-interactive mode
+		isInteractive = false
 		executor(cmdString)
 	} else {
 		// Run interactive mode

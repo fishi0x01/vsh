@@ -14,7 +14,7 @@ load ../../bin/plugins/bats-assert/load
   #######################################
   echo "==== case: ls non-existing dir ===="
   run ${APP_BIN} -c "ls ${KV_BACKEND}/src/does/not/exist"
-  assert_success
+  assert_failure 1
 
   echo "ensure proper error message"
   assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"

@@ -52,7 +52,7 @@ vegetable=tomato
 fruit=pear
 tree=oak
 
-> append /secret/from /secret/to
+> append /secret/from /secret/to -s
 
 > cat /secret/to
 
@@ -74,7 +74,7 @@ vegetable=tomato
 fruit=pear
 tree=oak
 
-> append /secret/from /secret/to
+> append /secret/from /secret/to -f
 
 > cat /secret/to
 
@@ -96,7 +96,7 @@ vegetable=tomato
 fruit=pear
 tree=oak
 
-> append /secret/from /secret/to
+> append /secret/from /secret/to -r
 
 > cat /secret/to
 
@@ -108,8 +108,7 @@ tree=oak
 
 ### grep
 
-`grep` recursively searches the given term in key and value pairs and does not support regex.
-[SSOT](https://en.wikipedia.org/wiki/Single_source_of_truth) is very much desired, however, in praxis it is probably not always applied consistently.
+`grep` recursively searches the given term in key and value pairs. It does not support regex.
  If you are looking for copies or just trying to find the path to a certain term, this command might come in handy.
 
 ## Setting the vault token
@@ -123,7 +122,7 @@ That means `vsh` supports setting vault tokens via `~/.vault-token`, `VAULT_TOKE
 Ideally, the vault token used by `vsh` has `list` permissions on `sys/mount`.
 If this is not the case, then `vsh` does not know the available backends beforehand.
 That means initially there won't be path auto-completion on the top (backend) level.
-However, `vsh` will try with best effort to reliably determine the kv version of every entered path.
+However, `vsh` will try with best-effort strategy to reliably determine the kv version of every entered path.
 
 ## Interactive mode
 
@@ -174,10 +173,13 @@ Further, it is needed to gather auto-completion data.
 
 For operations like `cp` or `mv`, `vsh` additionally requires `Read` and `Write` permissions on the operated paths.
 
-## Stability
+## Quality
 
-Every command has integration tests against KV1 and KV2.
-Every test is run against vault `1.0.0` and `1.5.3`, i.e., versions in between should also be compatible.
+Working on vault secrets can be critical, making quality and correct behavior a first class citizen for `vsh`.
+That being said, `vsh` is still a small open source project, meaning we cannot make any guarantees.
+However, we put strong emphasis on [TDD](https://en.wikipedia.org/wiki/Test-driven_development).
+Every PR is tested with an extensive [suite](test/suites) of integration tests.
+Most tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.5.3`, i.e., versions in between should also be compatible.
 
 ## Local Development
 
@@ -188,10 +190,6 @@ Requirements:
 
 ```
 make compile
+make get-bats
 make integration-tests
 ```
-
-## Potential TODOs
-
-- `tree` command
-- currently `mv` and `cp` behave a little different from UNIX. `mv /secret/source/a /secret/target/` should yield `/secret/target/a`

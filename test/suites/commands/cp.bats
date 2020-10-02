@@ -27,7 +27,7 @@ load ../../bin/plugins/bats-assert/load
   #######################################
   echo "==== case: copy non-existing file ===="
   run ${APP_BIN} -c "cp ${KV_BACKEND}/src/does/not/exist ${KV_BACKEND}/dest/a"
-  assert_success
+  assert_failure 1
 
   echo "ensure proper error message"
   assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
