@@ -116,6 +116,7 @@ func isCommandArgument(p string) bool {
 		words[0] == "mv" ||
 		words[0] == "grep" ||
 		words[0] == "cat" ||
+		words[0] == "dump" ||
 		words[0] == "append" ||
 		words[0] == "ls" ||
 		words[0] == "toggle-auto-completion"
@@ -134,6 +135,7 @@ func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 		{Text: "mv", Description: "mv <from> <to>"},
 		{Text: "grep", Description: "grep <term> <path>"},
 		{Text: "cat", Description: "cat <path>"},
+		{Text: "dump", Description: "dump <path>"},
 		{Text: "ls", Description: "ls <path>"},
 		{Text: "toggle-auto-completion", Description: "toggle path auto-completion on/off"},
 	}

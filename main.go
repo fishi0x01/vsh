@@ -104,6 +104,9 @@ func getCommand(args []string, commands *cli.Commands) (cmd cli.Command, err err
 	case commands.Cat.GetName():
 		err = commands.Cat.Parse(args)
 		cmd = commands.Cat
+	case commands.Dump.GetName():
+		err = commands.Dump.Parse(args)
+		cmd = commands.Dump
 	case commands.Grep.GetName():
 		err = commands.Grep.Parse(args)
 		cmd = commands.Grep

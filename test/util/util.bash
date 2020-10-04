@@ -55,6 +55,7 @@ setup() {
         vault_exec "vault kv put ${kv_backend}/src/a/foo/bar value=2"
         vault_exec "vault kv put ${kv_backend}/src/b/foo value=1"
         vault_exec "vault kv put ${kv_backend}/src/b/foo/bar value=2"
+        vault_exec "vault kv put ${kv_backend}/src/backup/foo/bar 'value=\@sf f\n gg\n-'"
     done
 }
 

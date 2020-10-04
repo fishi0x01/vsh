@@ -28,6 +28,7 @@ ls <dir-path // optional>
 grep <search-term> <path>
 cd <dir-path>
 cat <file-path>
+dump <path>
 ```
 
 `cp`, `rm` and `grep` command always have the `-r/-R` flag implied, i.e., every operation works recursively.
@@ -110,6 +111,12 @@ tree=oak
 
 `grep` recursively searches the given term in key and value pairs. It does not support regex.
  If you are looking for copies or just trying to find the path to a certain term, this command might come in handy.
+
+### dump
+
+`dump` dumps the secrets as json files to disk.
+Further, a `restore.sh` is generated which can be used to restore the secrets with the native vault client via `kv put`.
+Be aware, that secrets are in clear-text on your disk after using this operation.
 
 ## Setting the vault token
 

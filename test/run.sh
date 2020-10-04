@@ -10,11 +10,11 @@ BATS="${DIR}/bin/core/bin/bats"
 
 for vault_version in "${VAULT_VERSIONS[@]}"
 do
-    VAULT_VERSION=${vault_version} ${BATS} "${DIR}/suites/past-issues/"
-    VAULT_VERSION=${vault_version} ${BATS} "${DIR}/suites/edge-cases/"
+    #VAULT_VERSION=${vault_version} ${BATS} "${DIR}/suites/past-issues/"
+    #VAULT_VERSION=${vault_version} ${BATS} "${DIR}/suites/edge-cases/"
 
     for kv_backend in "${KV_BACKENDS[@]}"
     do
-        VAULT_VERSION=${vault_version} KV_BACKEND="${kv_backend}" ${BATS} "${DIR}/suites/commands/"
+        VAULT_VERSION=${vault_version} KV_BACKEND="${kv_backend}" ${BATS} "${DIR}/suites/commands/dump.bats"
     done
 done

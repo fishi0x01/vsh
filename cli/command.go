@@ -26,6 +26,7 @@ type Commands struct {
 	Ls     *ListCommand
 	Cd     *CdCommand
 	Cat    *CatCommand
+	Dump   *DumpCommand
 	Grep   *GrepCommand
 }
 
@@ -39,6 +40,7 @@ func NewCommands(client *client.Client) *Commands {
 		Ls:     NewListCommand(client),
 		Cd:     NewCdCommand(client),
 		Cat:    NewCatCommand(client),
+		Dump:   NewDumpCommand(client),
 		Grep:   NewGrepCommand(client, os.Stdout, os.Stderr),
 	}
 }
