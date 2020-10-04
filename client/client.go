@@ -156,7 +156,7 @@ func (client *Client) GetType(absolutePath string) (kind PathKind) {
 // Traverse traverses given absolutePath via DFS and returns sub-paths in array
 func (client *Client) Traverse(absolutePath string) (paths []string) {
 	if client.isTopLevelPath(absolutePath) {
-		paths = client.topLevelTraverse(normalizedVaultPath(absolutePath))
+		paths = client.topLevelTraverse()
 	} else {
 		paths = client.lowLevelTraverse(normalizedVaultPath(absolutePath))
 	}

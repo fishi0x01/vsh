@@ -141,7 +141,7 @@ load ../../bin/plugins/bats-assert/load
   assert_output "3"
 
   #######################################
-  echo "==== case: copy ambigious directory ===="
+  echo "==== case: copy ambiguous directory ===="
   run ${APP_BIN} -c "cp ${KV_BACKEND}/src/staging/all/ ${KV_BACKEND}/dest/staging/all/"
   assert_success
 
@@ -161,13 +161,13 @@ load ../../bin/plugins/bats-assert/load
   assert_success
   assert_output "v2"
 
-  echo "ensure the ambigious file still exists"
+  echo "ensure the ambiguous file still exists"
   run get_vault_value "value" "${KV_BACKEND}/src/staging/all"
   assert_success
   assert_output "all"
 
   #######################################
-  echo "==== case: copy ambigious file ===="
+  echo "==== case: copy ambiguous file ===="
   run ${APP_BIN} -c "cp ${KV_BACKEND}/src/tooling ${KV_BACKEND}/dest/tooling"
   assert_success
 
@@ -181,12 +181,25 @@ load ../../bin/plugins/bats-assert/load
   assert_success
   assert_output "tooling"
 
-  echo "ensure the ambigious directory still exists"
+  echo "ensure the ambiguous directory still exists"
   run get_vault_value "value" "${KV_BACKEND}/src/tooling/v1"
   assert_success
   assert_output "v1"
 
   run get_vault_value "value" "${KV_BACKEND}/src/tooling/v2"
+  assert_success
+  assert_output "v2"
+
+  #######################################
+  echo "==== case: copy ambiguous directory parent ===="
+  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/staging/ ${KV_BACKEND}/dest/staging5/"
+  assert_success
+
+  echo "ensure ambiguous file got copied"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging5/all"
+  assert_success
+  assert_output "all"
+  run get_vault_value "value" "${KV_BACKEND}/dest/staging/all/v2"
   assert_success
   assert_output "v2"
 }

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -14,6 +15,32 @@ type Command interface {
 	IsSane() bool
 	PrintUsage()
 	Parse(args []string) error
+}
+
+// Commands contains all available commands
+type Commands struct {
+	Mv     *MoveCommand
+	Cp     *CopyCommand
+	Append *AppendCommand
+	Rm     *RemoveCommand
+	Ls     *ListCommand
+	Cd     *CdCommand
+	Cat    *CatCommand
+	Grep   *GrepCommand
+}
+
+// NewCommands returns a Commands struct with all available commands
+func NewCommands(client *client.Client) *Commands {
+	return &Commands{
+		Mv:     NewMoveCommand(client),
+		Cp:     NewCopyCommand(client),
+		Append: NewAppendCommand(client),
+		Rm:     NewRemoveCommand(client),
+		Ls:     NewListCommand(client),
+		Cd:     NewCdCommand(client),
+		Cat:    NewCatCommand(client),
+		Grep:   NewGrepCommand(client, os.Stdout, os.Stderr),
+	}
 }
 
 func cmdPath(pwd string, arg string) (result string) {

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (client *Client) topLevelTraverse(path string) (result []string) {
+func (client *Client) topLevelTraverse() (result []string) {
 	for k := range client.KVBackends {
 		result = append(result, k)
 	}
@@ -24,7 +24,15 @@ func (client *Client) lowLevelTraverse(path string) (result []string) {
 		if keysInterface, ok := s.Data["keys"]; ok {
 			for _, valInterface := range keysInterface.([]interface{}) {
 				val := valInterface.(string)
-				result = append(result, client.lowLevelTraverse(path+"/"+val)...)
+				// prevent ambiguous dir/file to be added twice
+				if strings.HasSuffix(val, "/") {
+					// dir
+					result = append(result, client.lowLevelTraverse(path+"/"+val)...)
+				} else {
+					// file
+					leaf := strings.ReplaceAll("/"+path+"/"+val, "//", "/")
+					result = append(result, leaf)
+				}
 			}
 		}
 	} else {
