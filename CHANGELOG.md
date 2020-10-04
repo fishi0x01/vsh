@@ -1,3 +1,9 @@
+## v0.7.2 (October 4, 2020)
+
+BUG FIXES:
+
+* Fix copy of ambiguous sub-file ([#55](https://github.com/fishi0x01/vsh/pull/55))
+
 ## v0.7.1 (October 2, 2020)
 
 BUG FIXES:

@@ -16,30 +16,6 @@ import (
 
 var vaultClient *client.Client
 
-type commands struct {
-	mv     *cli.MoveCommand
-	cp     *cli.CopyCommand
-	append *cli.AppendCommand
-	rm     *cli.RemoveCommand
-	ls     *cli.ListCommand
-	cd     *cli.CdCommand
-	cat    *cli.CatCommand
-	grep   *cli.GrepCommand
-}
-
-func newCommands(client *client.Client) *commands {
-	return &commands{
-		mv:     cli.NewMoveCommand(client),
-		cp:     cli.NewCopyCommand(client),
-		append: cli.NewAppendCommand(client),
-		rm:     cli.NewRemoveCommand(client),
-		ls:     cli.NewListCommand(client),
-		cd:     cli.NewCdCommand(client),
-		cat:    cli.NewCatCommand(client),
-		grep:   cli.NewGrepCommand(client, os.Stdout, os.Stderr),
-	}
-}
-
 var (
 	vshVersion    = ""
 	verbosity     = "INFO"
@@ -65,7 +41,7 @@ func executor(in string) {
 	// Split the input separate the command and the arguments.
 	in = strings.TrimSpace(in)
 	args := parseInput(in)
-	commands := newCommands(vaultClient)
+	commands := cli.NewCommands(vaultClient)
 	var cmd cli.Command
 	var err error
 
@@ -105,32 +81,32 @@ func executor(in string) {
 	}
 }
 
-func getCommand(args []string, commands *commands) (cmd cli.Command, err error) {
+func getCommand(args []string, commands *cli.Commands) (cmd cli.Command, err error) {
 	switch args[0] {
-	case commands.ls.GetName():
-		err = commands.ls.Parse(args)
-		cmd = commands.ls
-	case commands.cd.GetName():
-		err = commands.cd.Parse(args)
-		cmd = commands.cd
-	case commands.mv.GetName():
-		err = commands.mv.Parse(args)
-		cmd = commands.mv
-	case commands.append.GetName():
-		err = commands.append.Parse(args)
-		cmd = commands.append
-	case commands.cp.GetName():
-		err = commands.cp.Parse(args)
-		cmd = commands.cp
-	case commands.rm.GetName():
-		err = commands.rm.Parse(args)
-		cmd = commands.rm
-	case commands.cat.GetName():
-		err = commands.cat.Parse(args)
-		cmd = commands.cat
-	case commands.grep.GetName():
-		err = commands.grep.Parse(args)
-		cmd = commands.grep
+	case commands.Ls.GetName():
+		err = commands.Ls.Parse(args)
+		cmd = commands.Ls
+	case commands.Cd.GetName():
+		err = commands.Cd.Parse(args)
+		cmd = commands.Cd
+	case commands.Mv.GetName():
+		err = commands.Mv.Parse(args)
+		cmd = commands.Mv
+	case commands.Append.GetName():
+		err = commands.Append.Parse(args)
+		cmd = commands.Append
+	case commands.Cp.GetName():
+		err = commands.Cp.Parse(args)
+		cmd = commands.Cp
+	case commands.Rm.GetName():
+		err = commands.Rm.Parse(args)
+		cmd = commands.Rm
+	case commands.Cat.GetName():
+		err = commands.Cat.Parse(args)
+		cmd = commands.Cat
+	case commands.Grep.GetName():
+		err = commands.Grep.Parse(args)
+		cmd = commands.Grep
 	default:
 		log.UserError("Not a valid command: %s", args[0])
 		return nil, fmt.Errorf("not a valid command")

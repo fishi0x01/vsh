@@ -196,4 +196,4 @@ make integration-tests
 
 ## Debugging
 
-The `-v` option enables verbose mode, which also creates a `vsh_trace.log` file to log any error object from the vault API.
+`-v DEBUG` sets debug log level, which also creates a `vsh_trace.log` file to log any error object from the vault API.
