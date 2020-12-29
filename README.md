@@ -1,10 +1,9 @@
-### Status
+# vsh
+
 [![Latest release](https://img.shields.io/github/release/fishi0x01/vsh.svg)](https://github.com/fishi0x01/vsh/releases/latest)
 ![CI](https://github.com/fishi0x01/vsh/workflows/CI/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fishi0x01/vsh)](https://goreportcard.com/report/github.com/fishi0x01/vsh)
 [![Code Climate](https://codeclimate.com/github/fishi0x01/vsh/badges/gpa.svg)](https://codeclimate.com/github/fishi0x01/vsh)
-
-# vsh
 
 ![vsh usage](https://user-images.githubusercontent.com/10799507/66355982-9872a980-e969-11e9-8ca4-6a2ff215f835.gif)
 
@@ -144,11 +143,13 @@ If your token has a limited number of uses, then consider using the non-interact
 To reduce the number of queries against vault, you can disable path auto-completion in 2 ways:
 
 1. Disable at start time:
+
 ```
 ./vsh --disable-auto-completion
 ```
 
 2. Toggle inside interactive mode:
+
 ```
 ./vsh
 http://localhost:8080 /secret/> toggle-auto-completion
@@ -179,12 +180,13 @@ Working on vault secrets can be critical, making quality and correct behavior a 
 That being said, `vsh` is still a small open source project, meaning we cannot make any guarantees.
 However, we put strong emphasis on [TDD](https://en.wikipedia.org/wiki/Test-driven_development).
 Every PR is tested with an extensive [suite](test/suites) of integration tests.
-Most tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.5.4`, i.e., versions in between should also be compatible.
+Most tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.6.1`, i.e., versions in between should also be compatible.
 
 ## Local Development
 
 Requirements:
-- `golang` (compiled and tested with `v1.13.12`)
+
+- `golang` (compiled and tested with `v1.15.3`)
 - `docker` for integration testing
 - `make` for simplified commands
 
