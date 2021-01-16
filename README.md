@@ -8,13 +8,37 @@
 ![vsh usage](https://user-images.githubusercontent.com/10799507/66355982-9872a980-e969-11e9-8ca4-6a2ff215f835.gif)
 
 `vsh` is an interactive [HashiCorp Vault](https://www.vaultproject.io/) shell which treats paths and keys like directories and files.
-Key features are:
+Core features are:
 
 - recursive operations on paths with `cp`, `mv` or `rm`
 - term search with `grep`
 - transparency towards differences between KV1 and KV2, i.e., you can freely move/copy secrets between both
 - non-interactive mode for automation (`vsh -c "<cmd>"`)
 - merging keys with different strategies through `append`
+
+## Installation
+
+### MacOS / Brew
+
+```sh
+brew install vsh
+```
+
+### Nix
+
+```sh
+nix-env -i vsh
+```
+
+### Static binaries for Linux / MacOS
+
+E.g., install to `/usr/local/bin`:
+
+```sh
+sudo curl -sLo /usr/local/bin/vsh https://github.com/fishi0x01/vsh/releases/download/v0.7.2/vsh_$(uname | tr '[:upper:]' '[:lower:]')_amd64
+```
+
+It is recommendable to verify [checksums](https://github.com/fishi0x01/vsh/releases/download/v0.7.2/SHA256SUM) for data integrity.
 
 ## Supported commands
 
