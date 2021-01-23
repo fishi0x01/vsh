@@ -147,6 +147,9 @@ func getCommand(args []string, commands *cli.Commands) (cmd cli.Command, err err
 	case commands.Grep.GetName():
 		err = commands.Grep.Parse(args)
 		cmd = commands.Grep
+	case commands.Replace.GetName():
+		err = commands.Replace.Parse(args)
+		cmd = commands.Replace
 	default:
 		log.UserError("Not a valid command: %s", args[0])
 		return nil, fmt.Errorf("not a valid command")
