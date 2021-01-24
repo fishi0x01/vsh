@@ -55,6 +55,9 @@ setup() {
         vault_exec "vault kv put ${kv_backend}/src/a/foo/bar value=2"
         vault_exec "vault kv put ${kv_backend}/src/b/foo value=1"
         vault_exec "vault kv put ${kv_backend}/src/b/foo/bar value=2"
+        vault_exec "echo -n \"a spaced value\" | vault kv put ${kv_backend}/src/spaces/foo bar=-"
+        vault_exec "vault kv put ${kv_backend}/src/apostrophe/foo bar=steve\'s"
+        vault_exec "echo -n 'a \"quoted\" value' | vault kv put ${kv_backend}/src/quoted/foo bar=-"
     done
 }
 
@@ -63,7 +66,7 @@ teardown() {
 }
 
 vault_exec() {
-    docker exec ${VAULT_CONTAINER_NAME} ${1} &> /dev/null
+    docker exec ${VAULT_CONTAINER_NAME} /bin/sh -c "$1" &> /dev/null
 }
 
 get_vault_value() {

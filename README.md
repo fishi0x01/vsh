@@ -11,7 +11,7 @@
 Core features are:
 
 - recursive operations on paths with `cp`, `mv` or `rm`
-- term search with `grep`
+- search with `grep` (substring or regular-expression)
 - transparency towards differences between KV1 and KV2, i.e., you can freely move/copy secrets between both
 - non-interactive mode for automation (`vsh -c "<cmd>"`)
 - merging keys with different strategies through `append`
@@ -48,7 +48,7 @@ cp <from-path> <to-path>
 append <from-secret> <to-secret> [flag]
 rm <dir-path or filel-path>
 ls <dir-path // optional>
-grep <search-term> <path>
+grep <search> <path> [-e|--regexp]
 cd <dir-path>
 cat <file-path>
 ```
@@ -131,8 +131,8 @@ tree=oak
 
 ### grep
 
-`grep` recursively searches the given term in key and value pairs. It does not support regex.
- If you are looking for copies or just trying to find the path to a certain term, this command might come in handy.
+`grep` recursively searches the given substring in key and value pairs. To treat the search string as a regular-expression, add `-e` or `--regexp` to the end of the command.
+ If you are looking for copies or just trying to find the path to a certain string, this command might come in handy.
 
 ## Setting the vault token
 

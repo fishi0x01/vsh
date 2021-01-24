@@ -31,6 +31,32 @@ load ../../bin/plugins/bats-assert/load
   assert_line --partial "/${KV_BACKEND}/src/tooling"
 
   #######################################
+  echo "==== case: grep value with quotes ===="
+  run ${APP_BIN} -c "grep \\\"quoted\\\" ${KV_BACKEND}/src/quoted/foo"
+  assert_line --partial "/${KV_BACKEND}/src/quoted/foo"
+
+  #######################################
+  echo "==== case: regexp pattern ===="
+  run ${APP_BIN} -c "grep app.* ${KV_BACKEND}/src -e"
+  assert_line --partial "/${KV_BACKEND}/src/dev/1"
+  assert_line --partial "/${KV_BACKEND}/src/ambivalence/1"
+
+  #######################################
+  echo "==== case: pattern with spaces ===="
+  run ${APP_BIN} -c "grep 'a spaced val' ${KV_BACKEND}/src/spaces"
+  assert_line --partial "/${KV_BACKEND}/src/spaces/foo"
+
+  #######################################
+  echo "==== case: pattern with escaped spaces ===="
+  run ${APP_BIN} -c "grep a\ spaced\ val ${KV_BACKEND}/src/spaces"
+  assert_line --partial "/${KV_BACKEND}/src/spaces/foo"
+
+  #######################################
+  echo "==== case: pattern with apostrophe ===="
+  run ${APP_BIN} -c "grep \"steve's\" ${KV_BACKEND}/src/apostrophe"
+  assert_line --partial "/${KV_BACKEND}/src/apostrophe"
+
+  #######################################
   echo "==== TODO case: grep term on directory with reduced permissions ===="
 
   #######################################

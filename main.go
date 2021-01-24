@@ -27,8 +27,47 @@ func printVersion() {
 }
 
 func parseInput(line string) (args []string) {
-	// TODO: allow "" and "\"\""
-	return strings.Fields(line)
+	quote := '0'
+	escaped := false
+	arg := ""
+
+	for _, c := range line {
+		switch {
+		case c == '\\' && !escaped: // next char will be escaped
+			escaped = true
+			continue
+		case escaped:
+			escaped = false
+			arg += string(c) // append char to current arg buffer
+			continue
+		case c == quote: // terminating quote
+			quote = '0'
+			args = append(args, arg)
+			arg = ""
+		case c == '"' || c == '\'':
+			if quote == '0' { // beginning quote
+				quote = c
+			} else if c != quote { // non-matching quote char
+				arg += string(c)
+			}
+		case c == ' ':
+			if quote == '0' {
+				if arg != "" { // unquoted space, store non-empty arg
+					args = append(args, arg)
+					arg = ""
+				}
+				continue
+			}
+			fallthrough
+		default:
+			arg += string(c) // append char to current arg buffer
+		}
+	}
+
+	if arg != "" { // store non-empty arg
+		args = append(args, arg)
+	}
+	return args
 }
 
 var completerInstance *completer.Completer
