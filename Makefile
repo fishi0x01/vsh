@@ -31,7 +31,10 @@ get-bats: ## Download bats dependencies to test directory
 	curl -sL https://github.com/bats-core/bats-file/archive/v0.2.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-file
 
 integration-tests: ## Run integration test suites (requires bats - see get-bats)
-	test/run.sh
+	test/run-all-tests.sh
+
+single-test: ## Run a single test suite, e.g., make single-test KV_BACKEND=KV2 VAULT_VERSION=1.6.1 TEST_SUITE=commands/cp
+	KV_BACKEND=$(KV_BACKEND) VAULT_VERSION=$(VAULT_VERSION) TEST_SUITE=$(TEST_SUITE) test/run-single-test.sh
 
 local-vault-test-instance: ## Start a local vault container with integration test provisioning
 	bash -c ". test/util/util.bash && setup"

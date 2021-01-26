@@ -24,6 +24,27 @@ load ../../bin/plugins/bats-assert/load
   assert_success
   assert_output "test"
 
+  #########################################
+  echo "==== case: copy single files with 'data' key ===="
+  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/data/1 ${KV_BACKEND}/dest/data/1"
+  assert_success
+
+  echo "ensure the file got copied to destination"
+  run get_vault_value "data" "${KV_BACKEND}/dest/data/1"
+  assert_success
+  assert_output "1"
+
+  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/data/2 ${KV_BACKEND}/dest/data/2"
+  assert_success
+
+  echo "ensure the file got copied to destination"
+  run get_vault_value "data" "${KV_BACKEND}/dest/data/2"
+  assert_success
+  assert_output "2"
+  run get_vault_value "value" "${KV_BACKEND}/dest/data/2"
+  assert_success
+  assert_output "1"
+
   #######################################
   echo "==== case: copy non-existing file ===="
   run ${APP_BIN} -c "cp ${KV_BACKEND}/src/does/not/exist ${KV_BACKEND}/dest/a"

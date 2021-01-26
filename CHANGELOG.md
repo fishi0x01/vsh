@@ -1,3 +1,14 @@
+## Latest
+
+ENHANCEMENTS:
+
+* Allow regex on `grep` operation ([#61](https://github.com/fishi0x01/vsh/pull/61) - Thank you for implementation [mattlqx](https://github.com/mattlqx))
+* Allow quotes and escapes in input ([#61](https://github.com/fishi0x01/vsh/pull/61) - Thank you for implementation [mattlqx](https://github.com/mattlqx))
+
+BUG FIXES:
+
+* Fix panic on `data` keys in KV1 ([#63](https://github.com/fishi0x01/vsh/pull/63) - Thank you for issue submission [tommartensen](https://github.com/tommartensen))
+
 ## v0.7.2 (October 4, 2020)
 
 BUG FIXES:
