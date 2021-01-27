@@ -65,7 +65,7 @@ load ../../bin/plugins/bats-assert/load
   assert_success
   assert_output "v2"
 
-  run ${APP_BIN} -c "rm ${KV_BACKEND}/src/staging/all/"
+  run ${APP_BIN} -c "rm \"${KV_BACKEND}/src/staging/all/\""
   assert_success
 
   echo "ensure the directory got removed"

@@ -34,7 +34,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: copy single directory without trailing '/' ===="
-  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev ${KV_BACKEND}/dest/dev"
+  run ${APP_BIN} -c "cp '${KV_BACKEND}/src/dev' '${KV_BACKEND}/dest/dev'"
   assert_success
 
   echo "ensure the directory got copied to destination"
@@ -61,7 +61,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: copy single directory with trailing '/' ===="
-  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev/ ${KV_BACKEND}/dest/dev.copy"
+  run ${APP_BIN} -c "cp \"${KV_BACKEND}/src/dev/\" \"${KV_BACKEND}/dest/dev.copy\""
   assert_success
 
   echo "ensure the directory got copied to destination"

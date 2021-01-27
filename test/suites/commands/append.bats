@@ -26,7 +26,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: append to non-existing file ===="
-  run ${APP_BIN} -c "append ${KV_BACKEND}/src/does/not/exist ${KV_BACKEND}/src/aa"
+  run ${APP_BIN} -c "append '${KV_BACKEND}/src/does/not/exist' \"${KV_BACKEND}/src/aa\""
   assert_failure 1
 
   echo "ensure proper error message"
@@ -50,7 +50,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: append value to existing destination with conflicting keys (skip strategy) ===="
-  run ${APP_BIN} -c "append ${KV_BACKEND}/src/tooling/v1 ${KV_BACKEND}/dest/prod/all --skip"
+  run ${APP_BIN} -c "append \"${KV_BACKEND}/src/tooling/v1\" '${KV_BACKEND}/dest/prod/all' --skip"
   assert_success
 
   echo "ensure the file got appended to destination"

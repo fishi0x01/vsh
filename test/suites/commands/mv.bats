@@ -5,7 +5,7 @@ load ../../bin/plugins/bats-assert/load
 @test "vault-${VAULT_VERSION} ${KV_BACKEND} 'mv'" {
   #######################################
   echo "==== case: move single file ===="
-  run ${APP_BIN} -c "mv ${KV_BACKEND}/src/prod/all ${KV_BACKEND}/dest/prod/all"
+  run ${APP_BIN} -c "mv '${KV_BACKEND}/src/prod/all' ${KV_BACKEND}/dest/prod/all"
   assert_success
 
   echo "ensure the file got moved to destination"
