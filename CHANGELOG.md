@@ -1,4 +1,4 @@
-## Latest
+## v0.8.0 (January 27, 2021)
 
 ENHANCEMENTS:
 

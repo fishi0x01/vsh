@@ -35,10 +35,10 @@ nix-env -i vsh
 E.g., install to `/usr/local/bin`:
 
 ```sh
-sudo curl -sLo /usr/local/bin/vsh https://github.com/fishi0x01/vsh/releases/download/v0.7.2/vsh_$(uname | tr '[:upper:]' '[:lower:]')_amd64
+sudo curl -sLo /usr/local/bin/vsh https://github.com/fishi0x01/vsh/releases/download/v0.8.0/vsh_$(uname | tr '[:upper:]' '[:lower:]')_amd64
 ```
 
-It is recommendable to verify [checksums](https://github.com/fishi0x01/vsh/releases/download/v0.7.2/SHA256SUM) for data integrity.
+It is recommendable to verify [checksums](https://github.com/fishi0x01/vsh/releases/download/v0.8.0/SHA256SUM) for data integrity.
 
 ## Supported commands
 
