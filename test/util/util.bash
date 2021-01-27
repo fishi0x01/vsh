@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export VAULT_VERSION=${VAULT_VERSION:-"1.5.3"}
+export VAULT_VERSION=${VAULT_VERSION:-"1.6.1"}
 export VAULT_CONTAINER_NAME="vsh-integration-test-vault"
 export VAULT_HOST_PORT=${VAULT_HOST_PORT:-"8888"}
 
@@ -39,6 +39,8 @@ setup() {
     vault_exec "vault secrets enable -version=2 -path=KV2 kv"
     for kv_backend in "${KV_BACKENDS[@]}"
     do
+        vault_exec "vault kv put ${kv_backend}/src/data/1 data=1"
+        vault_exec "vault kv put ${kv_backend}/src/data/2 value=1 data=2"
         vault_exec "vault kv put ${kv_backend}/src/dev/1 value=1 fruit=apple"
         vault_exec "vault kv put ${kv_backend}/src/dev/2 value=2 fruit=banana"
         vault_exec "vault kv put ${kv_backend}/src/dev/3 value=3 fruit=berry"

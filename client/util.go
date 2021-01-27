@@ -80,7 +80,7 @@ func (client *Client) isTopLevelPath(absolutePath string) bool {
 }
 
 func isValidKV2Data(secret *api.Secret) bool {
-	_, exists := secret.Data["data"]
+	_, exists := secret.Data["data"].(map[string]interface{})
 	return exists
 }
 
