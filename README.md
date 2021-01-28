@@ -48,7 +48,7 @@ cp <from-path> <to-path>
 append <from-secret> <to-secret> [flag]
 rm <dir-path or filel-path>
 ls <dir-path // optional>
-grep <search> <path> [-e|--regexp]
+grep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]
 cd <dir-path>
 cat <file-path>
 ```
@@ -131,7 +131,7 @@ tree=oak
 
 ### grep
 
-`grep` recursively searches the given substring in key and value pairs. To treat the search string as a regular-expression, add `-e` or `--regexp` to the end of the command.
+`grep` recursively searches the given substring in key and value pairs. To treat the search string as a regular-expression, add `-e` or `--regexp` to the end of the command. By default, both keys and values will be searched. If you would like to limit the search, you may add `-k` or `--keys` to the end of the command to search only a path's keys, or `-v` or `--values` to search only a path's values.
  If you are looking for copies or just trying to find the path to a certain string, this command might come in handy.
 
 ## Setting the vault token

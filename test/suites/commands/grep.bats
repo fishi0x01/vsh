@@ -42,6 +42,12 @@ load ../../bin/plugins/bats-assert/load
   assert_line --partial "/${KV_BACKEND}/src/ambivalence/1"
 
   #######################################
+  echo "==== case: fails on invalid regex pattern ===="
+  run ${APP_BIN} -c "grep '][' ${KV_BACKEND}/src/dev -e"
+  assert_line --partial "cannot parse regex"
+  assert_failure 1
+
+  #######################################
   echo "==== case: pattern with spaces ===="
   run ${APP_BIN} -c "grep 'a spaced val' ${KV_BACKEND}/src/spaces"
   assert_line --partial "/${KV_BACKEND}/src/spaces/foo"
@@ -55,6 +61,34 @@ load ../../bin/plugins/bats-assert/load
   echo "==== case: pattern with apostrophe ===="
   run ${APP_BIN} -c "grep \"steve's\" ${KV_BACKEND}/src/apostrophe"
   assert_line --partial "/${KV_BACKEND}/src/apostrophe"
+
+  #######################################
+  echo "==== case: no match when only searching keys ===="
+  run ${APP_BIN} -c "grep 'apple' ${KV_BACKEND}/src/dev/1 -k"
+  refute_line --partial "/${KV_BACKEND}/src/dev/1"
+
+  #######################################
+  echo "==== case: no match when only searching values ===="
+  run ${APP_BIN} -c "grep 'fruit' ${KV_BACKEND}/src/dev/1 -v"
+  refute_line --partial "/${KV_BACKEND}/src/dev/1"
+
+  #######################################
+  echo "==== case: match when only searching keys ===="
+  run ${APP_BIN} -c "grep 'fruit' ${KV_BACKEND}/src/dev -k"
+  assert_line --partial "/${KV_BACKEND}/src/dev/1"
+  assert_line --partial "/${KV_BACKEND}/src/dev/2"
+  assert_line --partial "/${KV_BACKEND}/src/dev/3"
+
+  #######################################
+  echo "==== case: match when only searching values ===="
+  run ${APP_BIN} -c "grep 'apple' ${KV_BACKEND}/src/dev -v"
+  assert_line --partial "/${KV_BACKEND}/src/dev/1"
+
+  #######################################
+  echo "==== case: fails on invalid flag ===="
+  run ${APP_BIN} -c "grep 'apple' ${KV_BACKEND}/src/dev --foo"
+  assert_line --partial "invalid flag"
+  assert_failure 1
 
   #######################################
   echo "==== TODO case: grep term on directory with reduced permissions ===="
