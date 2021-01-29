@@ -105,6 +105,7 @@ func executor(in string) {
 	}
 
 	if err != nil && cmd != nil {
+		log.UserError("%v", err)
 		cmd.PrintUsage()
 	}
 

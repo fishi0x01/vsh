@@ -132,7 +132,7 @@ func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 		{Text: "append", Description: "append <from> <to> [-f|--force] | [-s|--skip] | [-r|--rename] | -s is default"},
 		{Text: "rm", Description: "rm <path> | -r is implied"},
 		{Text: "mv", Description: "mv <from> <to>"},
-		{Text: "grep", Description: "grep <search> <path> [-e|--regexp]"},
+		{Text: "grep", Description: "grep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]"},
 		{Text: "cat", Description: "cat <path>"},
 		{Text: "ls", Description: "ls <path>"},
 		{Text: "toggle-auto-completion", Description: "toggle path auto-completion on/off"},

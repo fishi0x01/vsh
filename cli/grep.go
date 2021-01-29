@@ -13,6 +13,16 @@ import (
 	"github.com/fishi0x01/vsh/log"
 )
 
+// GrepMode defines the scope of which parts of a path to search (keys and/or values)
+type GrepMode int
+
+const (
+	// ModeKeys only searches keys
+	ModeKeys GrepMode = 1
+	// ModeValues only searches values
+	ModeValues GrepMode = 2
+)
+
 // GrepCommand container for all 'grep' parameters
 type GrepCommand struct {
 	name string
@@ -23,6 +33,7 @@ type GrepCommand struct {
 	Path   string
 	Search string
 	Regexp *regexp.Regexp
+	Mode   GrepMode
 }
 
 // Match structure to keep indices of matched terms
@@ -58,7 +69,12 @@ func (cmd *GrepCommand) IsSane() bool {
 
 // PrintUsage print command usage
 func (cmd *GrepCommand) PrintUsage() {
-	log.UserInfo("Usage:\ngrep <term-string> <path> [-e|--regexp]")
+	log.UserInfo("Usage:\ngrep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]")
+}
+
+// IsMode returns true if the specified mode is enabled
+func (cmd *GrepCommand) IsMode(mode GrepMode) bool {
+	return cmd.Mode&mode == mode
 }
 
 // Parse given arguments and return status
@@ -78,8 +94,18 @@ func (cmd *GrepCommand) Parse(args []string) error {
 				return fmt.Errorf("cannot parse regex pattern")
 			}
 			cmd.Regexp = re
+		case "-k", "--keys":
+			cmd.Mode |= ModeKeys
+		case "-v", "--values":
+			cmd.Mode |= ModeValues
+		default:
+			return fmt.Errorf("invalid flag: %s", v)
 		}
 	}
+	if cmd.Mode == 0 {
+		cmd.Mode = ModeKeys + ModeValues
+	}
+
 	return nil
 }
 
@@ -139,32 +165,35 @@ func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, 
 
 func (cmd *GrepCommand) doMatch(path string, k string, v string, search string) (m []*Match) {
 	if cmd.Regexp != nil {
-		return regexpMatch(path, k, v, cmd.Regexp)
+		return cmd.regexpMatch(path, k, v, cmd.Regexp)
 	}
-	return substrMatch(path, k, v, search)
+	return cmd.substrMatch(path, k, v, search)
 }
 
 // find all indices for matches in key and value
-func substrMatch(path string, k string, v string, substr string) (m []*Match) {
-	keyIndex := suffixarray.New([]byte(k))
-	keyMatches := keyIndex.Lookup([]byte(substr), -1)
-	sort.Ints(keyMatches)
-
-	valueIndex := suffixarray.New([]byte(v))
-	valueMatches := valueIndex.Lookup([]byte(substr), -1)
-	sort.Ints(valueMatches)
-
+func (cmd *GrepCommand) substrMatch(path string, k string, v string, substr string) (m []*Match) {
 	substrLength := len(substr)
 	keyMatchPairs := make([][]int, 0)
-	for _, offset := range keyMatches {
-		keyMatchPairs = append(keyMatchPairs, []int{offset, substrLength})
-	}
-	valueMatchPairs := make([][]int, 0)
-	for _, offset := range valueMatches {
-		valueMatchPairs = append(valueMatchPairs, []int{offset, substrLength})
+	if cmd.IsMode(ModeKeys) {
+		keyIndex := suffixarray.New([]byte(k))
+		keyMatches := keyIndex.Lookup([]byte(substr), -1)
+		sort.Ints(keyMatches)
+		for _, offset := range keyMatches {
+			keyMatchPairs = append(keyMatchPairs, []int{offset, substrLength})
+		}
 	}
 
-	if len(keyMatches) > 0 || len(valueMatches) > 0 {
+	valueMatchPairs := make([][]int, 0)
+	if cmd.IsMode(ModeValues) {
+		valueIndex := suffixarray.New([]byte(v))
+		valueMatches := valueIndex.Lookup([]byte(substr), -1)
+		sort.Ints(valueMatches)
+		for _, offset := range valueMatches {
+			valueMatchPairs = append(valueMatchPairs, []int{offset, substrLength})
+		}
+	}
+
+	if len(keyMatchPairs) > 0 || len(valueMatchPairs) > 0 {
 		m = []*Match{
 			{
 				path:       path,
@@ -176,13 +205,18 @@ func substrMatch(path string, k string, v string, substr string) (m []*Match) {
 			},
 		}
 	}
-
 	return m
 }
 
-func regexpMatch(path string, k string, v string, pattern *regexp.Regexp) (m []*Match) {
-	keyMatches := pattern.FindAllIndex([]byte(k), -1)
-	valueMatches := pattern.FindAllIndex([]byte(v), -1)
+func (cmd *GrepCommand) regexpMatch(path string, k string, v string, pattern *regexp.Regexp) (m []*Match) {
+	keyMatches := make([][]int, 0)
+	if cmd.IsMode(ModeKeys) {
+		keyMatches = pattern.FindAllIndex([]byte(k), -1)
+	}
+	valueMatches := make([][]int, 0)
+	if cmd.IsMode(ModeValues) {
+		valueMatches = pattern.FindAllIndex([]byte(v), -1)
+	}
 
 	if len(keyMatches) > 0 || len(valueMatches) > 0 {
 		m = []*Match{
@@ -196,7 +230,6 @@ func regexpMatch(path string, k string, v string, pattern *regexp.Regexp) (m []*
 			},
 		}
 	}
-
 	return m
 }
 
