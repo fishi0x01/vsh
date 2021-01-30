@@ -8,6 +8,9 @@ load ../../bin/plugins/bats-assert/load
   run ${APP_BIN} -c "cat ${KV_BACKEND}/src/dev/1"
   assert_success
   assert_line "value = 1"
+  refute_line --partial "created_time"
+  refute_line --partial "deletion_time"
+  refute_line --partial "destroyed"
 
   #######################################
   echo "==== case: cat non-existing file ===="
@@ -30,6 +33,9 @@ load ../../bin/plugins/bats-assert/load
   assert_line "value = tooling"
   assert_line "drink = beer"
   assert_line "key = A"
+  refute_line --partial "created_time"
+  refute_line --partial "deletion_time"
+  refute_line --partial "destroyed"
 
   #######################################
   echo "==== case: cat ambiguous directory ===="

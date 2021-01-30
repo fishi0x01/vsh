@@ -95,22 +95,25 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 }
 
 // Read returns secret at given path, using given Client
-func (client *Client) Read(absolutePath string) (secret *api.Secret, err error) {
+func (client *Client) Read(absolutePath string) (secret *Secret, err error) {
+	var apiSecret *api.Secret
 	if client.isTopLevelPath(absolutePath) {
-		secret, err = client.topLevelRead(normalizedVaultPath(absolutePath))
+		apiSecret, err = client.topLevelRead(normalizedVaultPath(absolutePath))
 	} else {
-		secret, err = client.lowLevelRead(normalizedVaultPath(absolutePath))
+		apiSecret, err = client.lowLevelRead(normalizedVaultPath(absolutePath))
 	}
-
+	if apiSecret != nil {
+		secret = NewSecret(apiSecret)
+	}
 	return secret, err
 }
 
 // Write writes secret to given path, using given Client
-func (client *Client) Write(absolutePath string, secret *api.Secret) (err error) {
+func (client *Client) Write(absolutePath string, secret *Secret) (err error) {
 	if client.isTopLevelPath(absolutePath) {
 		err = client.topLevelWrite(normalizedVaultPath(absolutePath))
 	} else {
-		err = client.lowLevelWrite(normalizedVaultPath(absolutePath), secret)
+		err = client.lowLevelWrite(normalizedVaultPath(absolutePath), secret.GetAPISecret())
 	}
 
 	return err

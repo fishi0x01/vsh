@@ -57,16 +57,8 @@ func (cmd *CatCommand) Run() int {
 			return 1
 		}
 
-		for k, v := range secret.Data {
-			if rec, ok := v.(map[string]interface{}); ok {
-				// KV 2
-				for kk, vv := range rec {
-					log.UserInfo("%s = %s", kk, vv)
-				}
-			} else {
-				// KV 1
-				log.UserInfo("%s = %s", k, v)
-			}
+		for k, v := range secret.GetData() {
+			log.UserInfo("%s = %s", k, v)
 		}
 	} else {
 		log.UserError("Not a valid path for operation: %s", absPath)

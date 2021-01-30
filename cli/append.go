@@ -139,8 +139,9 @@ func (cmd *AppendCommand) createDummySecret(target string) error {
 
 	dummy := make(map[string]interface{})
 	dummy["placeholder"] = struct{}{}
+	dummySecret := client.NewSecret(&api.Secret{Data: dummy})
 	if targetSecret == nil {
-		if err = cmd.client.Write(target, &api.Secret{Data: dummy}); err != nil {
+		if err = cmd.client.Write(target, dummySecret); err != nil {
 			return err
 		}
 	}
@@ -159,32 +160,17 @@ func (cmd *AppendCommand) mergeSecrets(source string, target string) error {
 	}
 
 	onConflict := cmd.Mode
-	merged := make(map[string]interface{})
+	merged := targetSecret.GetData()
 	skippedKeys := make([]string, 0)
 
-	for k, v := range targetSecret.Data {
-		if rec, ok := v.(map[string]interface{}); ok {
-			for kk, vv := range rec {
-				merged[kk] = vv
-			}
-		} else {
-			merged[k] = v
-		}
+	for k, v := range sourceSecret.GetData() {
+		skipped := addKey(merged, onConflict, k, v)
+		skippedKeys = append(skippedKeys, skipped...)
 	}
 
-	for k, v := range sourceSecret.Data {
-		if rec, ok := v.(map[string]interface{}); ok {
-			for kk, vv := range rec {
-				skipped := addKey(merged, onConflict, kk, vv)
-				skippedKeys = append(skippedKeys, skipped...)
-			}
-		} else {
-			skipped := addKey(merged, onConflict, k, v)
-			skippedKeys = append(skippedKeys, skipped...)
-		}
-	}
 	// write
-	if err := cmd.client.Write(target, &api.Secret{Data: merged}); err != nil {
+	resultSecret := client.NewSecret(&api.Secret{Data: merged})
+	if err := cmd.client.Write(target, resultSecret); err != nil {
 		fmt.Println(err)
 		return err
 	}
