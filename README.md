@@ -18,7 +18,7 @@ Core features are:
 
 ## Installation
 
-### MacOS / Brew
+### Homebrew
 
 ```sh
 brew install vsh
@@ -32,13 +32,7 @@ nix-env -i vsh
 
 ### Static binaries for Linux / MacOS
 
-E.g., install to `/usr/local/bin`:
-
-```sh
-sudo curl -sLo /usr/local/bin/vsh https://github.com/fishi0x01/vsh/releases/download/v0.8.0/vsh_$(uname | tr '[:upper:]' '[:lower:]')_amd64
-```
-
-It is recommendable to verify [checksums](https://github.com/fishi0x01/vsh/releases/download/v0.8.0/SHA256SUM) for data integrity.
+Download latest static binaries from [release page](https://github.com/fishi0x01/vsh/releases).
 
 ## Supported commands
 

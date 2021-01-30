@@ -1,3 +1,12 @@
+# Changelog
+
+## master (unreleased)
+
+ENHANCEMENTS:
+
+* Allow limiting scope of grep to keys or values ([#66](https://github.com/fishi0x01/vsh/pull/66) - Thank you for implementation [mattlqx](https://github.com/mattlqx))
+* Do not show and operate on KV2 metadata ([#68](https://github.com/fishi0x01/vsh/pull/68)
+
 ## v0.8.0 (January 27, 2021)
 
 ENHANCEMENTS:

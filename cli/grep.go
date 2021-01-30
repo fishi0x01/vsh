@@ -147,16 +147,8 @@ func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, 
 			return matches, err
 		}
 
-		for k, v := range secret.Data {
-			if rec, ok := v.(map[string]interface{}); ok {
-				// KV 2
-				for kk, vv := range rec {
-					matches = append(matches, cmd.doMatch(path, kk, fmt.Sprintf("%v", vv), search)...)
-				}
-			} else {
-				// KV 1
-				matches = append(matches, cmd.doMatch(path, k, fmt.Sprintf("%v", v), search)...)
-			}
+		for k, v := range secret.GetData() {
+			matches = append(matches, cmd.doMatch(path, k, fmt.Sprintf("%v", v), search)...)
 		}
 	}
 
