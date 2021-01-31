@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -40,7 +39,7 @@ func NewCommands(client *client.Client) *Commands {
 		Ls:      NewListCommand(client),
 		Cd:      NewCdCommand(client),
 		Cat:     NewCatCommand(client),
-		Grep:    NewGrepCommand(client, os.Stdout, os.Stderr),
+		Grep:    NewGrepCommand(client),
 		Replace: NewReplaceCommand(client),
 	}
 }
