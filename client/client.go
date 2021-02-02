@@ -2,6 +2,8 @@ package client
 
 import (
 	"errors"
+	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -165,6 +167,21 @@ func (client *Client) Traverse(absolutePath string) (paths []string) {
 	}
 
 	return paths
+}
+
+// SubpathsForPath will return an array of absolute paths at or below path
+func (client *Client) SubpathsForPath(path string) (filePaths []string, err error) {
+	switch t := client.GetType(path); t {
+	case LEAF:
+		filePaths = append(filePaths, filepath.Clean(path))
+	case NODE:
+		for _, traversedPath := range client.Traverse(path) {
+			filePaths = append(filePaths, traversedPath)
+		}
+	default:
+		return filePaths, fmt.Errorf("Not a valid path for operation: %s", path)
+	}
+	return filePaths, nil
 }
 
 // ClearCache clears the list cache

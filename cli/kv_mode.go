@@ -1,6 +1,6 @@
 package cli
 
-// GrepMode defines the scope of which parts of a path to search (keys and/or values)
+// KeyValueMode defines the scope of which parts of a path to search (keys and/or values)
 type KeyValueMode int
 
 const (
