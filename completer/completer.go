@@ -127,14 +127,15 @@ func isCommand(p string) bool {
 
 func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 	result = []prompt.Suggest{
+		{Text: "append", Description: "append <from> <to> [-f|--force] | [-s|--skip] | [-r|--rename] | -s is default"},
+		{Text: "cat", Description: "cat <path>"},
 		{Text: "cd", Description: "cd <path>"},
 		{Text: "cp", Description: "cp <from> <to> | -r is implied"},
-		{Text: "append", Description: "append <from> <to> [-f|--force] | [-s|--skip] | [-r|--rename] | -s is default"},
-		{Text: "rm", Description: "rm <path> | -r is implied"},
-		{Text: "mv", Description: "mv <from> <to>"},
 		{Text: "grep", Description: "grep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]"},
-		{Text: "cat", Description: "cat <path>"},
 		{Text: "ls", Description: "ls <path>"},
+		{Text: "mv", Description: "mv <from> <to>"},
+		{Text: "replace", Description: "replace <search> <replacement> <path> [-e|--regexp] [-k|--keys] [-v|--values] [-y|--confirm] [-n|--dry-run]"},
+		{Text: "rm", Description: "rm <path> | -r is implied"},
 		{Text: "toggle-auto-completion", Description: "toggle path auto-completion on/off"},
 	}
 	filtered := prompt.FilterHasPrefix(result, arg, true)

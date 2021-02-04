@@ -12,6 +12,7 @@ Core features are:
 
 - recursive operations on paths with `cp`, `mv` or `rm`
 - search with `grep` (substring or regular-expression)
+- substitute patterns in keys and/or values (substring or regular-expression) with `replace`
 - transparency towards differences between KV1 and KV2, i.e., you can freely move/copy secrets between both
 - non-interactive mode for automation (`vsh -c "<cmd>"`)
 - merging keys with different strategies through `append`
@@ -37,17 +38,18 @@ Download latest static binaries from [release page](https://github.com/fishi0x01
 ## Supported commands
 
 ```text
-mv <from-path> <to-path>
-cp <from-path> <to-path>
 append <from-secret> <to-secret> [flag]
-rm <dir-path or filel-path>
-ls <dir-path // optional>
-grep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]
-cd <dir-path>
 cat <file-path>
+cd <dir-path>
+cp <from-path> <to-path>
+grep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]
+ls <dir-path // optional>
+mv <from-path> <to-path>
+replace <search> <replacement> <path> [-e|--regexp] [-k|--keys] [-v|--values] [-y|--confirm] [-n|--dry-run]
+rm <dir-path or file-path>
 ```
 
-`cp`, `rm` and `grep` command always have the `-r/-R` flag implied, i.e., every operation works recursively.
+`cp`, `grep`, `replace` and `rm` command always have the `-r/-R` flag implied, i.e., every operation works recursively.
 
 ### append
 
@@ -127,6 +129,10 @@ tree=oak
 
 `grep` recursively searches the given substring in key and value pairs. To treat the search string as a regular-expression, add `-e` or `--regexp` to the end of the command. By default, both keys and values will be searched. If you would like to limit the search, you may add `-k` or `--keys` to the end of the command to search only a path's keys, or `-v` or `--values` to search only a path's values.
  If you are looking for copies or just trying to find the path to a certain string, this command might come in handy.
+
+### replace
+
+`replace` works similarly to `grep` above, but has the ability to mutate data inside Vault. By default, confirmation is required before writing data. You may skip confirmation by using the `-y`/`--confirm` flags. Conversely, you may use the `-n`/`--dry-run` flags to skip both confirmation and any writes. Changes that would be made are presented in red (delete) and green (add) coloring.
 
 ## Setting the vault token
 

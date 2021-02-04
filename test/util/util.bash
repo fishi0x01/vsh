@@ -68,9 +68,13 @@ teardown() {
 }
 
 vault_exec() {
-    docker exec ${VAULT_CONTAINER_NAME} /bin/sh -c "$1" &> /dev/null
+    vault_exec_output "$@" &> /dev/null
+}
+
+vault_exec_output() {
+    docker exec ${VAULT_CONTAINER_NAME} /bin/sh -c "$1"
 }
 
 get_vault_value() {
-    docker exec ${VAULT_CONTAINER_NAME} vault kv get -field="${1}" "${2}" || true
+    vault_exec_output "vault kv get -field=\"${1}\" \"${2}\" || true"
 }
