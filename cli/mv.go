@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
@@ -11,10 +10,20 @@ import (
 // MoveCommand container for all 'mv' parameters
 type MoveCommand struct {
 	name string
+	args *MoveCommandArgs
 
 	client *client.Client
-	Source string
-	Target string
+}
+
+// MoveCommandArgs provides a struct for go-arg parsing
+type MoveCommandArgs struct {
+	Source string `arg:"positional,required" help:"path to move"`
+	Target string `arg:"positional,required" help:"path to move source to"`
+}
+
+// Description provides detail on what the command does
+func (MoveCommandArgs) Description() string {
+	return "moves a secret from one path to another"
 }
 
 // NewMoveCommand creates a new MoveCommand parameter container
@@ -22,6 +31,7 @@ func NewMoveCommand(c *client.Client) *MoveCommand {
 	return &MoveCommand{
 		name:   "mv",
 		client: c,
+		args:   &MoveCommandArgs{},
 	}
 }
 
@@ -30,42 +40,34 @@ func (cmd *MoveCommand) GetName() string {
 	return cmd.name
 }
 
+// GetArgs provides the struct holding arguments for the command
+func (cmd *MoveCommand) GetArgs() interface{} {
+	return cmd.args
+}
+
 // IsSane returns true if command is sane
 func (cmd *MoveCommand) IsSane() bool {
-	return cmd.Source != "" && cmd.Target != ""
+	return cmd.args.Source != "" && cmd.args.Target != ""
 }
 
 // PrintUsage print command usage
 func (cmd *MoveCommand) PrintUsage() {
-	log.UserInfo("Usage:\nmv <from> <to>")
+	fmt.Println(Help(cmd))
 }
 
 // Parse given arguments and return status
 func (cmd *MoveCommand) Parse(args []string) error {
-	if len(args) != 3 {
-		return fmt.Errorf("cannot parse arguments")
+	_, err := parseCommandArgs(args, cmd)
+	if err != nil {
+		return err
 	}
-	cmd.Source = args[1]
-	cmd.Target = args[2]
+
 	return nil
 }
 
 // Run executes 'mv' with given MoveCommand's parameters
 func (cmd *MoveCommand) Run() int {
-	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
-	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
-
-	switch t := cmd.client.GetType(newSrcPwd); t {
-	case client.LEAF:
-		cmd.moveSecret(filepath.Clean(newSrcPwd), newTargetPwd)
-	case client.NODE:
-		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.moveSecret)
-	default:
-		log.UserError("Not a valid path for operation: %s", newSrcPwd)
-		return 1
-	}
-
-	return 0
+	return transportSecrets(cmd.client, cmd.args.Source, cmd.args.Target, cmd.moveSecret)
 }
 
 func (cmd *MoveCommand) moveSecret(source string, target string) error {

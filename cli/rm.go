@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
 )
@@ -9,9 +10,19 @@ import (
 // RemoveCommand container for all 'rm' parameters
 type RemoveCommand struct {
 	name string
+	args *RemoveCommandArgs
 
 	client *client.Client
-	Path   string
+}
+
+// RemoveCommandArgs provides a struct for go-arg parsing
+type RemoveCommandArgs struct {
+	Path string `arg:"positional,required" help:"path to remove"`
+}
+
+// Description provides detail on what the command does
+func (RemoveCommandArgs) Description() string {
+	return "removes a secret at a path"
 }
 
 // NewRemoveCommand creates a new RemoveCommand parameter container
@@ -19,6 +30,7 @@ func NewRemoveCommand(c *client.Client) *RemoveCommand {
 	return &RemoveCommand{
 		name:   "rm",
 		client: c,
+		args:   &RemoveCommandArgs{},
 	}
 }
 
@@ -27,28 +39,34 @@ func (cmd *RemoveCommand) GetName() string {
 	return cmd.name
 }
 
+// GetArgs provides the struct holding arguments for the command
+func (cmd *RemoveCommand) GetArgs() interface{} {
+	return cmd.args
+}
+
 // IsSane returns true if command is sane
 func (cmd *RemoveCommand) IsSane() bool {
-	return cmd.Path != ""
+	return cmd.args.Path != ""
 }
 
 // PrintUsage print command usage
 func (cmd *RemoveCommand) PrintUsage() {
-	log.UserInfo("Usage:\nrm <path>")
+	fmt.Println(Help(cmd))
 }
 
 // Parse given arguments and return status
 func (cmd *RemoveCommand) Parse(args []string) error {
-	if len(args) != 2 {
-		return fmt.Errorf("cannot parse arguments")
+	_, err := parseCommandArgs(args, cmd)
+	if err != nil {
+		return err
 	}
-	cmd.Path = args[1]
+
 	return nil
 }
 
 // Run executes 'rm' with given RemoveCommand's parameters
 func (cmd *RemoveCommand) Run() int {
-	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
+	newPwd := cmdPath(cmd.client.Pwd, cmd.args.Path)
 
 	switch t := cmd.client.GetType(newPwd); t {
 	case client.LEAF:

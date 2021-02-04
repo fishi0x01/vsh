@@ -1,12 +1,13 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/alexflint/go-arg"
 	"github.com/c-bata/go-prompt"
+	"github.com/cosiner/argv"
 	"github.com/fishi0x01/vsh/cli"
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/completer"
@@ -15,6 +16,7 @@ import (
 )
 
 var vaultClient *client.Client
+var completerInstance *completer.Completer
 
 var (
 	vshVersion    = ""
@@ -22,55 +24,19 @@ var (
 	isInteractive = true
 )
 
-func printVersion() {
-	fmt.Println(vshVersion)
+type args struct {
+	CmdString             string `arg:"-c,--cmd" help:"subcommand to run"`
+	DisableAutoCompletion bool   `arg:"--disable-auto-completion" help:"disable auto-completion on paths"`
+	Verbosity             string `arg:"-v,--log-level" help:"DEBUG | INFO | WARN | ERROR - debug option creates vsh_trace.log" default:"INFO" placeholder:"LEVEL"`
 }
 
-func parseInput(line string) (args []string) {
-	quote := '0'
-	escaped := false
-	arg := ""
-
-	for _, c := range line {
-		switch {
-		case c == '\\' && !escaped: // next char will be escaped
-			escaped = true
-			continue
-		case escaped:
-			escaped = false
-			arg += string(c) // append char to current arg buffer
-			continue
-		case c == quote: // terminating quote
-			quote = '0'
-			args = append(args, arg)
-			arg = ""
-		case c == '"' || c == '\'':
-			if quote == '0' { // beginning quote
-				quote = c
-			} else if c != quote { // non-matching quote char
-				arg += string(c)
-			}
-		case c == ' ':
-			if quote == '0' {
-				if arg != "" { // unquoted space, store non-empty arg
-					args = append(args, arg)
-					arg = ""
-				}
-				continue
-			}
-			fallthrough
-		default:
-			arg += string(c) // append char to current arg buffer
-		}
-	}
-
-	if arg != "" { // store non-empty arg
-		args = append(args, arg)
-	}
-	return args
+func (args) Version() string {
+	return vshVersion
 }
 
-var completerInstance *completer.Completer
+func (args) Description() string {
+	return "vsh - Shell for Hashicorp Vault"
+}
 
 func executor(in string) {
 	// Every command can change the vault content
@@ -79,10 +45,15 @@ func executor(in string) {
 
 	// Split the input separate the command and the arguments.
 	in = strings.TrimSpace(in)
-	args := parseInput(in)
+	args, err := argv.Argv(in, func(backquoted string) (string, error) {
+		return backquoted, nil
+	}, nil)
+	if err != nil {
+		log.UserError("%v", err)
+		return
+	}
 	commands := cli.NewCommands(vaultClient)
 	var cmd cli.Command
-	var err error
 
 	// edge cases
 	if len(args) == 0 {
@@ -94,14 +65,14 @@ func executor(in string) {
 	}
 
 	// parse command
-	switch args[0] {
+	switch args[0][0] {
 	case "toggle-auto-completion":
 		completerInstance.TogglePathCompletion()
 		return
 	case "exit":
 		os.Exit(0)
 	default:
-		cmd, err = getCommand(args, commands)
+		cmd, err = getCommand(args[0], commands)
 	}
 
 	if err != nil && cmd != nil {
@@ -174,24 +145,19 @@ func getVaultToken() (token string, err error) {
 }
 
 func main() {
-	var cmdString string
-	var hasVersion bool
-	var disableAutoCompletion bool
-	flag.StringVar(&cmdString, "c", "", "command to run")
-	flag.BoolVar(&hasVersion, "version", false, "print vsh version")
-	flag.BoolVar(&disableAutoCompletion, "disable-auto-completion", false, "disable auto-completion on paths")
-	flag.StringVar(&verbosity, "v", "INFO", "DEBUG | INFO | WARN | ERROR - debug option creates vsh_trace.log")
-	flag.Parse()
-
-	var err error
-	err = log.Init(verbosity)
-	if err != nil {
-		os.Exit(1)
+	var args args
+	p := arg.MustParse(&args)
+	switch level := strings.ToUpper(args.Verbosity); level {
+	case "DEBUG", "INFO", "WARN", "ERROR":
+		args.Verbosity = strings.ToUpper(args.Verbosity)
+	default:
+		p.Fail("Not a valid verbosity level")
 	}
 
-	if hasVersion {
-		printVersion()
-		return
+	var err error
+	err = log.Init(args.Verbosity)
+	if err != nil {
+		os.Exit(1)
 	}
 
 	token, ve := getVaultToken()
@@ -214,13 +180,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if cmdString != "" {
+	if args.CmdString != "" {
 		// Run non-interactive mode
 		isInteractive = false
-		executor(cmdString)
+		executor(args.CmdString)
 	} else {
 		// Run interactive mode
-		completerInstance = completer.NewCompleter(vaultClient, disableAutoCompletion)
+		completerInstance = completer.NewCompleter(vaultClient, args.DisableAutoCompletion)
 		p := prompt.New(
 			executor,
 			completerInstance.Complete,

@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/c-bata/go-prompt"
+	"github.com/fatih/structs"
+	"github.com/fishi0x01/vsh/cli"
 	"github.com/fishi0x01/vsh/client"
 )
 
@@ -104,21 +106,19 @@ func isAbsolutePath(path string) bool {
 	return strings.HasPrefix(path, "/")
 }
 
-func isCommandArgument(p string) bool {
+func (c *Completer) isCommandArgument(p string) bool {
 	words := strings.Split(p, " ")
 	if len(words) < 2 {
 		return false
 	}
 
-	return words[0] == "cd" ||
-		words[0] == "cp" ||
-		words[0] == "rm" ||
-		words[0] == "mv" ||
-		words[0] == "grep" ||
-		words[0] == "cat" ||
-		words[0] == "append" ||
-		words[0] == "ls" ||
-		words[0] == "toggle-auto-completion"
+	commands := cli.NewCommands(c.client)
+	for _, f := range structs.Fields(commands) {
+		if words[0] == f.Value().(cli.Command).GetName() || words[0] == "toggle-auto-completion" {
+			return true
+		}
+	}
+	return false
 }
 
 func isCommand(p string) bool {
@@ -126,18 +126,14 @@ func isCommand(p string) bool {
 }
 
 func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
-	result = []prompt.Suggest{
-		{Text: "append", Description: "append <from> <to> [-f|--force] | [-s|--skip] | [-r|--rename] | -s is default"},
-		{Text: "cat", Description: "cat <path>"},
-		{Text: "cd", Description: "cd <path>"},
-		{Text: "cp", Description: "cp <from> <to> | -r is implied"},
-		{Text: "grep", Description: "grep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]"},
-		{Text: "ls", Description: "ls <path>"},
-		{Text: "mv", Description: "mv <from> <to>"},
-		{Text: "replace", Description: "replace <search> <replacement> <path> [-e|--regexp] [-k|--keys] [-v|--values] [-y|--confirm] [-n|--dry-run]"},
-		{Text: "rm", Description: "rm <path> | -r is implied"},
-		{Text: "toggle-auto-completion", Description: "toggle path auto-completion on/off"},
+	result = make([]prompt.Suggest, 0)
+	commands := cli.NewCommands(c.client)
+	for _, f := range structs.Fields(commands) {
+		val := f.Value().(cli.Command)
+		result = append(result, prompt.Suggest{Text: val.GetName(), Description: cli.Usage(val)})
 	}
+	result = append(result, prompt.Suggest{Text: "toggle-auto-completion", Description: "toggle path auto-completion on/off"})
+
 	filtered := prompt.FilterHasPrefix(result, arg, true)
 	if len(filtered) > 0 {
 		result = filtered
@@ -150,7 +146,7 @@ func (c *Completer) Complete(in prompt.Document) (result []prompt.Suggest) {
 	p := in.TextBeforeCursor()
 	if isCommand(p) {
 		result = c.commandSuggestions(in.GetWordBeforeCursor())
-	} else if isCommandArgument(p) && c.pathCompletionToggle {
+	} else if c.isCommandArgument(p) && c.pathCompletionToggle {
 		cur := in.GetWordBeforeCursor()
 		if isAbsolutePath(cur) {
 			result = c.absolutePathSuggestions(cur)
