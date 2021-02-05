@@ -11,9 +11,19 @@ import (
 // ListCommand container for 'ls' parameters
 type ListCommand struct {
 	name string
+	args *ListCommandArgs
 
 	client *client.Client
-	Path   string
+}
+
+// ListCommandArgs provides a struct for go-arg parsing
+type ListCommandArgs struct {
+	Path string `arg:"positional" help:"path to list contents of, defaults to current path"`
+}
+
+// Description provides detail on what the command does
+func (ListCommandArgs) Description() string {
+	return "lists the secrets at a path"
 }
 
 // NewListCommand creates a new ListCommand parameter container
@@ -21,6 +31,7 @@ func NewListCommand(c *client.Client) *ListCommand {
 	return &ListCommand{
 		name:   "ls",
 		client: c,
+		args:   &ListCommandArgs{},
 	}
 }
 
@@ -29,31 +40,37 @@ func (cmd *ListCommand) GetName() string {
 	return cmd.name
 }
 
+// GetArgs provides the struct holding arguments for the command
+func (cmd *ListCommand) GetArgs() interface{} {
+	return cmd.args
+}
+
 // IsSane returns true if command is sane
 func (cmd *ListCommand) IsSane() bool {
-	return cmd.Path != ""
+	return cmd.args.Path != ""
 }
 
 // PrintUsage print command usage
 func (cmd *ListCommand) PrintUsage() {
-	log.UserInfo("Usage:\nls <path // optional>")
+	fmt.Println(Help(cmd))
 }
 
 // Parse given arguments and return status
 func (cmd *ListCommand) Parse(args []string) error {
-	if len(args) == 2 {
-		cmd.Path = args[1]
-	} else if len(args) == 1 {
-		cmd.Path = cmd.client.Pwd
-	} else {
-		return fmt.Errorf("cannot parse arguments")
+	_, err := parseCommandArgs(args, cmd)
+	if err != nil {
+		return err
 	}
+	if cmd.args.Path == "" {
+		cmd.args.Path = cmd.client.Pwd
+	}
+
 	return nil
 }
 
 // Run executes 'ls' with given ListCommand's parameters
 func (cmd *ListCommand) Run() int {
-	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
+	newPwd := cmdPath(cmd.client.Pwd, cmd.args.Path)
 	result, err := cmd.client.List(newPwd)
 
 	if err != nil {

@@ -11,11 +11,25 @@ import (
 // GrepCommand container for all 'grep' parameters
 type GrepCommand struct {
 	name string
+	args *GrepCommandArgs
 
 	client   *client.Client
-	Path     string
 	searcher *Searcher
-	SearchParameters
+	Mode     KeyValueMode
+}
+
+// GrepCommandArgs provides a struct for go-arg parsing
+type GrepCommandArgs struct {
+	Search string `arg:"positional,required"`
+	Path   string `arg:"positional,required"`
+	Regexp bool   `arg:"-e,--regexp" help:"Treat search string as a regexp"`
+	Keys   bool   `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
+	Values bool   `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
+}
+
+// Description provides detail on what the command does
+func (GrepCommandArgs) Description() string {
+	return "recursive searches for a pattern starting at a path"
 }
 
 // NewGrepCommand creates a new GrepCommand parameter container
@@ -23,6 +37,7 @@ func NewGrepCommand(c *client.Client) *GrepCommand {
 	return &GrepCommand{
 		name:   "grep",
 		client: c,
+		args:   &GrepCommandArgs{},
 	}
 }
 
@@ -31,40 +46,37 @@ func (cmd *GrepCommand) GetName() string {
 	return cmd.name
 }
 
+// GetArgs provides the struct holding arguments for the command
+func (cmd *GrepCommand) GetArgs() interface{} {
+	return cmd.args
+}
+
 // IsSane returns true if command is sane
 func (cmd *GrepCommand) IsSane() bool {
-	return cmd.Path != "" && cmd.Search != ""
+	return cmd.args.Path != "" && cmd.args.Search != ""
 }
 
 // PrintUsage print command usage
 func (cmd *GrepCommand) PrintUsage() {
-	log.UserInfo("Usage:\ngrep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]")
+	fmt.Println(Help(cmd))
 }
 
 // Parse given arguments and return status
 func (cmd *GrepCommand) Parse(args []string) error {
-	if len(args) < 3 {
-		return fmt.Errorf("cannot parse arguments")
+	_, err := parseCommandArgs(args, cmd)
+	if err != nil {
+		return err
 	}
-	cmd.Search = args[1]
-	cmd.Path = args[2]
-	flags := args[3:]
-
-	for _, v := range flags {
-		switch v {
-		case "-e", "--regexp":
-			cmd.IsRegexp = true
-		case "-k", "--keys":
-			cmd.Mode |= ModeKeys
-		case "-v", "--values":
-			cmd.Mode |= ModeValues
-		default:
-			return fmt.Errorf("invalid flag: %s", v)
-		}
+	if cmd.args.Keys == true {
+		cmd.Mode |= ModeKeys
+	}
+	if cmd.args.Values == true {
+		cmd.Mode |= ModeValues
 	}
 	if cmd.Mode == 0 {
 		cmd.Mode = ModeKeys + ModeValues
 	}
+
 	searcher, err := NewSearcher(cmd)
 	if err != nil {
 		return err
@@ -76,7 +88,7 @@ func (cmd *GrepCommand) Parse(args []string) error {
 
 // Run executes 'grep' with given GrepCommand's parameters
 func (cmd *GrepCommand) Run() int {
-	path := cmdPath(cmd.client.Pwd, cmd.Path)
+	path := cmdPath(cmd.client.Pwd, cmd.args.Path)
 	filePaths, err := cmd.client.SubpathsForPath(path)
 	if err != nil {
 		log.UserError(fmt.Sprintf("%s", err))
@@ -84,7 +96,7 @@ func (cmd *GrepCommand) Run() int {
 	}
 
 	for _, curPath := range filePaths {
-		matches, err := cmd.grepFile(cmd.Search, curPath)
+		matches, err := cmd.grepFile(cmd.args.Search, curPath)
 		if err != nil {
 			return 1
 		}
@@ -98,9 +110,9 @@ func (cmd *GrepCommand) Run() int {
 // GetSearchParams returns the search parameters the command was run with
 func (cmd *GrepCommand) GetSearchParams() SearchParameters {
 	return SearchParameters{
-		Search:   cmd.Search,
+		Search:   cmd.args.Search,
 		Mode:     cmd.Mode,
-		IsRegexp: cmd.IsRegexp,
+		IsRegexp: cmd.args.Regexp,
 	}
 }
 

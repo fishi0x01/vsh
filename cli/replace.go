@@ -12,13 +12,28 @@ import (
 // ReplaceCommand container for all 'replace' parameters
 type ReplaceCommand struct {
 	name string
+	args *ReplaceCommandArgs
 
 	client   *client.Client
-	Confirm  bool
-	DryRun   bool
-	Path     string
 	searcher *Searcher
-	SearchParameters
+	Mode     KeyValueMode
+}
+
+// ReplaceCommandArgs provides a struct for go-arg parsing
+type ReplaceCommandArgs struct {
+	Search      string `arg:"positional,required"`
+	Replacement string `arg:"positional,required"`
+	Path        string `arg:"positional,required"`
+	Regexp      bool   `arg:"-e,--regexp" help:"Treat search string as a regexp"`
+	Keys        bool   `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
+	Values      bool   `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
+	Confirm     bool   `arg:"-y,--confirm" help:"Write results without prompt"`
+	DryRun      bool   `arg:"-n,--dry-run" help:"Skip writing results without prompt"`
+}
+
+// Description provides detail on what the command does
+func (ReplaceCommandArgs) Description() string {
+	return "recursively replaces a matching pattern with a replacement string at a path"
 }
 
 // NewReplaceCommand creates a new ReplaceCommand parameter container
@@ -26,6 +41,7 @@ func NewReplaceCommand(c *client.Client) *ReplaceCommand {
 	return &ReplaceCommand{
 		name:   "replace",
 		client: c,
+		args:   &ReplaceCommandArgs{},
 	}
 }
 
@@ -34,58 +50,50 @@ func (cmd *ReplaceCommand) GetName() string {
 	return cmd.name
 }
 
+// GetArgs provides the struct holding arguments for the command
+func (cmd *ReplaceCommand) GetArgs() interface{} {
+	return cmd.args
+}
+
 // IsSane returns true if command is sane
 func (cmd *ReplaceCommand) IsSane() bool {
-	return cmd.Search != "" && cmd.Replacement != nil && cmd.Path != ""
+	return cmd.args.Search != "" && cmd.args.Path != ""
 }
 
 // PrintUsage print command usage
 func (cmd *ReplaceCommand) PrintUsage() {
-	log.UserInfo("Usage:\nreplace <search> <replacement> <path> [-e|--regexp] [-k|--keys] [-v|--values]")
+	fmt.Println(Help(cmd))
 }
 
 // GetSearchParams returns the search parameters the command was run with
 func (cmd *ReplaceCommand) GetSearchParams() SearchParameters {
 	return SearchParameters{
-		Search:      cmd.Search,
-		Replacement: cmd.Replacement,
+		Search:      cmd.args.Search,
+		Replacement: &cmd.args.Replacement,
 		Mode:        cmd.Mode,
-		IsRegexp:    cmd.IsRegexp,
+		IsRegexp:    cmd.args.Regexp,
 	}
 }
 
 // Parse given arguments and return status
 func (cmd *ReplaceCommand) Parse(args []string) error {
-	if len(args) < 4 {
-		return fmt.Errorf("cannot parse arguments")
+	_, err := parseCommandArgs(args, cmd)
+	if err != nil {
+		return err
 	}
-	cmd.Search = args[1]
-	cmd.Replacement = &args[2]
-	cmd.Path = args[3]
-	flags := args[4:]
-
-	for _, v := range flags {
-		switch v {
-		case "-e", "--regexp":
-			cmd.IsRegexp = true
-		case "-k", "--keys":
-			cmd.Mode |= ModeKeys
-		case "-v", "--values":
-			cmd.Mode |= ModeValues
-		case "-n", "--dry-run":
-			cmd.DryRun = true
-		case "-y", "--confirm":
-			cmd.Confirm = true
-		default:
-			return fmt.Errorf("invalid flag: %s", v)
-		}
+	if cmd.args.Keys == true {
+		cmd.Mode |= ModeKeys
+	}
+	if cmd.args.Values == true {
+		cmd.Mode |= ModeValues
 	}
 	if cmd.Mode == 0 {
 		cmd.Mode = ModeKeys + ModeValues
 	}
-	if cmd.DryRun == true && cmd.Confirm == true {
-		cmd.Confirm = false
+	if cmd.args.DryRun == true && cmd.args.Confirm == true {
+		cmd.args.Confirm = false
 	}
+
 	searcher, err := NewSearcher(cmd)
 	if err != nil {
 		return err
@@ -97,7 +105,7 @@ func (cmd *ReplaceCommand) Parse(args []string) error {
 
 // Run executes 'replace' with given ReplaceCommand's parameters
 func (cmd *ReplaceCommand) Run() int {
-	path := cmdPath(cmd.client.Pwd, cmd.Path)
+	path := cmdPath(cmd.client.Pwd, cmd.args.Path)
 	filePaths, err := cmd.client.SubpathsForPath(path)
 	if err != nil {
 		log.UserError(fmt.Sprintf("%s", err))
@@ -115,7 +123,7 @@ func (cmd *ReplaceCommand) Run() int {
 func (cmd *ReplaceCommand) findMatches(filePaths []string) (matchesByPath map[string][]*Match, err error) {
 	matchesByPath = make(map[string][]*Match, 0)
 	for _, curPath := range filePaths {
-		matches, err := cmd.FindReplacements(cmd.Search, *cmd.Replacement, curPath)
+		matches, err := cmd.FindReplacements(cmd.args.Search, cmd.args.Replacement, curPath)
 		if err != nil {
 			return matchesByPath, err
 		}
@@ -135,15 +143,15 @@ func (cmd *ReplaceCommand) findMatches(filePaths []string) (matchesByPath map[st
 
 func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int {
 	if len(matchesByPath) > 0 {
-		if cmd.Confirm == false && cmd.DryRun == false {
+		if cmd.args.Confirm == false && cmd.args.DryRun == false {
 			p := promptx.NewDefaultConfirm("Write changes to Vault?", false)
 			result, err := p.Run()
 			if err != nil {
 				return 1
 			}
-			cmd.Confirm = result
+			cmd.args.Confirm = result
 		}
-		if cmd.Confirm == false {
+		if cmd.args.Confirm == false {
 			fmt.Println("Skipping write.")
 			return 0
 		}

@@ -27,11 +27,24 @@ const (
 // AppendCommand container for all 'append' parameters
 type AppendCommand struct {
 	name string
+	args *AppendCommandArgs
 
 	client *client.Client
-	Source string
-	Target string
 	Mode   AppendMode
+}
+
+// AppendCommandArgs provides a struct for go-arg parsing
+type AppendCommandArgs struct {
+	Source string `arg:"positional,required"`
+	Target string `arg:"positional,required"`
+	Force  bool   `arg:"-f,--force" help:"Overwrite key if exists"`
+	Skip   bool   `arg:"-s,--skip" help:"Skip key if exists (default)"`
+	Rename bool   `arg:"-r,--rename" help:"Rename key if exists"`
+}
+
+// Description provides detail on what the command does
+func (AppendCommandArgs) Description() string {
+	return "appends the contents of one secret to another"
 }
 
 // NewAppendCommand creates a new AppendCommand parameter container
@@ -39,6 +52,7 @@ func NewAppendCommand(c *client.Client) *AppendCommand {
 	return &AppendCommand{
 		name:   "append",
 		client: c,
+		args:   &AppendCommandArgs{},
 		Mode:   ModeSkip,
 	}
 }
@@ -48,75 +62,42 @@ func (cmd *AppendCommand) GetName() string {
 	return cmd.name
 }
 
+// GetArgs provides the struct holding arguments for the command
+func (cmd *AppendCommand) GetArgs() interface{} {
+	return cmd.args
+}
+
 // IsSane returns true if command is sane
 func (cmd *AppendCommand) IsSane() bool {
-	return cmd.Source != "" && cmd.Target != "" && cmd.Mode != ModeInvalid
-}
-
-func isFlag(flag string) bool {
-	return strings.HasPrefix(flag, "-")
-}
-
-func parseFlag(flag string) AppendMode {
-	switch strings.TrimSpace(flag) {
-	case "-f", "--force":
-		return ModeOverwrite
-	case "", "-s", "--skip":
-		return ModeSkip
-	case "-r", "--rename":
-		return ModeRename
-	default:
-		return ModeInvalid
-	}
-}
-
-func (cmd *AppendCommand) parseArgs(src, dest, flag string) bool {
-	cmd.Source = src
-	cmd.Target = dest
-	mode := parseFlag(flag)
-	cmd.Mode = mode
-	if mode == ModeInvalid {
-		return false
-	}
-	return true
-}
-
-// tryParse returns true when parsing succeeded, false otherwise
-func (cmd *AppendCommand) tryParse(args []string) (success bool) {
-	if len(args) == 3 {
-		return cmd.parseArgs(args[1], args[2], "--skip") // --skip is default
-	}
-	if len(args) == 4 {
-		// flag can be given at the end or immediately after `append`
-		if isFlag(args[3]) {
-			return cmd.parseArgs(args[1], args[2], args[3])
-		}
-		if isFlag(args[1]) {
-			return cmd.parseArgs(args[2], args[3], args[1])
-		}
-	}
-	// wrong number of params or flag at incorrect position
-	return false
+	return cmd.args.Source != "" && cmd.args.Target != "" && cmd.Mode != ModeInvalid
 }
 
 // PrintUsage print command usage
 func (cmd *AppendCommand) PrintUsage() {
-	log.UserInfo("Usage:\nappend <from> <to> [-f|--force|-r|--rename|-s|--skip]")
+	fmt.Println(Help(cmd))
 }
 
-// Parse parses the arguments and returns true on success; otherwise it prints usage and returns false
+// Parse parses the arguments into the Command and Args structs
 func (cmd *AppendCommand) Parse(args []string) error {
-	success := cmd.tryParse(args)
-	if !success {
-		return fmt.Errorf("cannot parse arguments")
+	_, err := parseCommandArgs(args, cmd)
+	if err != nil {
+		return err
+	}
+
+	if cmd.args.Skip == true {
+		cmd.Mode = ModeSkip
+	} else if cmd.args.Force == true {
+		cmd.Mode = ModeOverwrite
+	} else if cmd.args.Rename == true {
+		cmd.Mode = ModeRename
 	}
 	return nil
 }
 
 // Run executes 'append' with given AppendCommand's parameters
 func (cmd *AppendCommand) Run() int {
-	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
-	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
+	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.args.Source)
+	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.args.Target)
 
 	src := cmd.client.GetType(newSrcPwd)
 	if src != client.LEAF {

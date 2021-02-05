@@ -11,9 +11,19 @@ import (
 // CdCommand container for all 'cd' parameters
 type CdCommand struct {
 	name string
+	args *CdCommandArgs
 
 	client *client.Client
-	Path   string
+}
+
+// CdCommandArgs provides a struct for go-arg parsing
+type CdCommandArgs struct {
+	Path string `arg:"positional,required" help:"change cwd to path"`
+}
+
+// Description provides detail on what the command does
+func (CdCommandArgs) Description() string {
+	return "changes the working path"
 }
 
 // NewCdCommand creates a new CdCommand parameter container
@@ -21,6 +31,7 @@ func NewCdCommand(c *client.Client) *CdCommand {
 	return &CdCommand{
 		name:   "cd",
 		client: c,
+		args:   &CdCommandArgs{},
 	}
 }
 
@@ -29,28 +40,34 @@ func (cmd *CdCommand) GetName() string {
 	return cmd.name
 }
 
+// GetArgs provides the struct holding arguments for the command
+func (cmd *CdCommand) GetArgs() interface{} {
+	return cmd.args
+}
+
 // IsSane returns true if command is sane
 func (cmd *CdCommand) IsSane() bool {
-	return cmd.Path != ""
+	return cmd.args.Path != ""
 }
 
 // PrintUsage print command usage
 func (cmd *CdCommand) PrintUsage() {
-	log.UserInfo("Usage:\ncd <path>")
+	fmt.Println(Help(cmd))
 }
 
 // Parse given arguments and return status
 func (cmd *CdCommand) Parse(args []string) error {
-	if len(args) != 2 {
-		return fmt.Errorf("cannot parse arguments")
+	_, err := parseCommandArgs(args, cmd)
+	if err != nil {
+		return err
 	}
-	cmd.Path = args[1]
+
 	return nil
 }
 
 // Run executes 'cd' with given CdCommand's parameters
 func (cmd *CdCommand) Run() int {
-	newPwd := cmdPath(cmd.client.Pwd, cmd.Path)
+	newPwd := cmdPath(cmd.client.Pwd, cmd.args.Path)
 
 	t := cmd.client.GetType(newPwd)
 

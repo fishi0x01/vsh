@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
@@ -11,10 +10,20 @@ import (
 // CopyCommand container for all 'cp' parameters
 type CopyCommand struct {
 	name string
+	args *CopyCommandArgs
 
 	client *client.Client
-	Source string
-	Target string
+}
+
+// CopyCommandArgs provides a struct for go-arg parsing
+type CopyCommandArgs struct {
+	Source string `arg:"positional,required" help:"path to copy from"`
+	Target string `arg:"positional,required" help:"path to copy to"`
+}
+
+// Description provides detail on what the command does
+func (CopyCommandArgs) Description() string {
+	return "recursively copies a path to another location"
 }
 
 // NewCopyCommand creates a new CopyCommand parameter container
@@ -22,6 +31,7 @@ func NewCopyCommand(c *client.Client) *CopyCommand {
 	return &CopyCommand{
 		name:   "cp",
 		client: c,
+		args:   &CopyCommandArgs{},
 	}
 }
 
@@ -30,42 +40,34 @@ func (cmd *CopyCommand) GetName() string {
 	return cmd.name
 }
 
+// GetArgs provides the struct holding arguments for the command
+func (cmd *CopyCommand) GetArgs() interface{} {
+	return cmd.args
+}
+
 // IsSane returns true if command is sane
 func (cmd *CopyCommand) IsSane() bool {
-	return cmd.Source != "" && cmd.Target != ""
+	return cmd.args.Source != "" && cmd.args.Target != ""
 }
 
 // PrintUsage print command usage
 func (cmd *CopyCommand) PrintUsage() {
-	log.UserInfo("Usage:\ncp <from> <to>")
+	fmt.Println(Help(cmd))
 }
 
 // Parse given arguments and return status
 func (cmd *CopyCommand) Parse(args []string) error {
-	if len(args) != 3 {
-		return fmt.Errorf("cannot parse arguments")
+	_, err := parseCommandArgs(args, cmd)
+	if err != nil {
+		return err
 	}
-	cmd.Source = args[1]
-	cmd.Target = args[2]
+
 	return nil
 }
 
 // Run executes 'cp' with given CopyCommand's parameters
 func (cmd *CopyCommand) Run() int {
-	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.Source)
-	newTargetPwd := cmdPath(cmd.client.Pwd, cmd.Target)
-
-	switch t := cmd.client.GetType(newSrcPwd); t {
-	case client.LEAF:
-		cmd.copySecret(filepath.Clean(newSrcPwd), newTargetPwd)
-	case client.NODE:
-		runCommandWithTraverseTwoPaths(cmd.client, newSrcPwd, newTargetPwd, cmd.copySecret)
-	default:
-		log.UserError("Not a valid path for operation: %s", newSrcPwd)
-		return 1
-	}
-
-	return 0
+	return transportSecrets(cmd.client, cmd.args.Source, cmd.args.Target, cmd.copySecret)
 }
 
 func (cmd *CopyCommand) copySecret(source string, target string) error {

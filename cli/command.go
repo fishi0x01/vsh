@@ -5,12 +5,14 @@ import (
 	"strings"
 
 	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // Command interface to describe a command structure
 type Command interface {
 	Run() int
 	GetName() string
+	GetArgs() interface{}
 	IsSane() bool
 	PrintUsage()
 	Parse(args []string) error
@@ -18,29 +20,29 @@ type Command interface {
 
 // Commands contains all available commands
 type Commands struct {
-	Mv      *MoveCommand
-	Cp      *CopyCommand
 	Append  *AppendCommand
-	Rm      *RemoveCommand
-	Ls      *ListCommand
-	Cd      *CdCommand
 	Cat     *CatCommand
+	Cd      *CdCommand
+	Cp      *CopyCommand
 	Grep    *GrepCommand
+	Ls      *ListCommand
+	Mv      *MoveCommand
 	Replace *ReplaceCommand
+	Rm      *RemoveCommand
 }
 
 // NewCommands returns a Commands struct with all available commands
 func NewCommands(client *client.Client) *Commands {
 	return &Commands{
-		Mv:      NewMoveCommand(client),
-		Cp:      NewCopyCommand(client),
 		Append:  NewAppendCommand(client),
-		Rm:      NewRemoveCommand(client),
-		Ls:      NewListCommand(client),
-		Cd:      NewCdCommand(client),
 		Cat:     NewCatCommand(client),
+		Cd:      NewCdCommand(client),
+		Cp:      NewCopyCommand(client),
 		Grep:    NewGrepCommand(client),
+		Ls:      NewListCommand(client),
+		Mv:      NewMoveCommand(client),
 		Replace: NewReplaceCommand(client),
+		Rm:      NewRemoveCommand(client),
 	}
 }
 
@@ -70,4 +72,21 @@ func runCommandWithTraverseTwoPaths(client *client.Client, source string, target
 	}
 
 	return
+}
+
+func transportSecrets(c *client.Client, source string, target string, transport func(string, string) error) int {
+	newSrcPwd := cmdPath(c.Pwd, source)
+	newTargetPwd := cmdPath(c.Pwd, target)
+
+	switch t := c.GetType(newSrcPwd); t {
+	case client.LEAF:
+		transport(filepath.Clean(newSrcPwd), newTargetPwd)
+	case client.NODE:
+		runCommandWithTraverseTwoPaths(c, newSrcPwd, newTargetPwd, transport)
+	default:
+		log.UserError("Not a valid path for operation: %s", newSrcPwd)
+		return 1
+	}
+
+	return 0
 }

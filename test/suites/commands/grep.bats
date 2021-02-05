@@ -87,7 +87,7 @@ load ../../bin/plugins/bats-assert/load
   #######################################
   echo "==== case: fails on invalid flag ===="
   run ${APP_BIN} -c "grep 'apple' ${KV_BACKEND}/src/dev --foo"
-  assert_line --partial "invalid flag"
+  assert_line --partial "unknown argument --foo"
   assert_failure 1
 
   #######################################
