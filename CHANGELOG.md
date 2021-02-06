@@ -1,11 +1,16 @@
 # Changelog
 
-## master (unreleased)
+## v0.9.0 (February 6, 2021)
+
+Big thank you to [mattlqx](https://github.com/mattlqx) for the great enhancements.
 
 ENHANCEMENTS:
 
+* Proper arg parsing with help text for subcommands ([#73](https://github.com/fishi0x01/vsh/pull/73) - Thank you for implementation [mattlqx](https://github.com/mattlqx))
+* Add replace command ([#69](https://github.com/fishi0x01/vsh/pull/69) - Thank you for implementation [mattlqx](https://github.com/mattlqx))
+* Add key selector to replace command ([#72](https://github.com/fishi0x01/vsh/pull/72) - Thank you for implementation [mattlqx](https://github.com/mattlqx))
 * Allow limiting scope of grep to keys or values ([#66](https://github.com/fishi0x01/vsh/pull/66) - Thank you for implementation [mattlqx](https://github.com/mattlqx))
-* Do not show and operate on KV2 metadata ([#68](https://github.com/fishi0x01/vsh/pull/68)
+* Do not show and operate on KV2 metadata ([#68](https://github.com/fishi0x01/vsh/pull/68))
 
 ## v0.8.0 (January 27, 2021)
 

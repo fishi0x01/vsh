@@ -7,10 +7,10 @@
 
 ![vsh usage](https://user-images.githubusercontent.com/10799507/66355982-9872a980-e969-11e9-8ca4-6a2ff215f835.gif)
 
-`vsh` is an interactive [HashiCorp Vault](https://www.vaultproject.io/) shell which treats paths and keys like directories and files.
+`vsh` is an interactive [HashiCorp Vault](https://www.vaultproject.io/) shell and cli tool. It comes with multiple common operations and treats paths like directories and files.
 Core features are:
 
-- recursive operations on paths with `cp`, `mv` or `rm`
+- recursive operations on paths for many operations, e.g., `cp`, `rm`, `mv`
 - search with `grep` (substring or regular-expression)
 - substitute patterns in keys and/or values (substring or regular-expression) with `replace`
 - transparency towards differences between KV1 and KV2, i.e., you can freely move/copy secrets between both
@@ -37,115 +37,33 @@ Download latest static binaries from [release page](https://github.com/fishi0x01
 
 ## Supported commands
 
-```text
-append <from-secret> <to-secret> [flag]
-cat <file-path>
-cd <dir-path>
-cp <from-path> <to-path>
-grep <search> <path> [-e|--regexp] [-k|--keys] [-v|--values]
-ls <dir-path // optional>
-mv <from-path> <to-path>
-replace <search> <replacement> <path> [-e|--regexp] [-k|--keys] [-v|--values] [-y|--confirm] [-n|--dry-run]
-rm <dir-path or file-path>
-```
-
-`cp`, `grep`, `replace` and `rm` command always have the `-r/-R` flag implied, i.e., every operation works recursively.
-
-### append
-
-Append operation reads secrets from `<from-secret>` and merges it to `<to-secret>`.
-The `<to-secret>` will be created with a placeholder value if it does not exists.
-Both `<from-secret>` and `<to-secret>` must be leaves (path cannot end with `/`).
-
-By default, `append` does not overwrite secrets if the `<to-secret>` already contains a key.
-The default behavior can be explicitly set using flag: `-s` or `--skip`. Example:
-
-```bash
-> cat /secret/from
-
-fruit=apple
-vegetable=tomato
-
-> cat /secret/to
-
-fruit=pear
-tree=oak
-
-> append /secret/from /secret/to -s
-
-> cat /secret/to
-
-fruit=pear
-vegetable=tomato
-tree=oak
-```
-
-Setting flag `-f` or `--force` will cause the conflicting keys from the `<to-secret>` to be overwritten with keys from the `<from-secret`>. Example:
-
-```bash
-> cat /secret/from
-
-fruit=apple
-vegetable=tomato
-
-> cat /secret/to
-
-fruit=pear
-tree=oak
-
-> append /secret/from /secret/to -f
-
-> cat /secret/to
-
-fruit=apple
-vegetable=tomato
-tree=oak
-```
-
-Setting flag `-r` or `--rename` will cause the conflicting keys from the `<to-secret>` to be kept as they are. Instead the keys from the `<from-secret`> will be stored under a renamed key. Example:
-
-```bash
-> cat /secret/from
-
-fruit=apple
-vegetable=tomato
-
-> cat /secret/to
-
-fruit=pear
-tree=oak
-
-> append /secret/from /secret/to -r
-
-> cat /secret/to
-
-fruit=pear
-fruit_1=apple
-vegetable=tomato
-tree=oak
-```
-
-### grep
-
-`grep` recursively searches the given substring in key and value pairs. To treat the search string as a regular-expression, add `-e` or `--regexp` to the end of the command. By default, both keys and values will be searched. If you would like to limit the search, you may add `-k` or `--keys` to the end of the command to search only a path's keys, or `-v` or `--values` to search only a path's values.
- If you are looking for copies or just trying to find the path to a certain string, this command might come in handy.
-
-### replace
-
-`replace` works similarly to `grep` above, but has the ability to mutate data inside Vault. By default, confirmation is required before writing data. You may skip confirmation by using the `-y`/`--confirm` flags. Conversely, you may use the `-n`/`--dry-run` flags to skip both confirmation and any writes. Changes that would be made are presented in red (delete) and green (add) coloring.
+- [append](doc/commands/append.md) merges secrets with different strategies (allows recursive operation on paths)
+- [cat](doc/commands/cat.md) shows the key/value pairs of a path
+- [cd](doc/commands/cd.md) allows interactive navigation through the paths
+- [cp](doc/commands/cp.md) copies secrets from one location to another (allows recursive operation on paths)
+- [grep](doc/commands/grep.md) searches for substrings or regular expressions (allows recursive operation on paths)
+- [ls](doc/commands/ls.md) shows the subpaths of a given path
+- [mv](doc/commands/mv.md) moves secrets from one location to another (allows recursive operation on paths)
+- [replace](doc/commands/replace.md) substrings or regular expressions (allows recursive operation on paths)
+- [rm](doc/commands/rm.md) removes secret(s) (allows recursive operation on paths)
 
 ## Setting the vault token
 
-In order to get a valid token, `vsh` uses vault's TokenHelper mechanism (`github.com/hashicorp/vault/command/config`).
-That means `vsh` supports setting vault tokens via `~/.vault-token`, `VAULT_TOKEN` and external `token_helper`.
+In order to get a valid token, `vsh` uses vault's TokenHelper mechanism.
+That means `vsh` supports setting vault tokens via `~/.vault-token`, `VAULT_TOKEN` and external [token-helper](https://www.vaultproject.io/docs/commands/token-helper).
 
-## Secret Backend Discovery
+## Token permission requirements
 
-`vsh` attempts to reliably discover all available backends.
-Ideally, the vault token used by `vsh` has `list` permissions on `sys/mount`.
-If this is not the case, then `vsh` does not know the available backends beforehand.
+`vsh` requires `List` permission on the operated paths.
+This is necessary to determine if a path points to a node or leaf in the path tree.
+Further, it is needed to gather auto-completion data.
+
+Commands which alter the data like `cp` or `mv`, additionally require `Read` and `Write` permissions on the operated paths.
+
+In order to reliably discover all available backends, ideally the vault token used by `vsh` has `List` permission on `sys/mount`. However, this is not a hard requirement.
+If the token doesn't have `List` permission on `sys/mount`, then `vsh` does not know the available backends beforehand.
 That means initially there won't be path auto-completion on the top (backend) level.
-However, `vsh` will try with best-effort strategy to reliably determine the kv version of every entered path.
+Regardless, `vsh` will try with best-effort strategy to reliably determine the kv version of every entered path.
 
 ## Interactive mode
 
@@ -160,7 +78,7 @@ http://localhost:8080 /secret/>
 **Note:** the given token is used for auto-completion, i.e., `List()` queries are done with that token, even if you do not `rm` or `mv` anything.
 `vsh` caches `List()` results to reduce the amount of queries. However, after execution of each command the cache is cleared
 in order to do accurate tab-completion.
-If your token has a limited number of uses, then consider using the non-interactive mode to avoid auto-completion queries.
+If your token has a limited number of uses, then consider using the non-interactive mode or toggle auto-completion off, to avoid `List()` queries.
 
 ### Toggle auto-completion
 
@@ -190,27 +108,23 @@ export VAULT_TOKEN=<token>
 ./vsh -c "rm secret/dir/to/remove/"
 ```
 
-## Permission requirements
-
-`vsh` requires `List` permission on the operated paths.
-This is necessary to determine if a path points to a node or leaf in the path tree.
-Further, it is needed to gather auto-completion data.
-
-For operations like `cp` or `mv`, `vsh` additionally requires `Read` and `Write` permissions on the operated paths.
-
-## Quality
+## Some words about the quality
 
 Working on vault secrets can be critical, making quality and correct behavior a first class citizen for `vsh`.
-That being said, `vsh` is still a small open source project, meaning we cannot make any guarantees.
-However, we put strong emphasis on [TDD](https://en.wikipedia.org/wiki/Test-driven_development).
+That being said, `vsh` is still a small open source project, meaning we cannot give any guarantees.
+However, we put strong emphasis on test-driven development.
 Every PR is tested with an extensive [suite](test/suites) of integration tests.
-Most tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.6.1`, i.e., versions in between should also be compatible.
+Vast majority of tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.6.2`, i.e., vault versions in between should also be compatible.
 
-## Local Development
+## Contributions
+
+Contributions in any form are always welcome! Without contributions from the community, `vsh` wouldn't be the tool it is today.
+
+### Local Development
 
 Requirements:
 
-- `golang` (compiled and tested with `v1.15.3`)
+- `golang` (compiled and tested with `v1.15.7`)
 - `docker` for integration testing
 - `make` for simplified commands
 
@@ -220,6 +134,6 @@ make get-bats
 make integration-tests
 ```
 
-## Debugging
+### Debugging
 
 `-v DEBUG` sets debug log level, which also creates a `vsh_trace.log` file to log any error object from the vault API.
