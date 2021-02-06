@@ -24,7 +24,8 @@ type ReplaceCommandArgs struct {
 	Search      string `arg:"positional,required"`
 	Replacement string `arg:"positional,required"`
 	Path        string `arg:"positional,required"`
-	Regexp      bool   `arg:"-e,--regexp" help:"Treat search string as a regexp"`
+	Regexp      bool   `arg:"-e,--regexp" help:"Treat search string and selector as a regexp"`
+	KeySelector string `arg:"-s,--key-selector" help:"Limit replacements to specified key" placeholder:"PATTERN"`
 	Keys        bool   `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
 	Values      bool   `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
 	Confirm     bool   `arg:"-y,--confirm" help:"Write results without prompt"`
@@ -68,10 +69,11 @@ func (cmd *ReplaceCommand) PrintUsage() {
 // GetSearchParams returns the search parameters the command was run with
 func (cmd *ReplaceCommand) GetSearchParams() SearchParameters {
 	return SearchParameters{
-		Search:      cmd.args.Search,
-		Replacement: &cmd.args.Replacement,
-		Mode:        cmd.Mode,
 		IsRegexp:    cmd.args.Regexp,
+		KeySelector: cmd.args.KeySelector,
+		Mode:        cmd.Mode,
+		Replacement: &cmd.args.Replacement,
+		Search:      cmd.args.Search,
 	}
 }
 

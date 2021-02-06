@@ -48,6 +48,12 @@ load ../../bin/plugins/bats-assert/load
   assert_failure 1
 
   #######################################
+  echo "==== case: regex pattern on a long value ===="
+  run ${APP_BIN} -c "grep -e 'value-for-testing' ${KV_BACKEND}/src/a/foo"
+  assert_line --partial this-is-a-really-long-value-for-testing
+  assert_success
+
+  #######################################
   echo "==== case: pattern with spaces ===="
   run ${APP_BIN} -c "grep 'a spaced val' ${KV_BACKEND}/src/spaces"
   assert_line --partial "/${KV_BACKEND}/src/spaces/foo"

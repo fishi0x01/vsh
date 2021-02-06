@@ -64,6 +64,16 @@ load ../../bin/plugins/bats-assert/load
   assert_line exhibit
   run get_vault_value "value" "${KV_BACKEND}/src/prod/all"
   assert_line all
+
+  #######################################
+  echo "==== case: replace value in single path with selector ===="
+  run ${APP_BIN} -c "replace -s 'produce' 'apple' 'orange' ${KV_BACKEND}/src/selector/1 -y"
+  assert_success
+  assert_line "Writing!"
+  run get_vault_value "produce" "${KV_BACKEND}/src/selector/1"
+  assert_line orange
+  run get_vault_value "fruit" "${KV_BACKEND}/src/selector/1"
+  assert_line apple
 }
 
 @test "vault-${VAULT_VERSION} ${KV_BACKEND} 'replace' regexp" {
@@ -110,4 +120,20 @@ load ../../bin/plugins/bats-assert/load
   assert_line testexhibit
   run get_vault_value "value" "${KV_BACKEND}/src/prod/all"
   assert_line all
+
+  #######################################
+  echo "==== case: replace value in single path with selector ===="
+  run ${APP_BIN} -c "replace -e -s 'prod.*' '^apple' 'orange' ${KV_BACKEND}/src/selector/1 -y"
+  assert_success
+  assert_line "Writing!"
+  run get_vault_value "produce" "${KV_BACKEND}/src/selector/1"
+  assert_line orange
+  run get_vault_value "fruit" "${KV_BACKEND}/src/selector/1"
+  assert_line apple
+
+  #######################################
+  echo "==== case: replace fails with bad regex selector ===="
+  run ${APP_BIN} -c "replace -e -s '][' '^apple' 'orange' ${KV_BACKEND}/src/selector/1 -y"
+  assert_failure
+  assert_line  --partial "key-selector: error parsing regexp"
 }
