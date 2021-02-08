@@ -133,7 +133,7 @@ func (s *Searcher) keySelectorMatches(k string) (matches [][]int) {
 		return s.keySelectorRe.FindAllStringIndex(k, -1)
 	}
 	if k == s.cmd.GetSearchParams().KeySelector {
-		return [][]int{[]int{0, len(k)}}
+		return [][]int{{0, len(k)}}
 	}
 	return [][]int{}
 }
@@ -165,7 +165,7 @@ func (s *Searcher) highlightLineDiff(d string) string {
 
 	for _, b := range []byte(d) {
 		buf = append(buf, b)
-		if len(buf) >= 3 && string(buf[len(buf)-3:len(buf)]) == "(~~" && !removeMode && !addMode {
+		if len(buf) >= 3 && string(buf[len(buf)-3:]) == "(~~" && !removeMode && !addMode {
 			res = append(res, buf[0:len(buf)-3]...)
 			buf = make([]byte, 0)
 			removeMode = true
@@ -173,7 +173,7 @@ func (s *Searcher) highlightLineDiff(d string) string {
 			res = append(res, removeColor.SprintFunc()(string(buf[0:len(buf)-3]))...)
 			buf = make([]byte, 0)
 			removeMode = false
-		} else if len(buf) >= 3 && string(buf[len(buf)-3:len(buf)]) == "(++" && !removeMode && !addMode {
+		} else if len(buf) >= 3 && string(buf[len(buf)-3:]) == "(++" && !removeMode && !addMode {
 			res = append(res, buf[0:len(buf)-3]...)
 			buf = make([]byte, 0)
 			addMode = true
