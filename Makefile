@@ -42,3 +42,6 @@ local-vault-test-instance: ## Start a local vault container with integration tes
 clean: ## Remove builds and vsh related docker containers
 	docker rm -f vsh-integration-test-vault || true
 	rm ./build/* || true
+
+vendor: ## synch dependencies in vendor/ directory
+	go mod vendor
