@@ -7,12 +7,14 @@ import (
 // Secret holds vault secret and offers operations to simplify KV abstraction
 type Secret struct {
 	vaultSecret *api.Secret
+	Path        string
 }
 
 // NewSecret create a new Secret object
-func NewSecret(vaultSecret *api.Secret) *Secret {
+func NewSecret(vaultSecret *api.Secret, path string) *Secret {
 	return &Secret{
 		vaultSecret: vaultSecret,
+		Path:        path,
 	}
 }
 

@@ -34,6 +34,9 @@ compile-releases: clean ## Compile vsh binaries for multiple platforms and archi
 compile: ## Compile vsh for platform based on uname
 	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$(shell uname | tr '[:upper:]' '[:lower:]')_$(ARCH)
 
+compile-debug: clean
+	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$(shell uname | tr '[:upper:]' '[:lower:]')_amd64 -gcflags="all=-N -l"
+
 get-bats: ## Download bats dependencies to test directory
 	rm -rf test/bin/
 	mkdir -p test/bin/core
