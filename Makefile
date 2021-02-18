@@ -1,23 +1,38 @@
 APP_NAME := vsh
-PLATFORMS := linux darwin
-ARCHS := 386 amd64
+SUPPORTED_PLATFORMS := linux darwin
+SUPPORTED_ARCHS := amd64 arm64
 VERSION := $(shell git describe --tags --always --dirty)
+
+UNAME_M := $(shell uname -m)
+ARCH := $(UNAME_M)
+ifeq ($(UNAME_M),x86_64)
+	ARCH=amd64
+endif
+ifneq ($(filter %86,$(UNAME_M)),)
+	ARCH=386
+endif
+ifneq ($(filter arm%,$(UNAME_M)),)
+  ARCH=arm
+endif
+ifneq ($(filter $(UNAME_M),arm64 aarch64 armv8b armv8l),)
+	ARCH=arm64
+endif
 
 help: ## Prints help for targets with comments
 	@grep -E '^[a-zA-Z0-9.\ _-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-cross-compile: clean ## Compile vsh binaries for multiple platforms and architectures
+compile-releases: clean ## Compile vsh binaries for multiple platforms and architectures strictly using vendor directory
 	mkdir -p ./build/
-	for GOOS in $(PLATFORMS); do \
-		for GOARCH in $(ARCHS); do \
+	for GOOS in $(SUPPORTED_PLATFORMS); do \
+		for GOARCH in $(SUPPORTED_ARCHS); do \
 			GOOS=$$GOOS GOARCH=$$GOARCH \
-				go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$${GOOS}_$${GOARCH}; \
+				go build -mod vendor -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$${GOOS}_$${GOARCH}; \
 		done \
 	done
-	ls build/
+	cd build/ && sha256sum * > SHA256SUM
 
 compile: clean ## Compile vsh for platform based on uname
-	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$(shell uname | tr '[:upper:]' '[:lower:]')_amd64
+	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$(shell uname | tr '[:upper:]' '[:lower:]')_$(ARCH)
 
 get-bats: ## Download bats dependencies to test directory
 	rm -rf test/bin/
@@ -43,5 +58,7 @@ clean: ## Remove builds and vsh related docker containers
 	docker rm -f vsh-integration-test-vault || true
 	rm ./build/* || true
 
+.PHONY: vendor
 vendor: ## synch dependencies in vendor/ directory
+	go mod tidy
 	go mod vendor
