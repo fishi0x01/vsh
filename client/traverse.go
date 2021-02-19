@@ -14,10 +14,10 @@ func (client *Client) topLevelTraverse() (result []string) {
 }
 
 func (client *Client) lowLevelTraverse(path string) (result []string) {
-	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
+	s, err := client.cache.List(client.getKVMetaDataPath(path))
 	if err != nil {
 		log.AppTrace("%+v", err)
-		return nil
+		return
 	}
 
 	if s != nil {
@@ -39,6 +39,5 @@ func (client *Client) lowLevelTraverse(path string) (result []string) {
 		leaf := strings.ReplaceAll("/"+path, "//", "/")
 		result = append(result, leaf)
 	}
-
 	return result
 }
