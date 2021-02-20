@@ -2,7 +2,9 @@ package cli
 
 import (
 	"path/filepath"
+	"sort"
 	"strings"
+	"sync"
 
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
@@ -89,4 +91,33 @@ func transportSecrets(c *client.Client, source string, target string, transport 
 	}
 
 	return 0
+}
+
+func funcOnPaths(c *client.Client, paths []string, f func(s *client.Secret) (matches []*Match)) (matches []*Match, err error) {
+	secrets, err := c.BatchRead(c.FilterPaths(paths, client.LEAF))
+	if err != nil {
+		return nil, err
+	}
+
+	var wg sync.WaitGroup
+	queue := make(chan *client.Secret, len(paths))
+	recv := make(chan []*Match, len(paths))
+	for _, secret := range secrets {
+		queue <- secret
+	}
+	for range secrets {
+		wg.Add(1)
+		go func() {
+			recv <- f(<-queue)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	close(recv)
+
+	for m := range recv {
+		matches = append(matches, m...)
+	}
+	sort.Slice(matches, func(i, j int) bool { return matches[i].path < matches[j].path })
+	return matches, nil
 }

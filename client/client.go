@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/fishi0x01/vsh/log"
 	"github.com/hashicorp/vault/api"
@@ -18,6 +19,8 @@ type Client struct {
 	Pwd        string
 	KVBackends map[string]int
 	listCache  map[string][]string
+	cacheMutex sync.Mutex
+	waitGroup  sync.WaitGroup
 }
 
 // VaultConfig container to keep parameters for Client configuration
@@ -25,6 +28,12 @@ type VaultConfig struct {
 	Addr      string
 	Token     string
 	StartPath string
+}
+
+type secretOperation struct {
+	Result *Secret
+	Path   string
+	Error  error
 }
 
 func verifyClientPwd(client *Client) (*Client, error) {
@@ -105,9 +114,14 @@ func (client *Client) Read(absolutePath string) (secret *Secret, err error) {
 		apiSecret, err = client.lowLevelRead(normalizedVaultPath(absolutePath))
 	}
 	if apiSecret != nil {
-		secret = NewSecret(apiSecret)
+		secret = NewSecret(apiSecret, absolutePath)
 	}
 	return secret, err
+}
+
+// BatchRead returns secrets for given paths
+func (client *Client) BatchRead(absolutePaths []string) (secrets []*Secret, err error) {
+	return client.BatchOperation(absolutePaths, OP_READ, make([]*Secret, 0))
 }
 
 // Write writes secret to given path, using given Client
@@ -118,6 +132,12 @@ func (client *Client) Write(absolutePath string, secret *Secret) (err error) {
 		err = client.lowLevelWrite(normalizedVaultPath(absolutePath), secret.GetAPISecret())
 	}
 
+	return err
+}
+
+// BatchWrite writes provided secrets to Vault
+func (client *Client) BatchWrite(absolutePaths []string, secrets []*Secret) (err error) {
+	_, err = client.BatchOperation(absolutePaths, OP_WRITE, secrets)
 	return err
 }
 
@@ -134,14 +154,19 @@ func (client *Client) Delete(absolutePath string) (err error) {
 
 // List elements at the given absolutePath, using the given client
 func (client *Client) List(absolutePath string) (result []string, err error) {
+	defer client.cacheMutex.Unlock()
+
+	client.cacheMutex.Lock()
 	if val, ok := client.listCache[absolutePath]; ok {
 		return val, nil
 	}
+	client.cacheMutex.Unlock() // reading from Vault will be relatively slow
 	if client.isTopLevelPath(absolutePath) {
 		result = client.listTopLevel()
 	} else {
 		result, err = client.listLowLevel(normalizedVaultPath(absolutePath))
 	}
+	client.cacheMutex.Lock()
 	client.listCache[absolutePath] = result
 
 	return result, err
@@ -186,5 +211,7 @@ func (client *Client) SubpathsForPath(path string) (filePaths []string, err erro
 
 // ClearCache clears the list cache
 func (client *Client) ClearCache() {
+	client.cacheMutex.Lock()
 	client.listCache = make(map[string][]string)
+	client.cacheMutex.Unlock()
 }

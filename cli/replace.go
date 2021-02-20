@@ -114,7 +114,7 @@ func (cmd *ReplaceCommand) Run() int {
 		return 1
 	}
 
-	allMatches, err := cmd.findMatches(filePaths)
+	allMatches, err := cmd.FindMatches(filePaths)
 	if err != nil {
 		log.UserError(fmt.Sprintf("%s", err))
 		return 1
@@ -122,25 +122,37 @@ func (cmd *ReplaceCommand) Run() int {
 	return cmd.commitMatches(allMatches)
 }
 
-func (cmd *ReplaceCommand) findMatches(filePaths []string) (matchesByPath map[string][]*Match, err error) {
-	matchesByPath = make(map[string][]*Match, 0)
-	for _, curPath := range filePaths {
-		matches, err := cmd.FindReplacements(cmd.args.Search, cmd.args.Replacement, curPath)
-		if err != nil {
-			return matchesByPath, err
+func (cmd *ReplaceCommand) grepPaths(search string, paths []string) (matches []*Match, err error) {
+	return funcOnPaths(cmd.client, paths, func(s *client.Secret) []*Match {
+		for k, v := range s.GetData() {
+			matches = append(matches, cmd.searcher.DoSearch(s.Path, k, fmt.Sprintf("%v", v))...)
 		}
-		for _, match := range matches {
-			match.print(os.Stdout, true)
-		}
-		if len(matches) > 0 {
-			_, ok := matchesByPath[curPath]
-			if ok == false {
-				matchesByPath[curPath] = make([]*Match, 0)
-			}
-			matchesByPath[curPath] = append(matchesByPath[curPath], matches...)
-		}
+		return matches
+	})
+}
+
+// FindMatches will return a map of files sorted by path in which the search occurs
+func (cmd *ReplaceCommand) FindMatches(filePaths []string) (matchesByPath map[string][]*Match, err error) {
+	matches, err := cmd.grepPaths(cmd.args.Search, filePaths)
+	if err != nil {
+		return matchesByPath, err
 	}
-	return matchesByPath, nil
+	for _, match := range matches {
+		match.print(os.Stdout, true)
+	}
+	return cmd.groupMatchesByPath(matches), nil
+}
+
+func (cmd *ReplaceCommand) groupMatchesByPath(matches []*Match) (matchesByPath map[string][]*Match) {
+	matchesByPath = make(map[string][]*Match, 0)
+	for _, m := range matches {
+		_, ok := matchesByPath[m.path]
+		if ok == false {
+			matchesByPath[m.path] = make([]*Match, 0)
+		}
+		matchesByPath[m.path] = append(matchesByPath[m.path], matches...)
+	}
+	return matchesByPath
 }
 
 func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int {
@@ -165,34 +177,23 @@ func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int 
 	return 0
 }
 
-// FindReplacements will find the matches for a given search string to be replaced
-func (cmd *ReplaceCommand) FindReplacements(search string, replacement string, path string) (matches []*Match, err error) {
-	if cmd.client.GetType(path) == client.LEAF {
-		secret, err := cmd.client.Read(path)
-		if err != nil {
-			return matches, err
-		}
-
-		for k, v := range secret.GetData() {
-			match := cmd.searcher.DoSearch(path, k, fmt.Sprintf("%v", v))
-			matches = append(matches, match...)
-		}
-	}
-	return matches, nil
-}
-
 // WriteReplacements will write replacement data back to Vault
 func (cmd *ReplaceCommand) WriteReplacements(groupedMatches map[string][]*Match) error {
-	// process matches by vault path
-	for path, matches := range groupedMatches {
-		secret, err := cmd.client.Read(path)
-		if err != nil {
-			return err
-		}
-		data := secret.GetData()
+	// Re-read paths because they could've gone stale
+	paths := make([]string, 0)
+	for path, _ := range groupedMatches {
+		paths = append(paths, path)
+	}
+	secrets, err := cmd.client.BatchRead(paths)
+	if err != nil {
+		return err
+	}
+
+	for _, secret := range secrets {
+		data, path := secret.GetData(), secret.Path
 
 		// update secret with changes. remove key w/ prior names, add renamed keys, update values.
-		for _, match := range matches {
+		for _, match := range groupedMatches[path] {
 			if path != match.path {
 				return fmt.Errorf("match path does not equal group path")
 			}

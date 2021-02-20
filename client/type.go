@@ -26,6 +26,15 @@ func (client *Client) topLevelType(path string) PathKind {
 	}
 }
 
+func (client *Client) FilterPaths(paths []string, kind PathKind) (filtered []string) {
+	for _, path := range paths {
+		if client.GetType(path) == kind {
+			filtered = append(filtered, path)
+		}
+	}
+	return filtered
+}
+
 var cachedPath = ""
 var cachedDirFiles = make(map[string]int)
 

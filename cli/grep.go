@@ -95,14 +95,12 @@ func (cmd *GrepCommand) Run() int {
 		return 1
 	}
 
-	for _, curPath := range filePaths {
-		matches, err := cmd.grepFile(cmd.args.Search, curPath)
-		if err != nil {
-			return 1
-		}
-		for _, match := range matches {
-			match.print(os.Stdout, false)
-		}
+	matches, err := cmd.grepPaths(cmd.args.Search, filePaths)
+	if err != nil {
+		return 1
+	}
+	for _, match := range matches {
+		match.print(os.Stdout, false)
 	}
 	return 0
 }
@@ -116,19 +114,11 @@ func (cmd *GrepCommand) GetSearchParams() SearchParameters {
 	}
 }
 
-func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, err error) {
-	matches = []*Match{}
-
-	if cmd.client.GetType(path) == client.LEAF {
-		secret, err := cmd.client.Read(path)
-		if err != nil {
-			return matches, err
+func (cmd *GrepCommand) grepPaths(search string, paths []string) (matches []*Match, err error) {
+	return funcOnPaths(cmd.client, paths, func(s *client.Secret) []*Match {
+		for k, v := range s.GetData() {
+			matches = append(matches, cmd.searcher.DoSearch(s.Path, k, fmt.Sprintf("%v", v))...)
 		}
-
-		for k, v := range secret.GetData() {
-			matches = append(matches, cmd.searcher.DoSearch(path, k, fmt.Sprintf("%v", v))...)
-		}
-	}
-
-	return matches, nil
+		return matches
+	})
 }
