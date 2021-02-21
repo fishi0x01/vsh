@@ -26,38 +26,37 @@ func (client *Client) topLevelType(path string) PathKind {
 	}
 }
 
-var cachedPath = ""
-var cachedDirFiles = make(map[string]int)
-
-func (client *Client) isAmbiguous(path string) (result bool) {
-	// get current directory content
-	if cachedPath != path {
-		pathTrim := strings.TrimSuffix(path, "/")
-		cachedDirFiles = make(map[string]int)
-		s, err := client.Vault.Logical().List(client.getKVMetaDataPath(filepath.Dir(pathTrim)))
-		if err == nil && s != nil {
-			if keysInterface, ok := s.Data["keys"]; ok {
-				for _, valInterface := range keysInterface.([]interface{}) {
-					val := valInterface.(string)
-					cachedDirFiles[val] = 1
-				}
-			}
-		}
-		cachedPath = path
-	}
-
+func (client *Client) isAmbiguous(path string, dirFiles map[string]int) (result bool) {
 	// check if path exists as file and directory
 	result = false
-	if _, ok := cachedDirFiles[filepath.Base(path)]; ok {
-		if _, ok := cachedDirFiles[filepath.Base(path)+"/"]; ok {
+	if _, ok := dirFiles[filepath.Base(path)]; ok {
+		if _, ok := dirFiles[filepath.Base(path)+"/"]; ok {
 			result = true
 		}
 	}
 	return result
 }
 
+func (client *Client) getDirFiles(path string) (result map[string]int) {
+	// get current directory content
+	result = make(map[string]int)
+	pathTrim := strings.TrimSuffix(path, "/")
+	lsPath := client.getKVMetaDataPath(filepath.Dir(pathTrim))
+	s, err := client.cache.List(lsPath)
+	if err == nil && s != nil {
+		if keysInterface, ok := s.Data["keys"]; ok {
+			for _, valInterface := range keysInterface.([]interface{}) {
+				val := valInterface.(string)
+				result[val] = 1
+			}
+		}
+	}
+	return result
+}
+
 func (client *Client) lowLevelType(path string) (result PathKind) {
-	if client.isAmbiguous(path) {
+	dirFiles := client.getDirFiles(path)
+	if client.isAmbiguous(path, dirFiles) {
 		if strings.HasSuffix(path, "/") {
 			result = NODE
 		} else {
@@ -65,7 +64,8 @@ func (client *Client) lowLevelType(path string) (result PathKind) {
 		}
 	} else {
 		hasNode := false
-		s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path + "/"))
+		kvPath := client.getKVMetaDataPath(path + "/")
+		s, err := client.cache.List(kvPath)
 		if err == nil && s != nil {
 			if _, ok := s.Data["keys"]; ok {
 				hasNode = true
@@ -74,7 +74,7 @@ func (client *Client) lowLevelType(path string) (result PathKind) {
 		if hasNode {
 			result = NODE
 		} else {
-			if _, ok := cachedDirFiles[filepath.Base(path)]; ok {
+			if _, ok := dirFiles[filepath.Base(path)]; ok {
 				result = LEAF
 			} else {
 				result = NONE

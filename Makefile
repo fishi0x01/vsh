@@ -31,7 +31,7 @@ compile-releases: clean ## Compile vsh binaries for multiple platforms and archi
 	done
 	cd build/ && sha256sum * > SHA256SUM
 
-compile: clean ## Compile vsh for platform based on uname
+compile: ## Compile vsh for platform based on uname
 	go build -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$(shell uname | tr '[:upper:]' '[:lower:]')_$(ARCH)
 
 get-bats: ## Download bats dependencies to test directory
@@ -51,8 +51,11 @@ integration-tests: ## Run integration test suites (requires bats - see get-bats)
 single-test: ## Run a single test suite, e.g., make single-test KV_BACKEND=KV2 VAULT_VERSION=1.6.1 TEST_SUITE=commands/cp
 	KV_BACKEND=$(KV_BACKEND) VAULT_VERSION=$(VAULT_VERSION) TEST_SUITE=$(TEST_SUITE) test/run-single-test.sh
 
-local-vault-test-instance: ## Start a local vault container with integration test provisioning
-	bash -c ". test/util/util.bash && setup"
+local-vault-standard-test-instance: ## Start a local vault container with standard setup provisioning
+	bash -c ". test/util/common.bash && . test/util/standard-setup.bash && setup"
+
+local-vault-concurrency-test-instance: ## Start a local vault container with concurrency setup provisioning
+	bash -c ". test/util/common.bash && . test/util/concurrency-setup.bash && setup"
 
 clean: ## Remove builds and vsh related docker containers
 	docker rm -f vsh-integration-test-vault || true

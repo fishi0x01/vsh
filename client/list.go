@@ -18,7 +18,7 @@ func (client *Client) listLowLevel(path string) (result []string, err error) {
 		return nil, errors.New("Not a directory: " + path)
 	}
 
-	s, err := client.Vault.Logical().List(client.getKVMetaDataPath(path))
+	s, err := client.cache.List(client.getKVMetaDataPath(path))
 	if err != nil {
 		log.AppTrace("%+v", err)
 		return result, err

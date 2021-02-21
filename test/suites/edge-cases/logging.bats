@@ -1,4 +1,5 @@
-load ../../util/util
+load ../../util/common
+load ../../util/standard-setup
 load ../../bin/plugins/bats-support/load
 load ../../bin/plugins/bats-assert/load
 load ../../bin/plugins/bats-file/load

@@ -18,3 +18,8 @@ do
         VAULT_VERSION=${vault_version} KV_BACKEND="${kv_backend}" ${BATS} "${DIR}/suites/commands/"
     done
 done
+
+# Concurrency tests are primarily designed to operate on a large set of files.
+# At this point, we only care about catching potential concurrency issues.
+# Testing different vault and KV versions has been done in prior tests.
+VAULT_VERSION=${VAULT_VERSIONS[0]} ${BATS} "${DIR}/suites/concurrency/"
