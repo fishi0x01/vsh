@@ -5,15 +5,13 @@ import (
 	"strings"
 )
 
-func (client *Client) topLevelTraverse() (result []string) {
+func (client *Client) topLevelTraverse(c chan<- string) {
 	for k := range client.KVBackends {
-		result = append(result, k)
+		c <- k
 	}
-
-	return result
 }
 
-func (client *Client) lowLevelTraverse(path string) (result []string) {
+func (client *Client) lowLevelTraverse(path string, c chan<- string) {
 	s, err := client.cache.List(client.getKVMetaDataPath(path))
 	if err != nil {
 		log.AppTrace("%+v", err)
@@ -27,17 +25,16 @@ func (client *Client) lowLevelTraverse(path string) (result []string) {
 				// prevent ambiguous dir/file to be added twice
 				if strings.HasSuffix(val, "/") {
 					// dir
-					result = append(result, client.lowLevelTraverse(path+"/"+val)...)
+					client.lowLevelTraverse(path+"/"+val, c)
 				} else {
 					// file
 					leaf := strings.ReplaceAll("/"+path+"/"+val, "//", "/")
-					result = append(result, leaf)
+					c <- leaf
 				}
 			}
 		}
 	} else {
 		leaf := strings.ReplaceAll("/"+path, "//", "/")
-		result = append(result, leaf)
+		c <- leaf
 	}
-	return result
 }

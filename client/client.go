@@ -153,30 +153,36 @@ func (client *Client) GetType(absolutePath string) (kind PathKind) {
 	return kind
 }
 
-// Traverse traverses given absolutePath via DFS and returns sub-paths in array
-func (client *Client) Traverse(absolutePath string) (paths []string) {
+// Traverse traverses given absolutePath via DFS and pushes paths to given channel
+func (client *Client) Traverse(absolutePath string, c chan<- string) {
+	defer close(c)
 	if client.isTopLevelPath(absolutePath) {
-		paths = client.topLevelTraverse()
+		client.topLevelTraverse(c)
 	} else {
-		paths = client.lowLevelTraverse(normalizedVaultPath(absolutePath))
+		client.lowLevelTraverse(normalizedVaultPath(absolutePath), c)
 	}
-
-	return paths
 }
 
 // SubpathsForPath will return an array of absolute paths at or below path
-func (client *Client) SubpathsForPath(path string) (filePaths []string, err error) {
+func (client *Client) SubpathsForPath(path string) (result []string, err error) {
 	switch t := client.GetType(path); t {
 	case LEAF:
-		filePaths = append(filePaths, filepath.Clean(path))
+		result = []string{filepath.Clean(path)}
 	case NODE:
-		for _, traversedPath := range client.Traverse(path) {
-			filePaths = append(filePaths, traversedPath)
+		c := make(chan string, 10)
+		go client.Traverse(path, c)
+		// TODO: this is currently fully sequential to keep old behavior
+		for {
+			p, ok := <-c
+			if !ok {
+				break
+			}
+			result = append(result, p)
 		}
 	default:
-		return filePaths, fmt.Errorf("Not a valid path for operation: %s", path)
+		err = fmt.Errorf("Not a valid path for operation: %s", path)
 	}
-	return filePaths, nil
+	return result, err
 }
 
 // ClearCache clears the list cache
