@@ -74,11 +74,16 @@ func executor(in string) {
 		os.Exit(0)
 	default:
 		cmd, err = getCommand(args[0], commands)
+		if err == nil {
+			err = cmd.Parse(args[0])
+		}
 	}
 
-	if err != nil && cmd != nil {
+	if err != nil {
 		log.UserError("%v", err)
-		cmd.PrintUsage()
+		if cmd != nil {
+			cmd.PrintUsage()
+		}
 	}
 
 	if err != nil && !isInteractive {
@@ -94,38 +99,11 @@ func executor(in string) {
 }
 
 func getCommand(args []string, commands *cli.Commands) (cmd cli.Command, err error) {
-	switch args[0] {
-	case commands.Ls.GetName():
-		err = commands.Ls.Parse(args)
-		cmd = commands.Ls
-	case commands.Cd.GetName():
-		err = commands.Cd.Parse(args)
-		cmd = commands.Cd
-	case commands.Mv.GetName():
-		err = commands.Mv.Parse(args)
-		cmd = commands.Mv
-	case commands.Append.GetName():
-		err = commands.Append.Parse(args)
-		cmd = commands.Append
-	case commands.Cp.GetName():
-		err = commands.Cp.Parse(args)
-		cmd = commands.Cp
-	case commands.Rm.GetName():
-		err = commands.Rm.Parse(args)
-		cmd = commands.Rm
-	case commands.Cat.GetName():
-		err = commands.Cat.Parse(args)
-		cmd = commands.Cat
-	case commands.Grep.GetName():
-		err = commands.Grep.Parse(args)
-		cmd = commands.Grep
-	case commands.Replace.GetName():
-		err = commands.Replace.Parse(args)
-		cmd = commands.Replace
-	default:
-		log.UserError("Not a valid command: %s", args[0])
-		return nil, fmt.Errorf("not a valid command")
+	cmd = commands.Get(args[0])
+	if cmd == nil {
+		return nil, fmt.Errorf("not a valid command: %s", args[0])
 	}
+
 	return cmd, err
 }
 

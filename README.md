@@ -37,6 +37,7 @@ Download latest static binaries from [release page](https://github.com/fishi0x01
 
 ## Supported commands
 
+- [add](doc/commands/add.md) adds a single key and value to a path
 - [append](doc/commands/append.md) merges secrets with different strategies (allows recursive operation on paths)
 - [cat](doc/commands/cat.md) shows the key/value pairs of a path
 - [cd](doc/commands/cd.md) allows interactive navigation through the paths

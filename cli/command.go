@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fatih/structs"
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
 )
@@ -20,6 +21,7 @@ type Command interface {
 
 // Commands contains all available commands
 type Commands struct {
+	Add     *AddCommand
 	Append  *AppendCommand
 	Cat     *CatCommand
 	Cd      *CdCommand
@@ -31,9 +33,20 @@ type Commands struct {
 	Rm      *RemoveCommand
 }
 
+// Get returns the Command that matches the string
+func (cmds *Commands) Get(cmd string) Command {
+	for _, f := range structs.Fields(cmds) {
+		if c := f.Value().(Command); cmd == c.GetName() {
+			return c
+		}
+	}
+	return nil
+}
+
 // NewCommands returns a Commands struct with all available commands
 func NewCommands(client *client.Client) *Commands {
 	return &Commands{
+		Add:     NewAddCommand(client),
 		Append:  NewAppendCommand(client),
 		Cat:     NewCatCommand(client),
 		Cd:      NewCdCommand(client),
