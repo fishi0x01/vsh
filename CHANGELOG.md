@@ -1,5 +1,11 @@
 # Changelog
 
+## master - unreleased
+
+BUG FIXES:
+
+* Don't show error on empty line enter in interactive mode ([#85](https://github.com/fishi0x01/vsh/pull/85))
+
 ## v0.9.0 (February 6, 2021)
 
 Big thank you to [mattlqx](https://github.com/mattlqx) for the great enhancements.

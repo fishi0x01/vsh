@@ -48,12 +48,6 @@ func executor(in string) {
 	args, err := argv.Argv(in, func(backquoted string) (string, error) {
 		return backquoted, nil
 	}, nil)
-	if err != nil {
-		log.UserError("%v", err)
-		return
-	}
-	commands := cli.NewCommands(vaultClient)
-	var cmd cli.Command
 
 	// edge cases
 	if len(args) == 0 {
@@ -63,6 +57,13 @@ func executor(in string) {
 		}
 		return
 	}
+
+	if err != nil {
+		log.UserError("%v", err)
+		return
+	}
+	commands := cli.NewCommands(vaultClient)
+	var cmd cli.Command
 
 	// parse command
 	switch args[0][0] {
