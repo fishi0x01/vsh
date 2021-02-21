@@ -2,6 +2,10 @@
 
 ## master - unreleased
 
+ENHANCEMENTS:
+
+* Add `--output` flag to `replace` command to output as line diffs for each replacement in addition to the default inline format. ([#88](https://github.com/fishi0x01/vsh/pull/88))
+
 BUG FIXES:
 
 * Don't show error on empty line enter in interactive mode ([#85](https://github.com/fishi0x01/vsh/pull/85))

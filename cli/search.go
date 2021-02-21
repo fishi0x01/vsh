@@ -24,6 +24,7 @@ type SearchParameters struct {
 	KeySelector string
 	Mode        KeyValueMode
 	IsRegexp    bool
+	Output      MatchOutput
 }
 
 // Match structure to keep indices of matched and replaced terms
@@ -34,12 +35,41 @@ type Match struct {
 	// sorted slices of indices of match starts and length
 	keyIndex   [][]int
 	valueIndex [][]int
-	// in-line diffs of key and value replacements
-	keyLineDiff   string
-	valueLineDiff string
+	// diffs of chosen format for key and value replacements
+	keyDiff   string
+	valueDiff string
 	// final strings after replacement
 	replacedKey   string
 	replacedValue string
+}
+
+// MatchOutput contains the possible ways of presenting a match
+type MatchOutput string
+
+// MatchOutputArg provides a struct to custom validate an arg
+type MatchOutputArg struct {
+	Value MatchOutput
+}
+
+const (
+	// MatchOutputHighlight outputs yellow highlighted matching text
+	MatchOutputHighlight MatchOutput = "highlight"
+	// MatchOutputInline outputs red and green text to show replacements
+	MatchOutputInline MatchOutput = "inline"
+	// MatchOutputDiff outputs addition and subtraction lines to show replacements
+	MatchOutputDiff MatchOutput = "diff"
+)
+
+// UnmarshalText validates the MatchOutputArg
+func (a *MatchOutputArg) UnmarshalText(b []byte) error {
+	arg := string(b[:])
+	switch MatchOutput(arg) {
+	case MatchOutputInline, MatchOutputDiff, MatchOutputHighlight:
+		a.Value = MatchOutput(arg)
+		return nil
+	default:
+		return fmt.Errorf("invalid output format: %s", arg)
+	}
 }
 
 // Searcher provides matching and replacement methods while maintaining references to the command
@@ -80,8 +110,8 @@ func (s *Searcher) IsMode(mode KeyValueMode) bool {
 // DoSearch searches with either regexp or substring search methods
 func (s *Searcher) DoSearch(path string, k string, v string) (m []*Match) {
 	// Default to original strings
-	replacedKey, keyLineDiff := k, k
-	replacedValue, valueLineDiff := v, v
+	replacedKey, keyDiff := k, k
+	replacedValue, valueDiff := v, v
 	var keyMatchPairs, valueMatchPairs, keySelectorMatches [][]int
 
 	if s.cmd.GetSearchParams().KeySelector != "" {
@@ -91,14 +121,14 @@ func (s *Searcher) DoSearch(path string, k string, v string) (m []*Match) {
 		}
 	}
 	if s.IsMode(ModeKeys) {
-		keyMatchPairs, replacedKey, keyLineDiff = s.matchData(k)
+		keyMatchPairs, replacedKey = s.matchData(k)
 	}
 	if len(keySelectorMatches) > 0 {
-		keyLineDiff = highlightMatches(keyLineDiff, s.keySelectorMatches(keyLineDiff))
+		keyDiff = highlightMatches(keyDiff, s.keySelectorMatches(keyDiff))
 	}
 
 	if s.IsMode(ModeValues) {
-		valueMatchPairs, replacedValue, valueLineDiff = s.matchData(v)
+		valueMatchPairs, replacedValue = s.matchData(v)
 	}
 
 	if len(keyMatchPairs) > 0 || len(valueMatchPairs) > 0 {
@@ -109,8 +139,8 @@ func (s *Searcher) DoSearch(path string, k string, v string) (m []*Match) {
 				value:         v,
 				keyIndex:      keyMatchPairs,
 				valueIndex:    valueMatchPairs,
-				keyLineDiff:   keyLineDiff,
-				valueLineDiff: valueLineDiff,
+				keyDiff:       keyDiff,
+				valueDiff:     valueDiff,
 				replacedKey:   replacedKey,
 				replacedValue: replacedValue,
 			},
@@ -119,10 +149,17 @@ func (s *Searcher) DoSearch(path string, k string, v string) (m []*Match) {
 	return m
 }
 
-func (match *Match) print(out io.Writer, diff bool) {
-	if diff == true {
-		fmt.Fprintf(out, "%s> %s = %s\n", match.path, match.keyLineDiff, match.valueLineDiff)
-	} else {
+func (match *Match) print(out io.Writer, format MatchOutput) {
+	switch format {
+	case MatchOutputInline:
+		coloredKey := colorizeLineDiff(diff.CharacterDiff(match.key, match.replacedKey))
+		coloredValue := colorizeLineDiff(diff.CharacterDiff(match.value, match.replacedValue))
+		fmt.Fprintf(out, "%s> %s = %s\n", match.path, coloredKey, coloredValue)
+	case MatchOutputDiff:
+		before := fmt.Sprintf(" %s> %s = %s\n", match.path, match.key, match.value)
+		after := fmt.Sprintf(" %s> %s = %s\n", match.path, match.replacedKey, match.replacedValue)
+		fmt.Fprint(out, diff.LineDiff(before, after)+"\n")
+	case MatchOutputHighlight:
 		fmt.Fprintf(out, "%s> %s = %s\n", match.path, highlightMatches(match.key, match.keyIndex), highlightMatches(match.value, match.valueIndex))
 	}
 }
@@ -156,8 +193,8 @@ func highlightMatches(s string, matches [][]int) (result string) {
 	return result
 }
 
-// highlightLineDiff will consume (~~del~~)(++add++) markup and colorize in its place
-func (s *Searcher) highlightLineDiff(d string) string {
+// colorizeLineDiff will consume (~~del~~)(++add++) markup and colorize in its place
+func colorizeLineDiff(d string) string {
 	var buf, res []byte
 	removeMode, addMode := false, false
 	removeColor := color.New(color.FgWhite).Add(color.BgRed)
@@ -201,8 +238,8 @@ func (s *Searcher) regexpMatchData(subject string, re *regexp.Regexp) (matchPair
 	return re.FindAllStringIndex(subject, -1)
 }
 
-func (s *Searcher) matchData(subject string) (matchPairs [][]int, replaced string, inlineDiff string) {
-	replaced, inlineDiff = subject, subject
+func (s *Searcher) matchData(subject string) (matchPairs [][]int, replaced string) {
+	replaced = subject
 	matchPairs = make([][]int, 0)
 
 	if s.cmd.GetSearchParams().IsRegexp {
@@ -217,8 +254,7 @@ func (s *Searcher) matchData(subject string) (matchPairs [][]int, replaced strin
 		} else {
 			replaced = strings.ReplaceAll(subject, s.cmd.GetSearchParams().Search, *s.cmd.GetSearchParams().Replacement)
 		}
-		inlineDiff = s.highlightLineDiff(diff.CharacterDiff(subject, replaced))
 	}
 
-	return matchPairs, replaced, inlineDiff
+	return matchPairs, replaced
 }

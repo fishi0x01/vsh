@@ -67,6 +67,19 @@ load ../../bin/plugins/bats-assert/load
   assert_line all
 
   #######################################
+  echo "==== case: replace with invalid output format ===="
+  run ${APP_BIN} -c "replace -s 'produce' 'apple' 'orange' ${KV_BACKEND}/src/selector/1 -o invalid"
+  assert_failure
+  assert_line --partial "invalid output format: invalid"
+
+  #######################################
+  echo "==== case: replace with diff output format ===="
+  run ${APP_BIN} -c "replace -s 'produce' 'apple' 'orange' ${KV_BACKEND}/src/selector/1 -n -o diff"
+  assert_success
+  assert_line "- /${KV_BACKEND}/src/selector/1> produce = apple"
+  assert_line "+ /${KV_BACKEND}/src/selector/1> produce = orange"
+
+  #######################################
   echo "==== case: replace value in single path with selector ===="
   run ${APP_BIN} -c "replace -s 'produce' 'apple' 'orange' ${KV_BACKEND}/src/selector/1 -y"
   assert_success

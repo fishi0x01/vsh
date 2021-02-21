@@ -101,7 +101,7 @@ func (cmd *GrepCommand) Run() int {
 			return 1
 		}
 		for _, match := range matches {
-			match.print(os.Stdout, false)
+			match.print(os.Stdout, MatchOutputHighlight)
 		}
 	}
 	return 0
