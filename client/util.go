@@ -98,8 +98,11 @@ func transformToKV2Secret(secret api.Secret) *api.Secret {
 }
 
 func normalizedVaultPath(absolutePath string) string {
-	// remove trailing '/'
-	return absolutePath[1:]
+	// remove leading '/'
+	if absolutePath[0] == '/' {
+		return absolutePath[1:]
+	}
+	return absolutePath
 }
 
 func sliceContains(arr []string, search string) bool {
