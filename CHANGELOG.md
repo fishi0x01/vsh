@@ -2,6 +2,8 @@
 
 ## master - unreleased
 
+## v0.10.0 (February 24, 2021)
+
 ENHANCEMENTS:
 
 * Add `--output` flag to `replace` command to output as line diffs for each replacement in addition to the default inline format. ([#88](https://github.com/fishi0x01/vsh/pull/88))
