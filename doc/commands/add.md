@@ -1,7 +1,7 @@
 # add
 
 ```text
-add [-f|--force] [-y|--commit] [-n|--dry-run] KEY VALUE PATH
+add [-f|--force] [-y|--confirm] [-n|--dry-run] KEY VALUE PATH
 ```
 
 Add operation adds or overwrites a single key at path.
