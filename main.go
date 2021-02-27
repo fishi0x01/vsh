@@ -40,8 +40,8 @@ func (args) Description() string {
 
 func executor(in string) {
 	// Every command can change the vault content
-	// i.e., the cache should be cleared on command execution
-	vaultClient.ClearCache()
+	// i.e., the cache should be cleared after a command got executed
+	defer vaultClient.ClearCache()
 
 	// Split the input separate the command and the arguments.
 	in = strings.TrimSpace(in)
