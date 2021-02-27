@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 
+	"github.com/cnlubo/promptx"
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
 )
@@ -17,10 +18,12 @@ type AddCommand struct {
 
 // AddCommandArgs provides a struct for go-arg parsing
 type AddCommandArgs struct {
-	Key   string `arg:"positional,required"`
-	Value string `arg:"positional,required"`
-	Path  string `arg:"positional,required"`
-	Force bool   `arg:"-f,--force" help:"Overwrite key if exists"`
+	Key     string `arg:"positional,required"`
+	Value   string `arg:"positional,required"`
+	Path    string `arg:"positional,required"`
+	Force   bool   `arg:"-f,--force" help:"Overwrite key if exists"`
+	Confirm bool   `arg:"-y,--confirm" help:"Write results without prompt"`
+	DryRun  bool   `arg:"-n,--dry-run" help:"Skip writing results without prompt"`
 }
 
 // Description provides detail on what the command does
@@ -63,6 +66,9 @@ func (cmd *AddCommand) Parse(args []string) error {
 	if err != nil {
 		return err
 	}
+	if cmd.args.DryRun == true && cmd.args.Confirm == true {
+		cmd.args.Confirm = false
+	}
 
 	return nil
 }
@@ -97,5 +103,18 @@ func (cmd *AddCommand) addKeyValue(path string, key string, value string) error 
 	}
 	data[key] = value
 	secret.SetData(data)
+	if cmd.args.Confirm == false && cmd.args.DryRun == false {
+		p := promptx.NewDefaultConfirm("Write changes to Vault?", false)
+		result, err := p.Run()
+		if err != nil {
+			return fmt.Errorf("Error prompting for confirmation")
+		}
+		cmd.args.Confirm = result
+	}
+	if cmd.args.Confirm == false {
+		fmt.Println("Skipping write.")
+		return nil
+	}
+	fmt.Println("Writing!")
 	return cmd.client.Write(path, secret)
 }
