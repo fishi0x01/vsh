@@ -2,6 +2,16 @@
 
 ## master - unreleased
 
+## v0.11.0 (February 27, 2021)
+
+ENHANCEMENTS:
+
+* Adding dry-run/confirm flags to the `add` command ([#91](https://github.com/fishi0x01/vsh/pull/91) - Thank you for implementation [dugshnay](https://github.com/dugshnay))
+
+BUG FIXES:
+
+* Fix stale cache in interactive mode ([#92](https://github.com/fishi0x01/vsh/pull/92))
+
 ## v0.10.0 (February 24, 2021)
 
 ENHANCEMENTS:
