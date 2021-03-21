@@ -23,7 +23,7 @@ type ReplaceCommand struct {
 type ReplaceCommandArgs struct {
 	Search      string         `arg:"positional,required"`
 	Replacement string         `arg:"positional,required"`
-	Path        string         `arg:"positional,required"`
+	Path        string         `arg:"positional"`
 	Regexp      bool           `arg:"-e,--regexp" help:"Treat search string and selector as a regexp"`
 	KeySelector string         `arg:"-s,--key-selector" help:"Limit replacements to specified key" placeholder:"PATTERN"`
 	Keys        bool           `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
@@ -84,6 +84,9 @@ func (cmd *ReplaceCommand) Parse(args []string) error {
 	_, err := parseCommandArgs(args, cmd)
 	if err != nil {
 		return err
+	}
+	if cmd.args.Path == "" {
+		cmd.args.Path = cmd.client.Pwd
 	}
 	if cmd.args.Keys == true {
 		cmd.Mode |= ModeKeys

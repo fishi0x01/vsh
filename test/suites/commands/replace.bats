@@ -150,4 +150,14 @@ load ../../bin/plugins/bats-assert/load
   run ${APP_BIN} -c "replace -e -s '][' '^apple' 'orange' ${KV_BACKEND}/src/selector/1 -y"
   assert_failure
   assert_line  --partial "key-selector: error parsing regexp"
+
+  #######################################
+  echo "==== case: replace in pwd ===="
+  export VAULT_PATH=${KV_BACKEND}/src/a
+  run ${APP_BIN} -c "replace 'long-value' 'interesting-value' -y"
+  assert_success
+  assert_line "Writing!"
+  unset VAULT_PATH
+  run get_vault_value "long" "${KV_BACKEND}/src/a/foo"
+  assert_line this-is-a-really-interesting-value-for-testing
 }

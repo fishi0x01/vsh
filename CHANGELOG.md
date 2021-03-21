@@ -2,6 +2,10 @@
 
 ## master - unreleased
 
+ENHANCEMENTS:
+
+* In interactive mode, assume path for command is pwd for grep and replace ([#95](https://github.com/fishi0x01/vsh/pull/95))
+
 ## v0.11.0 (February 27, 2021)
 
 ENHANCEMENTS:
