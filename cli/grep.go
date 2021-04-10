@@ -21,7 +21,7 @@ type GrepCommand struct {
 // GrepCommandArgs provides a struct for go-arg parsing
 type GrepCommandArgs struct {
 	Search string `arg:"positional,required"`
-	Path   string `arg:"positional,required"`
+	Path   string `arg:"positional"`
 	Regexp bool   `arg:"-e,--regexp" help:"Treat search string as a regexp"`
 	Keys   bool   `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
 	Values bool   `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
@@ -66,6 +66,9 @@ func (cmd *GrepCommand) Parse(args []string) error {
 	_, err := parseCommandArgs(args, cmd)
 	if err != nil {
 		return err
+	}
+	if cmd.args.Path == "" {
+		cmd.args.Path = cmd.client.Pwd
 	}
 	if cmd.args.Keys == true {
 		cmd.Mode |= ModeKeys

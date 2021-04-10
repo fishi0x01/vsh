@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e # required to fail test suite when a single test fails
 
-VAULT_VERSION=${VAULT_VERSION:-"1.6.2"}
+VAULT_VERSION=${VAULT_VERSION:-"1.6.3"}
 KV_BACKEND=${KV_BACKEND:-"KV2"}
 TEST_SUITE=${TEST_SUITE:-"commands/cp"}
 

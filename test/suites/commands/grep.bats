@@ -98,6 +98,13 @@ load ../../bin/plugins/bats-assert/load
   assert_failure 1
 
   #######################################
+  echo "==== case: match in pwd ===="
+  export VAULT_PATH=${KV_BACKEND}/src/dev
+  run ${APP_BIN} -c "grep 'apple' -v"
+  unset VAULT_PATH
+  assert_line --partial "/${KV_BACKEND}/src/dev/1"
+
+  #######################################
   echo "==== TODO case: grep term on directory with reduced permissions ===="
 
   #######################################
