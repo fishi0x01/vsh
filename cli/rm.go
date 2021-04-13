@@ -72,7 +72,9 @@ func (cmd *RemoveCommand) Run() int {
 	case client.LEAF:
 		cmd.removeSecret(newPwd)
 	case client.NODE:
-		for _, path := range cmd.client.Traverse(newPwd) {
+		c := make(chan string, 10)
+		go cmd.client.Traverse(newPwd, c)
+		for path := range c {
 			err := cmd.removeSecret(path)
 			if err != nil {
 				return 1

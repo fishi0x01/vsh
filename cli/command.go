@@ -3,6 +3,7 @@ package cli
 import (
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/fatih/structs"
 	"github.com/fishi0x01/vsh/client"
@@ -74,17 +75,31 @@ func cmdPath(pwd string, arg string) (result string) {
 	return result
 }
 
-func runCommandWithTraverseTwoPaths(client *client.Client, source string, target string, f func(string, string) error) {
-	source = filepath.Clean(source) // remove potential trailing '/'
-	for _, path := range client.Traverse(source) {
-		target := strings.Replace(path, source, target, 1)
-		err := f(path, target)
-		if err != nil {
-			return
-		}
-	}
+var numWorkers = 5
 
-	return
+func runCommandWithTraverseTwoPaths(client *client.Client, source string, target string, f func(string, string) error) {
+	c := make(chan string, numWorkers)
+	source = filepath.Clean(source) // remove potential trailing '/'
+	go client.Traverse(source, c)
+	var wg sync.WaitGroup
+	for t := 0; t < numWorkers; t++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				path, ok := <-c
+				if !ok {
+					return
+				}
+				target := strings.Replace(path, source, target, 1)
+				err := f(path, target)
+				if err != nil {
+					return
+				}
+			}
+		}()
+	}
+	wg.Wait()
 }
 
 func transportSecrets(c *client.Client, source string, target string, transport func(string, string) error) int {
