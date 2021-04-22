@@ -48,12 +48,10 @@ func (client *Client) listLowLevel(path string, mode int) (result []string, err 
 }
 
 func (client *Client) listAllLowLevel(path string, subResult* []string) (result[]string, err error) {
-	// fmt.Printf("lookup root %s\n", path)
 	subResult2, err := client.listLowLevel(path, MODE_IGNORE_NONE_DIRECTORY)
 	if subResult2 != nil {
 		var subResult3 []string
 		for _, resultPath := range subResult2 {
-			// fmt.Printf("lookup loop %s\n", path  +resultPath)
 			_, err := client.listAllLowLevel(normalizedVaultPath(path + resultPath), subResult)
 			if err != nil {
 				log.AppTrace("%+v", err)
@@ -61,8 +59,9 @@ func (client *Client) listAllLowLevel(path string, subResult* []string) (result[
 			}
 			result = append(result, normalizedVaultPath(path + resultPath))
 		}
+	} else {
+		*subResult = append(*subResult, path)
 	}
-	*subResult = append(*subResult, result...)
 	return *subResult, err
 }
 
