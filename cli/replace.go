@@ -24,13 +24,14 @@ type ReplaceCommandArgs struct {
 	Search      string         `arg:"positional,required"`
 	Replacement string         `arg:"positional,required"`
 	Path        string         `arg:"positional"`
-	Regexp      bool           `arg:"-e,--regexp" help:"Treat search string and selector as a regexp"`
-	KeySelector string         `arg:"-s,--key-selector" help:"Limit replacements to specified key" placeholder:"PATTERN"`
-	Keys        bool           `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
-	Values      bool           `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
 	Confirm     bool           `arg:"-y,--confirm" help:"Write results without prompt"`
 	DryRun      bool           `arg:"-n,--dry-run" help:"Skip writing results without prompt"`
+	KeySelector string         `arg:"-s,--key-selector" help:"Limit replacements to specified key" placeholder:"PATTERN"`
+	Keys        bool           `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
 	Output      MatchOutputArg `arg:"-o,--output" help:"Present changes as 'inline' with color or traditional 'diff'" default:"inline"`
+	Regexp      bool           `arg:"-e,--regexp" help:"Treat search string and selector as a regexp"`
+	Shallow     bool           `arg:"-S,--shallow" help:"Only search leaf nodes of the path rather than recurse deeper"`
+	Values      bool           `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
 }
 
 // Description provides detail on what the command does
@@ -113,7 +114,7 @@ func (cmd *ReplaceCommand) Parse(args []string) error {
 // Run executes 'replace' with given ReplaceCommand's parameters
 func (cmd *ReplaceCommand) Run() int {
 	path := cmdPath(cmd.client.Pwd, cmd.args.Path)
-	filePaths, err := cmd.client.SubpathsForPath(path)
+	filePaths, err := cmd.client.SubpathsForPath(path, cmd.args.Shallow)
 	if err != nil {
 		log.UserError(fmt.Sprintf("%s", err))
 		return 1

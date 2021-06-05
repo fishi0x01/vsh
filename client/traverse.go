@@ -13,7 +13,7 @@ func (client *Client) topLevelTraverse() (result []string) {
 	return result
 }
 
-func (client *Client) lowLevelTraverse(path string) (result []string) {
+func (client *Client) lowLevelTraverse(path string, shallow bool) (result []string) {
 	s, err := client.cache.List(client.getKVMetaDataPath(path))
 	if err != nil {
 		log.AppTrace("%+v", err)
@@ -27,7 +27,9 @@ func (client *Client) lowLevelTraverse(path string) (result []string) {
 				// prevent ambiguous dir/file to be added twice
 				if strings.HasSuffix(val, "/") {
 					// dir
-					result = append(result, client.lowLevelTraverse(path+"/"+val)...)
+					if shallow == false {
+						result = append(result, client.lowLevelTraverse(path+"/"+val, false)...)
+					}
 				} else {
 					// file
 					leaf := strings.ReplaceAll("/"+path+"/"+val, "//", "/")

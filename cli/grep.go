@@ -20,11 +20,12 @@ type GrepCommand struct {
 
 // GrepCommandArgs provides a struct for go-arg parsing
 type GrepCommandArgs struct {
-	Search string `arg:"positional,required"`
-	Path   string `arg:"positional"`
-	Regexp bool   `arg:"-e,--regexp" help:"Treat search string as a regexp"`
-	Keys   bool   `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
-	Values bool   `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
+	Search  string `arg:"positional,required"`
+	Path    string `arg:"positional"`
+	Keys    bool   `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
+	Regexp  bool   `arg:"-e,--regexp" help:"Treat search string as a regexp"`
+	Shallow bool   `arg:"-S,--shallow" help:"Only search leaf nodes of the path rather than recurse deeper"`
+	Values  bool   `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
 }
 
 // Description provides detail on what the command does
@@ -92,7 +93,7 @@ func (cmd *GrepCommand) Parse(args []string) error {
 // Run executes 'grep' with given GrepCommand's parameters
 func (cmd *GrepCommand) Run() int {
 	path := cmdPath(cmd.client.Pwd, cmd.args.Path)
-	filePaths, err := cmd.client.SubpathsForPath(path)
+	filePaths, err := cmd.client.SubpathsForPath(path, cmd.args.Shallow)
 	if err != nil {
 		log.UserError(fmt.Sprintf("%s", err))
 		return 1
