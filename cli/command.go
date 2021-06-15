@@ -76,7 +76,7 @@ func cmdPath(pwd string, arg string) (result string) {
 
 func runCommandWithTraverseTwoPaths(client *client.Client, source string, target string, f func(string, string) error) {
 	source = filepath.Clean(source) // remove potential trailing '/'
-	for _, path := range client.Traverse(source) {
+	for _, path := range client.Traverse(source, false) {
 		target := strings.Replace(path, source, target, 1)
 		err := f(path, target)
 		if err != nil {

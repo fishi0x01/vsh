@@ -154,23 +154,26 @@ func (client *Client) GetType(absolutePath string) (kind PathKind) {
 }
 
 // Traverse traverses given absolutePath via DFS and returns sub-paths in array
-func (client *Client) Traverse(absolutePath string) (paths []string) {
+func (client *Client) Traverse(absolutePath string, shallow bool) (paths []string) {
 	if client.isTopLevelPath(absolutePath) {
 		paths = client.topLevelTraverse()
 	} else {
-		paths = client.lowLevelTraverse(normalizedVaultPath(absolutePath))
+		paths = client.lowLevelTraverse(normalizedVaultPath(absolutePath), shallow)
 	}
 
 	return paths
 }
 
 // SubpathsForPath will return an array of absolute paths at or below path
-func (client *Client) SubpathsForPath(path string) (filePaths []string, err error) {
+func (client *Client) SubpathsForPath(path string, shallow bool) (filePaths []string, err error) {
 	switch t := client.GetType(path); t {
 	case LEAF:
 		filePaths = append(filePaths, filepath.Clean(path))
 	case NODE:
-		for _, traversedPath := range client.Traverse(path) {
+		for _, traversedPath := range client.Traverse(path, shallow) {
+			if shallow && client.GetType(traversedPath) == NODE {
+				continue
+			}
 			filePaths = append(filePaths, traversedPath)
 		}
 	default:

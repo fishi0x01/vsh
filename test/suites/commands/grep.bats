@@ -98,6 +98,13 @@ load ../../bin/plugins/bats-assert/load
   assert_failure 1
 
   #######################################
+  echo "==== case: shallow search"
+  run ${APP_BIN} -c "grep -S 'tree' /${KV_BACKEND}/src/staging/all"
+  assert_line --partial "/${KV_BACKEND}/src/staging/all"
+  refute_line --partial "/${KV_BACKEND}/src/staging/all/v1"
+  refute_line --partial "/${KV_BACKEND}/src/staging/all/v2"
+
+  #######################################
   echo "==== case: match in pwd ===="
   export VAULT_PATH=${KV_BACKEND}/src/dev
   run ${APP_BIN} -c "grep 'apple' -v"

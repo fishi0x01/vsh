@@ -152,6 +152,13 @@ load ../../bin/plugins/bats-assert/load
   assert_line  --partial "key-selector: error parsing regexp"
 
   #######################################
+  echo "==== case: shallow replace"
+  run ${APP_BIN} -c "replace -e -S -k 'tree' '.*' 'maple' /${KV_BACKEND}/src/staging/all"
+  assert_line --partial "/${KV_BACKEND}/src/staging/all"
+  refute_line --partial "/${KV_BACKEND}/src/staging/all/v1"
+  refute_line --partial "/${KV_BACKEND}/src/staging/all/v2"
+
+  #######################################
   echo "==== case: replace in pwd ===="
   export VAULT_PATH=${KV_BACKEND}/src/a
   run ${APP_BIN} -c "replace 'long-value' 'interesting-value' -y"
