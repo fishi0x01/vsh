@@ -2,9 +2,12 @@
 
 ## master - unreleased
 
+## v0.12.0 (June 15, 2021)
+
 ENHANCEMENTS:
 
 * In interactive mode, assume path for command is pwd for grep and replace ([#95](https://github.com/fishi0x01/vsh/pull/95))
+* add shallow flag to grep/replace commands ([#97](https://github.com/fishi0x01/vsh/pull/97)) - Thank you for implementation [mattlqx](https://github.com/mattlqx))
 
 ## v0.11.0 (February 27, 2021)
 

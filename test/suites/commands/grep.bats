@@ -38,7 +38,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: regexp pattern ===="
-  run ${APP_BIN} -c "grep app.* ${KV_BACKEND}/src -e"
+  run ${APP_BIN} -c "grep -e app.* ${KV_BACKEND}/src"
   assert_line --partial "/${KV_BACKEND}/src/dev/1"
   assert_line --partial "/${KV_BACKEND}/src/ambivalence/1"
 
@@ -88,7 +88,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: match when only searching values ===="
-  run ${APP_BIN} -c "grep 'apple' ${KV_BACKEND}/src/dev -v"
+  run ${APP_BIN} -c "grep -v 'apple' ${KV_BACKEND}/src/dev"
   assert_line --partial "/${KV_BACKEND}/src/dev/1"
 
   #######################################
