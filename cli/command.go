@@ -28,6 +28,7 @@ type Commands struct {
 	Cp      *CopyCommand
 	Grep    *GrepCommand
 	Ls      *ListCommand
+	Lsa     *ListAllCommand
 	Mv      *MoveCommand
 	Replace *ReplaceCommand
 	Rm      *RemoveCommand
@@ -53,6 +54,7 @@ func NewCommands(client *client.Client) *Commands {
 		Cp:      NewCopyCommand(client),
 		Grep:    NewGrepCommand(client),
 		Ls:      NewListCommand(client),
+		Lsa:     NewListAllCommand(client),
 		Mv:      NewMoveCommand(client),
 		Replace: NewReplaceCommand(client),
 		Rm:      NewRemoveCommand(client),

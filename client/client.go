@@ -137,7 +137,19 @@ func (client *Client) List(absolutePath string) (result []string, err error) {
 	if client.isTopLevelPath(absolutePath) {
 		result = client.listTopLevel()
 	} else {
-		result, err = client.listLowLevel(normalizedVaultPath(absolutePath))
+		result, err = client.listLowLevel(normalizedVaultPath(absolutePath), MODE_DIRECTORY_ONLY)
+	}
+	return result, err
+}
+
+// List elements at the given absolutePath, using the given client
+func (client *Client) ListAll(absolutePath string) (result []string, err error) {
+	if client.isTopLevelPath(absolutePath) {
+		result, err = client.listAllFromTopLevel()
+	} else {
+		res:= []string{}
+		result, err = client.listAllLowLevel(normalizedVaultPath(absolutePath), &res)
+		result = res
 	}
 	return result, err
 }
