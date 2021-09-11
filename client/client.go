@@ -120,7 +120,7 @@ func (client *Client) Read(absolutePath string) (secret *Secret, err error) {
 
 // BatchRead returns secrets for given paths
 func (client *Client) BatchRead(absolutePaths []string) (secrets []*Secret, err error) {
-	return client.BatchOperation(absolutePaths, OP_READ, make([]*Secret, 0))
+	return client.BatchOperation(absolutePaths, OpRead, make([]*Secret, 0))
 }
 
 // Write writes secret to given path, using given Client
@@ -136,7 +136,7 @@ func (client *Client) Write(absolutePath string, secret *Secret) (err error) {
 
 // BatchWrite writes provided secrets to Vault
 func (client *Client) BatchWrite(absolutePaths []string, secrets []*Secret) (err error) {
-	_, err = client.BatchOperation(absolutePaths, OP_WRITE, secrets)
+	_, err = client.BatchOperation(absolutePaths, OpWrite, secrets)
 	return err
 }
 

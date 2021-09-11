@@ -99,7 +99,7 @@ func (cmd *GrepCommand) Run() int {
 		return 1
 	}
 
-	matches, err := cmd.grepPaths(cmd.args.Search, filePaths)
+	matches, err := cmd.searcher.grepPaths(cmd.client, cmd.args.Search, filePaths)
 	if err != nil {
 		return 1
 	}
@@ -116,13 +116,4 @@ func (cmd *GrepCommand) GetSearchParams() SearchParameters {
 		Mode:     cmd.Mode,
 		IsRegexp: cmd.args.Regexp,
 	}
-}
-
-func (cmd *GrepCommand) grepPaths(search string, paths []string) (matches []*Match, err error) {
-	return funcOnPaths(cmd.client, paths, func(s *client.Secret) []*Match {
-		for k, v := range s.GetData() {
-			matches = append(matches, cmd.searcher.DoSearch(s.Path, k, fmt.Sprintf("%v", v))...)
-		}
-		return matches
-	})
 }

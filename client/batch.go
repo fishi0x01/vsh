@@ -9,43 +9,43 @@ type BatchOperation int
 
 // types of operations
 const (
-	OP_READ  BatchOperation = 0
-	OP_WRITE BatchOperation = 1
+	OpRead  BatchOperation = 0
+	OpWrite BatchOperation = 1
 )
 
 // how many worker threads to use for batch operations
 const (
-	VAULT_CONCURENCY = 5
+	VaultConcurency = 5
 )
 
 // BatchOperation can perform reads or writes with concurrency
 func (client *Client) BatchOperation(absolutePaths []string, op BatchOperation, secretsIn []*Secret) (secrets []*Secret, err error) {
-	read_queue := make(chan string, len(absolutePaths))
-	write_queue := make(chan *Secret, len(absolutePaths))
+	readQueue := make(chan string, len(absolutePaths))
+	writeQueue := make(chan *Secret, len(absolutePaths))
 	results := make(chan *secretOperation, len(absolutePaths))
 
 	// load up queue for operation
 	switch op {
-	case OP_READ:
+	case OpRead:
 		for _, path := range absolutePaths {
-			read_queue <- path
+			readQueue <- path
 		}
-	case OP_WRITE:
+	case OpWrite:
 		for _, secret := range secretsIn {
-			write_queue <- secret
+			writeQueue <- secret
 		}
 	default:
 		return nil, fmt.Errorf("invalid batch operation")
 	}
 
 	// fire off goroutines for operation
-	for i := 0; i < VAULT_CONCURENCY; i++ {
+	for i := 0; i < VaultConcurency; i++ {
 		client.waitGroup.Add(1)
 		switch op {
-		case OP_READ:
-			go client.readWorker(read_queue, results)
-		case OP_WRITE:
-			go client.writeWorker(write_queue, results)
+		case OpRead:
+			go client.readWorker(readQueue, results)
+		case OpWrite:
+			go client.writeWorker(writeQueue, results)
 		}
 	}
 	client.waitGroup.Wait()

@@ -128,18 +128,9 @@ func (cmd *ReplaceCommand) Run() int {
 	return cmd.commitMatches(allMatches)
 }
 
-func (cmd *ReplaceCommand) grepPaths(search string, paths []string) (matches []*Match, err error) {
-	return funcOnPaths(cmd.client, paths, func(s *client.Secret) []*Match {
-		for k, v := range s.GetData() {
-			matches = append(matches, cmd.searcher.DoSearch(s.Path, k, fmt.Sprintf("%v", v))...)
-		}
-		return matches
-	})
-}
-
 // FindMatches will return a map of files sorted by path in which the search occurs
 func (cmd *ReplaceCommand) FindMatches(filePaths []string) (matchesByPath map[string][]*Match, err error) {
-	matches, err := cmd.grepPaths(cmd.args.Search, filePaths)
+	matches, err := cmd.searcher.grepPaths(cmd.client, cmd.args.Search, filePaths)
 	if err != nil {
 		return matchesByPath, err
 	}
@@ -187,7 +178,7 @@ func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int 
 func (cmd *ReplaceCommand) WriteReplacements(groupedMatches map[string][]*Match) error {
 	// Re-read paths because they could've gone stale
 	paths := make([]string, 0)
-	for path, _ := range groupedMatches {
+	for path := range groupedMatches {
 		paths = append(paths, path)
 	}
 	secrets, err := cmd.client.BatchRead(paths)

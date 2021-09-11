@@ -26,6 +26,7 @@ func (client *Client) topLevelType(path string) PathKind {
 	}
 }
 
+// FilterPaths reduces an array of paths to only include the specified type (leaf vs node)
 func (client *Client) FilterPaths(paths []string, kind PathKind) (filtered []string) {
 	for _, path := range paths {
 		if client.GetType(path) == kind {
