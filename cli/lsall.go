@@ -68,7 +68,7 @@ func (cmd *ListAllCommand) Parse(args []string) error {
 	return nil
 }
 
-// Run executes 'ls' with given ListCommand's parameters
+// Run executes 'ls' with given ListAllCommand's parameters
 func (cmd *ListAllCommand) Run() int {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.args.Path)
 	result, err := cmd.client.ListAll(newPwd)
