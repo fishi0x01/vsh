@@ -21,15 +21,10 @@ github.com/bgentry/speakeasy
 github.com/c-bata/go-prompt
 # github.com/cenkalti/backoff/v3 v3.0.0
 github.com/cenkalti/backoff/v3
-# github.com/cnlubo/promptx v0.0.0-20190626092511-0fff67c60c75
-## explicit
-github.com/cnlubo/promptx
-github.com/cnlubo/promptx/list
-github.com/cnlubo/promptx/utils
 # github.com/cosiner/argv v0.1.0
 ## explicit
 github.com/cosiner/argv
-# github.com/fatih/color v1.11.0
+# github.com/fatih/color v1.13.0
 ## explicit
 github.com/fatih/color
 # github.com/fatih/structs v1.1.0
@@ -61,14 +56,14 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
-# github.com/hashicorp/vault v1.8.3
+# github.com/hashicorp/vault v1.8.4
 ## explicit
 github.com/hashicorp/vault/command/config
 github.com/hashicorp/vault/command/token
 # github.com/hashicorp/vault/api v1.1.2-0.20210713235431-1fc8af4c041f
 ## explicit
 github.com/hashicorp/vault/api
-# github.com/hashicorp/vault/sdk v0.2.2-0.20210927220632-193e27e9cc1e
+# github.com/hashicorp/vault/sdk v0.2.2-0.20211005222123-93e045565e4a
 github.com/hashicorp/vault/sdk/helper/compressutil
 github.com/hashicorp/vault/sdk/helper/consts
 github.com/hashicorp/vault/sdk/helper/hclutil
@@ -82,11 +77,12 @@ github.com/imdario/mergo
 # github.com/logrusorgru/aurora v0.0.0-20190803045625-94edacc10f9b
 ## explicit
 github.com/logrusorgru/aurora
-# github.com/mattn/go-colorable v0.1.8
+# github.com/mattn/go-colorable v0.1.11
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.12
+# github.com/mattn/go-isatty v0.0.14
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.4
+## explicit
 github.com/mattn/go-runewidth
 # github.com/mattn/go-tty v0.0.0-20190424173100-523744f04859
 ## explicit
@@ -101,15 +97,11 @@ github.com/mitchellh/go-homedir
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.1
 github.com/mitchellh/reflectwalk
-# github.com/mritd/readline v0.0.0-20190430155141-1af16399dc52
-github.com/mritd/readline
 # github.com/natefinch/atomic v0.0.0-20150920032501-a62ce929ffcc
 github.com/natefinch/atomic
 # github.com/pierrec/lz4 v2.5.2+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
-# github.com/pkg/errors v0.9.1
-github.com/pkg/errors
 # github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942
 ## explicit
 github.com/pkg/term/termios
@@ -132,7 +124,7 @@ golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
-# golang.org/x/sys v0.0.0-20210514084401-e8d321eab015
+# golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 # golang.org/x/text v0.3.6
