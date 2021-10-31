@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 
-	"github.com/cnlubo/promptx"
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
 )
@@ -104,8 +103,7 @@ func (cmd *AddCommand) addKeyValue(path string, key string, value string) error 
 	data[key] = value
 	secret.SetData(data)
 	if cmd.args.Confirm == false && cmd.args.DryRun == false {
-		p := promptx.NewDefaultConfirm("Write changes to Vault?", false)
-		result, err := p.Run()
+		result, err := askForConfirmation("Write changes to Vault?")
 		if err != nil {
 			return fmt.Errorf("Error prompting for confirmation")
 		}

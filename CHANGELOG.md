@@ -2,6 +2,10 @@
 
 ## master - unreleased
 
+ENHANCEMENTS:
+
+* Remove bad dependency and patch dependencies ([#101](https://github.com/fishi0x01/vsh/pull/101))
+
 ## v0.12.1 (October, 06, 2021)
 
 ENHANCEMENTS:

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cnlubo/promptx"
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
 )
@@ -152,8 +151,7 @@ func (cmd *ReplaceCommand) findMatches(filePaths []string) (matchesByPath map[st
 func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int {
 	if len(matchesByPath) > 0 {
 		if cmd.args.Confirm == false && cmd.args.DryRun == false {
-			p := promptx.NewDefaultConfirm("Write changes to Vault?", false)
-			result, err := p.Run()
+			result, err := askForConfirmation("Write changes to Vault?")
 			if err != nil {
 				return 1
 			}
