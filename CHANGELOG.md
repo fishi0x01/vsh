@@ -5,6 +5,7 @@
 ENHANCEMENTS:
 
 * Remove bad dependency and patch dependencies ([#101](https://github.com/fishi0x01/vsh/pull/101))
+* bump go version 1.17 and patch dependencies ([#102](https://github.com/fishi0x01/vsh/pull/102))
 
 ## v0.12.1 (October, 06, 2021)
 

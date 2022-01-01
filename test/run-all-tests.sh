@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e # required to fail test suite when a single test fails
 
-VAULT_VERSIONS=("1.8.3" "1.0.0")
+VAULT_VERSIONS=("1.9.2" "1.0.0")
 KV_BACKENDS=("KV1" "KV2")
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
