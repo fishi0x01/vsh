@@ -63,5 +63,5 @@ clean: ## Remove builds and vsh related docker containers
 
 .PHONY: vendor
 vendor: ## synch dependencies in vendor/ directory
-	go mod tidy
+	go mod tidy -compat=1.17
 	go mod vendor

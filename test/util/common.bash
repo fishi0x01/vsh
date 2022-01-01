@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export VAULT_VERSION=${VAULT_VERSION:-"1.8.3"}
+export VAULT_VERSION=${VAULT_VERSION:-"1.9.2"}
 export VAULT_CONTAINER_NAME="vsh-integration-test-vault"
 export VAULT_HOST_PORT=${VAULT_HOST_PORT:-"8888"}
 
