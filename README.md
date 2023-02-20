@@ -125,7 +125,7 @@ Contributions in any form are always welcome! Without contributions from the com
 
 Requirements:
 
-- `golang` (`>= v1.17`)
+- `golang` (`>= v1.19`)
 - `docker` for integration testing
 - `make` for simplified commands
 
