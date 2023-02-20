@@ -4,6 +4,14 @@
 This library provides a stackdriver sink for applications instrumented with the
 [go-metrics](https://github.com/armon/go-metrics) library.
 
+## 🚨 Warning
+
+__This is not an officially supported Google product.__
+
+In general the author of this package would recommend instrumenting custom metrics for new code by following the [official GCP documentation](https://cloud.google.com/monitoring/custom-metrics), especially for new applications.
+
+This package is intended as a way to publish metrics for applications that are _already_ instrumented with `go-metrics` without having to use a sidecar process like [stackdriver-prometheus-sidecar](https://github.com/Stackdriver/stackdriver-prometheus-sidecar).
+
 ## Details
 
 [stackdriver.NewSink](https://godoc.org/github.com/google/go-metrics-stackdriver#NewSink)'s return value satisfies the go-metrics library's [MetricSink](https://godoc.org/github.com/armon/go-metrics#MetricSink) interface. When providing a `stackdriver.Sink` to libraries and applications instrumented against `MetricSink`, the metrics will be aggregated within this library and written to stackdriver as [Generic Task](https://cloud.google.com/monitoring/api/resources#tag_generic_task) timeseries metrics.
@@ -28,6 +36,3 @@ The [full example](example/main.go) can be run from a cloud shell console to tes
 You can also try out the example using Cloud Run!
 
 [![Run on Google Cloud](https://storage.googleapis.com/cloudrun/button.svg)](https://console.cloud.google.com/cloudshell/editor?shellonly=true&cloudshell_image=gcr.io/cloudrun/button&cloudshell_git_repo=https://github.com/google/go-metrics-stackdriver.git&cloudshell_working_dir=example)
-
-
-__This is not an officially supported Google product.__

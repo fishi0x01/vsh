@@ -23,9 +23,12 @@ import (
 // if the old one could not be deleted.
 //
 // Supported options: WithEnvironmentCredentials, WithSharedCredentials,
-// WithAwsSession, WithUsername, WithValidityCheckTimeout. Note that WithValidityCheckTimeout
-// here, when non-zero, controls the WithValidityCheckTimeout option on access key
-// creation. See CreateAccessKey for more details.
+// WithAwsSession, WithUsername, WithValidityCheckTimeout, WithIAMAPIFunc,
+// WithSTSAPIFunc
+//
+// Note that WithValidityCheckTimeout here, when non-zero, controls the
+// WithValidityCheckTimeout option on access key creation. See CreateAccessKey
+// for more details.
 func (c *CredentialsConfig) RotateKeys(opt ...Option) error {
 	if c.AccessKey == "" || c.SecretKey == "" {
 		return errors.New("cannot rotate credentials when either access_key or secret_key is empty")
@@ -64,7 +67,8 @@ func (c *CredentialsConfig) RotateKeys(opt ...Option) error {
 // CreateAccessKey creates a new access/secret key pair.
 //
 // Supported options: WithEnvironmentCredentials, WithSharedCredentials,
-// WithAwsSession, WithUsername, WithValidityCheckTimeout
+// WithAwsSession, WithUsername, WithValidityCheckTimeout, WithIAMAPIFunc,
+// WithSTSAPIFunc
 //
 // When WithValidityCheckTimeout is non-zero, it specifies a timeout to wait on
 // the created credentials to be valid and ready for use.
@@ -74,17 +78,9 @@ func (c *CredentialsConfig) CreateAccessKey(opt ...Option) (*iam.CreateAccessKey
 		return nil, fmt.Errorf("error reading options in CreateAccessKey: %w", err)
 	}
 
-	sess := opts.withAwsSession
-	if sess == nil {
-		sess, err = c.GetSession(opt...)
-		if err != nil {
-			return nil, fmt.Errorf("error calling GetSession: %w", err)
-		}
-	}
-
-	client := iam.New(sess)
-	if client == nil {
-		return nil, errors.New("could not obtain iam client from session")
+	client, err := c.IAMClient(opt...)
+	if err != nil {
+		return nil, fmt.Errorf("error loading IAM client: %w", err)
 	}
 
 	var getUserInput iam.GetUserInput
@@ -112,8 +108,11 @@ func (c *CredentialsConfig) CreateAccessKey(opt ...Option) (*iam.CreateAccessKey
 	if err != nil {
 		return nil, fmt.Errorf("error calling aws.CreateAccessKey: %w", err)
 	}
-	if createAccessKeyRes.AccessKey == nil {
+	if createAccessKeyRes == nil {
 		return nil, fmt.Errorf("nil response from aws.CreateAccessKey")
+	}
+	if createAccessKeyRes.AccessKey == nil {
+		return nil, fmt.Errorf("nil access key in response from aws.CreateAccessKey")
 	}
 	if createAccessKeyRes.AccessKey.AccessKeyId == nil || createAccessKeyRes.AccessKey.SecretAccessKey == nil {
 		return nil, fmt.Errorf("nil AccessKeyId or SecretAccessKey returned from aws.CreateAccessKey")
@@ -128,7 +127,10 @@ func (c *CredentialsConfig) CreateAccessKey(opt ...Option) (*iam.CreateAccessKey
 			SecretKey: *createAccessKeyRes.AccessKey.SecretAccessKey,
 		}
 
-		if _, err := newC.GetCallerIdentity(WithValidityCheckTimeout(opts.withValidityCheckTimeout)); err != nil {
+		if _, err := newC.GetCallerIdentity(
+			WithValidityCheckTimeout(opts.withValidityCheckTimeout),
+			WithSTSAPIFunc(opts.withSTSAPIFunc),
+		); err != nil {
 			return nil, fmt.Errorf("error verifying new credentials: %w", err)
 		}
 	}
@@ -139,24 +141,16 @@ func (c *CredentialsConfig) CreateAccessKey(opt ...Option) (*iam.CreateAccessKey
 // DeleteAccessKey deletes an access key.
 //
 // Supported options: WithEnvironmentCredentials, WithSharedCredentials,
-// WithAwsSession, WithUserName
+// WithAwsSession, WithUserName, WithIAMAPIFunc
 func (c *CredentialsConfig) DeleteAccessKey(accessKeyId string, opt ...Option) error {
 	opts, err := getOpts(opt...)
 	if err != nil {
 		return fmt.Errorf("error reading options in RotateKeys: %w", err)
 	}
 
-	sess := opts.withAwsSession
-	if sess == nil {
-		sess, err = c.GetSession(opt...)
-		if err != nil {
-			return fmt.Errorf("error calling GetSession: %w", err)
-		}
-	}
-
-	client := iam.New(sess)
-	if client == nil {
-		return errors.New("could not obtain iam client from session")
+	client, err := c.IAMClient(opt...)
+	if err != nil {
+		return fmt.Errorf("error loading IAM client: %w", err)
 	}
 
 	deleteAccessKeyInput := iam.DeleteAccessKeyInput{
@@ -230,17 +224,9 @@ func (c *CredentialsConfig) GetCallerIdentity(opt ...Option) (*sts.GetCallerIden
 		return nil, fmt.Errorf("error reading options in GetCallerIdentity: %w", err)
 	}
 
-	sess := opts.withAwsSession
-	if sess == nil {
-		sess, err = c.GetSession(opt...)
-		if err != nil {
-			return nil, fmt.Errorf("error calling GetSession: %w", err)
-		}
-	}
-
-	client := sts.New(sess)
-	if client == nil {
-		return nil, errors.New("could not obtain STS client from session")
+	client, err := c.STSClient(opt...)
+	if err != nil {
+		return nil, fmt.Errorf("error loading STS client: %w", err)
 	}
 
 	delay := time.Second
