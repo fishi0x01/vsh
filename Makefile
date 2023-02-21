@@ -61,7 +61,10 @@ clean: ## Remove builds and vsh related docker containers
 	docker rm -f vsh-integration-test-vault || true
 	rm ./build/* || true
 
+update-dependencies: ## Update all dependencies
+	go get -u
+
 .PHONY: vendor
 vendor: ## synch dependencies in vendor/ directory
-	go mod tidy -compat=1.17
+	go mod tidy -compat=1.19
 	go mod vendor

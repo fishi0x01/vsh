@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/textproto"
+	"regexp"
 	"strings"
 	"time"
 
@@ -27,6 +28,12 @@ type ListenerProfiling struct {
 	UnusedKeys                    UnusedKeyMap `hcl:",unusedKeyPositions"`
 	UnauthenticatedPProfAccess    bool         `hcl:"-"`
 	UnauthenticatedPProfAccessRaw interface{}  `hcl:"unauthenticated_pprof_access,alias:UnauthenticatedPProfAccessRaw"`
+}
+
+type ListenerInFlightRequestLogging struct {
+	UnusedKeys                       UnusedKeyMap `hcl:",unusedKeyPositions"`
+	UnauthenticatedInFlightAccess    bool         `hcl:"-"`
+	UnauthenticatedInFlightAccessRaw interface{}  `hcl:"unauthenticated_in_flight_requests_access,alias:unauthenticatedInFlightAccessRaw"`
 }
 
 // Listener is the listener configuration for the server.
@@ -55,8 +62,6 @@ type Listener struct {
 	TLSMaxVersion                    string      `hcl:"tls_max_version"`
 	TLSCipherSuites                  []uint16    `hcl:"-"`
 	TLSCipherSuitesRaw               string      `hcl:"tls_cipher_suites"`
-	TLSPreferServerCipherSuites      bool        `hcl:"-"`
-	TLSPreferServerCipherSuitesRaw   interface{} `hcl:"tls_prefer_server_cipher_suites"`
 	TLSRequireAndVerifyClientCert    bool        `hcl:"-"`
 	TLSRequireAndVerifyClientCertRaw interface{} `hcl:"tls_require_and_verify_client_cert"`
 	TLSClientCAFile                  string      `hcl:"tls_client_ca_file"`
@@ -89,8 +94,11 @@ type Listener struct {
 	SocketUser  string `hcl:"socket_user"`
 	SocketGroup string `hcl:"socket_group"`
 
-	Telemetry ListenerTelemetry `hcl:"telemetry"`
-	Profiling ListenerProfiling `hcl:"profiling"`
+	AgentAPI *AgentAPI `hcl:"agent_api"`
+
+	Telemetry              ListenerTelemetry              `hcl:"telemetry"`
+	Profiling              ListenerProfiling              `hcl:"profiling"`
+	InFlightRequestLogging ListenerInFlightRequestLogging `hcl:"inflight_requests_logging"`
 
 	// RandomPort is used only for some testing purposes
 	RandomPort bool `hcl:"-"`
@@ -104,6 +112,11 @@ type Listener struct {
 	// Custom Http response headers
 	CustomResponseHeaders    map[string]map[string]string `hcl:"-"`
 	CustomResponseHeadersRaw interface{}                  `hcl:"custom_response_headers"`
+}
+
+// AgentAPI allows users to select which parts of the Agent API they want enabled.
+type AgentAPI struct {
+	EnableQuit bool `hcl:"enable_quit"`
 }
 
 func (l *Listener) GoString() string {
@@ -154,6 +167,7 @@ func ParseListeners(result *SharedConfig, list *ast.ObjectList) error {
 			l.Type = strings.ToLower(l.Type)
 			switch l.Type {
 			case "tcp", "unix":
+				result.found(l.Type, l.Type)
 			default:
 				return multierror.Prefix(fmt.Errorf("unsupported listener type %q", l.Type), fmt.Sprintf("listeners.%d:", i))
 			}
@@ -214,14 +228,6 @@ func ParseListeners(result *SharedConfig, list *ast.ObjectList) error {
 				if l.TLSCipherSuites, err = tlsutil.ParseCiphers(l.TLSCipherSuitesRaw); err != nil {
 					return multierror.Prefix(fmt.Errorf("invalid value for tls_cipher_suites: %w", err), fmt.Sprintf("listeners.%d", i))
 				}
-			}
-
-			if l.TLSPreferServerCipherSuitesRaw != nil {
-				if l.TLSPreferServerCipherSuites, err = parseutil.ParseBool(l.TLSPreferServerCipherSuitesRaw); err != nil {
-					return multierror.Prefix(fmt.Errorf("invalid value for tls_prefer_server_cipher_suites: %w", err), fmt.Sprintf("listeners.%d", i))
-				}
-
-				l.TLSPreferServerCipherSuitesRaw = nil
 			}
 
 			if l.TLSRequireAndVerifyClientCertRaw != nil {
@@ -355,6 +361,17 @@ func ParseListeners(result *SharedConfig, list *ast.ObjectList) error {
 			}
 		}
 
+		// InFlight Request logging
+		{
+			if l.InFlightRequestLogging.UnauthenticatedInFlightAccessRaw != nil {
+				if l.InFlightRequestLogging.UnauthenticatedInFlightAccess, err = parseutil.ParseBool(l.InFlightRequestLogging.UnauthenticatedInFlightAccessRaw); err != nil {
+					return multierror.Prefix(fmt.Errorf("invalid value for inflight_requests_logging.unauthenticated_in_flight_requests_access: %w", err), fmt.Sprintf("listeners.%d", i))
+				}
+
+				l.InFlightRequestLogging.UnauthenticatedInFlightAccessRaw = ""
+			}
+		}
+
 		// CORS
 		{
 			if l.CorsEnabledRaw != nil {
@@ -395,7 +412,14 @@ func ParseListeners(result *SharedConfig, list *ast.ObjectList) error {
 
 // ParseSingleIPTemplate is used as a helper function to parse out a single IP
 // address from a config parameter.
+// If the input doesn't appear to contain the 'template' format,
+// it will return the specified input unchanged.
 func ParseSingleIPTemplate(ipTmpl string) (string, error) {
+	r := regexp.MustCompile("{{.*?}}")
+	if !r.MatchString(ipTmpl) {
+		return ipTmpl, nil
+	}
+
 	out, err := template.Parse(ipTmpl)
 	if err != nil {
 		return "", fmt.Errorf("unable to parse address template %q: %v", ipTmpl, err)

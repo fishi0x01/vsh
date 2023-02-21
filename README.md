@@ -115,7 +115,7 @@ Working on vault secrets can be critical, making quality and correct behavior a 
 That being said, `vsh` is still a small open source project, meaning we cannot give any guarantees.
 However, we put strong emphasis on test-driven development.
 Every PR is tested with an extensive [suite](test/suites) of integration tests.
-Vast majority of tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.9.2`, i.e., vault versions in between should also be compatible.
+Vast majority of tests run on KV1 and KV2 and every test runs against vault `1.0.0` and `1.12.3`, i.e., vault versions in between should also be compatible.
 
 ## Contributions
 
@@ -125,7 +125,7 @@ Contributions in any form are always welcome! Without contributions from the com
 
 Requirements:
 
-- `golang` (`>= v1.17`)
+- `golang` (`>= v1.19`)
 - `docker` for integration testing
 - `make` for simplified commands
 

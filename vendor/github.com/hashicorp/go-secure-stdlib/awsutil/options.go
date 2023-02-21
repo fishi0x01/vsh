@@ -42,6 +42,8 @@ type options struct {
 	withRegion                 string
 	withHttpClient             *http.Client
 	withValidityCheckTimeout   time.Duration
+	withIAMAPIFunc             IAMAPIFunc
+	withSTSAPIFunc             STSAPIFunc
 }
 
 func getDefaultOptions() options {
@@ -167,6 +169,24 @@ func WithHttpClient(with *http.Client) Option {
 func WithValidityCheckTimeout(with time.Duration) Option {
 	return func(o *options) error {
 		o.withValidityCheckTimeout = with
+		return nil
+	}
+}
+
+// WithIAMAPIFunc allows passing in an IAM interface constructor for mocking
+// the AWS IAM API.
+func WithIAMAPIFunc(with IAMAPIFunc) Option {
+	return func(o *options) error {
+		o.withIAMAPIFunc = with
+		return nil
+	}
+}
+
+// WithSTSAPIFunc allows passing in a STS interface constructor for mocking the
+// AWS STS API.
+func WithSTSAPIFunc(with STSAPIFunc) Option {
+	return func(o *options) error {
+		o.withSTSAPIFunc = with
 		return nil
 	}
 }

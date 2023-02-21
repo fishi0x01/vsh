@@ -2,10 +2,13 @@
 
 ## master - unreleased
 
+## v0.12.2 (February, 21, 2023)
+
 ENHANCEMENTS:
 
 * Remove bad dependency and patch dependencies ([#101](https://github.com/fishi0x01/vsh/pull/101))
 * bump go version 1.17 and patch dependencies ([#102](https://github.com/fishi0x01/vsh/pull/102))
+* bump go version 1.19 and patch dependencies ([#111](https://github.com/fishi0x01/vsh/pull/111))
 
 ## v0.12.1 (October, 06, 2021)
 

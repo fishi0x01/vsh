@@ -85,13 +85,13 @@ func MustParse(dest ...interface{}) *Parser {
 	err = p.Parse(flags())
 	switch {
 	case err == ErrHelp:
-		p.writeHelpForCommand(stdout, p.lastCmd)
+		p.writeHelpForSubcommand(stdout, p.lastCmd)
 		osExit(0)
 	case err == ErrVersion:
 		fmt.Fprintln(stdout, p.version)
 		osExit(0)
 	case err != nil:
-		p.failWithCommand(err.Error(), p.lastCmd)
+		p.failWithSubcommand(err.Error(), p.lastCmd)
 	}
 
 	return p
@@ -653,7 +653,11 @@ func (p *Parser) process(args []string) error {
 		}
 
 		if spec.required {
-			return fmt.Errorf("%s is required", name)
+			msg := fmt.Sprintf("%s is required", name)
+			if spec.env != "" {
+				msg += " (or environment variable " + spec.env + ")"
+			}
+			return errors.New(msg)
 		}
 		if spec.defaultVal != "" {
 			err := scalar.ParseValue(p.val(spec.dest), spec.defaultVal)
