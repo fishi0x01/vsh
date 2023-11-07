@@ -53,6 +53,10 @@ Download latest static binaries from [release page](https://github.com/fishi0x01
 In order to get a valid token, `vsh` uses vault's TokenHelper mechanism.
 That means `vsh` supports setting vault tokens via `~/.vault-token`, `VAULT_TOKEN` and external [token-helper](https://www.vaultproject.io/docs/commands/token-helper).
 
+## TLS
+
+Add tls certificate for server by setting `VAULT_CERT` environment variable to the `pem` certificate path.
+
 ## Token permission requirements
 
 `vsh` requires `List` permission on the operated paths.
