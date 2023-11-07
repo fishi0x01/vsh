@@ -55,7 +55,7 @@ That means `vsh` supports setting vault tokens via `~/.vault-token`, `VAULT_TOKE
 
 ## TLS
 
-Add tls certificate for server by setting `VAULT_CERT` environment variable to the `pem` certificate path.
+Add tls certificate for server by setting `VAULT_CACERT` environment variable to the `pem` certificate path.
 
 ## Token permission requirements
 

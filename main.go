@@ -150,7 +150,7 @@ func main() {
 		Addr:            os.Getenv("VAULT_ADDR"),
 		Token:           token,
 		StartPath:       os.Getenv("VAULT_PATH"),
-		CertificatePath: os.Getenv("VAULT_CERT"),
+		CertificatePath: os.Getenv("VAULT_CACERT"),
 	}
 
 	vaultClient, err = client.NewClient(conf)
