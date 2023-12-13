@@ -103,7 +103,7 @@ Use path auto-completion: true
 
 ## Non-interactive mode
 
-```
+```sh
 export VAULT_ADDR=<addr>
 export VAULT_TOKEN=<token>
 ./vsh -c "rm secret/dir/to/remove/"
