@@ -22,9 +22,10 @@ type Client struct {
 
 // VaultConfig container to keep parameters for Client configuration
 type VaultConfig struct {
-	Addr      string
-	Token     string
-	StartPath string
+	Addr            string
+	Token           string
+	StartPath       string
+	CertificatePath string
 }
 
 func verifyClientPwd(client *Client) (*Client, error) {
@@ -51,14 +52,22 @@ func verifyClientPwd(client *Client) (*Client, error) {
 
 // NewClient creates a new Client Vault wrapper
 func NewClient(conf *VaultConfig) (*Client, error) {
-	vault, err := api.NewClient(&api.Config{
+	config := &api.Config{
 		Address: conf.Addr,
-	})
+	}
+
+	if len(conf.CertificatePath) > 0 {
+		log.UserDebug("Configuring TLS to be " + conf.CertificatePath)
+		config.ConfigureTLS(&api.TLSConfig{
+			CAPath: conf.CertificatePath,
+		})
+	}
+
+	vault, err := api.NewClient(config)
 
 	if err != nil {
 		return nil, err
 	}
-
 	vault.SetToken(conf.Token)
 
 	permissions, err := vault.Sys().CapabilitiesSelf("sys/mounts")

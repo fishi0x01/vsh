@@ -147,9 +147,10 @@ func main() {
 	}
 
 	conf := &client.VaultConfig{
-		Addr:      os.Getenv("VAULT_ADDR"),
-		Token:     token,
-		StartPath: os.Getenv("VAULT_PATH"),
+		Addr:            os.Getenv("VAULT_ADDR"),
+		Token:           token,
+		StartPath:       os.Getenv("VAULT_PATH"),
+		CertificatePath: os.Getenv("VAULT_CACERT"),
 	}
 
 	vaultClient, err = client.NewClient(conf)
