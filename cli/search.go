@@ -10,6 +10,7 @@ import (
 
 	"github.com/andreyvit/diff"
 	"github.com/fatih/color"
+	"github.com/fishi0x01/vsh/client"
 )
 
 // SearchingCommand interface to describe a command that performs a search operation
@@ -257,4 +258,13 @@ func (s *Searcher) matchData(subject string) (matchPairs [][]int, replaced strin
 	}
 
 	return matchPairs, replaced
+}
+
+func (s *Searcher) grepPaths(c *client.Client, search string, paths []string) (matches []*Match, err error) {
+	return funcOnPaths(c, paths, func(secret *client.Secret) []*Match {
+		for k, v := range secret.GetData() {
+			matches = append(matches, s.DoSearch(secret.Path, k, fmt.Sprintf("%v", v))...)
+		}
+		return matches
+	})
 }

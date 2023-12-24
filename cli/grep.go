@@ -99,14 +99,12 @@ func (cmd *GrepCommand) Run() int {
 		return 1
 	}
 
-	for _, curPath := range filePaths {
-		matches, err := cmd.grepFile(cmd.args.Search, curPath)
-		if err != nil {
-			return 1
-		}
-		for _, match := range matches {
-			match.print(os.Stdout, MatchOutputHighlight)
-		}
+	matches, err := cmd.searcher.grepPaths(cmd.client, cmd.args.Search, filePaths)
+	if err != nil {
+		return 1
+	}
+	for _, match := range matches {
+		match.print(os.Stdout, MatchOutputHighlight)
 	}
 	return 0
 }
@@ -118,21 +116,4 @@ func (cmd *GrepCommand) GetSearchParams() SearchParameters {
 		Mode:     cmd.Mode,
 		IsRegexp: cmd.args.Regexp,
 	}
-}
-
-func (cmd *GrepCommand) grepFile(search string, path string) (matches []*Match, err error) {
-	matches = []*Match{}
-
-	if cmd.client.GetType(path) == client.LEAF {
-		secret, err := cmd.client.Read(path)
-		if err != nil {
-			return matches, err
-		}
-
-		for k, v := range secret.GetData() {
-			matches = append(matches, cmd.searcher.DoSearch(path, k, fmt.Sprintf("%v", v))...)
-		}
-	}
-
-	return matches, nil
 }
