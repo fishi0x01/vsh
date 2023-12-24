@@ -2,6 +2,8 @@ package client
 
 import (
 	"errors"
+	_"fmt"
+
 	"github.com/fishi0x01/vsh/log"
 )
 
