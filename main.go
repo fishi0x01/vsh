@@ -12,7 +12,6 @@ import (
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/completer"
 	"github.com/fishi0x01/vsh/log"
-	"github.com/hashicorp/vault/command/config"
 )
 
 var vaultClient *client.Client
@@ -110,15 +109,11 @@ func getCommand(args []string, commands *cli.Commands) (cmd cli.Command, err err
 func getVaultToken() (token string, err error) {
 	token = os.Getenv("VAULT_TOKEN")
 	if token == "" {
-		helper, ve := config.DefaultTokenHelper()
-		if ve != nil {
-			err = ve
-			return token, err
+		tok, err := getTokenFromHelper()
+		if err != nil {
+			return "", err
 		}
-		token, ve = helper.Get()
-		if ve != nil {
-			err = ve
-		}
+		token = tok
 	}
 	return token, err
 }
