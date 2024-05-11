@@ -67,5 +67,13 @@ update-dependencies: ## Update all dependencies
 
 .PHONY: vendor
 vendor: ## synch dependencies in vendor/ directory
-	go mod tidy -compat=1.19
+	go mod tidy
 	go mod vendor
+
+reinit-go-mod:
+	rm go.mod
+	rm go.sum
+	go mod init github.com/fishi0x01/vsh
+	go mod tidy
+	go mod vendor
+

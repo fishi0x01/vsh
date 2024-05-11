@@ -79,6 +79,11 @@ func (m *HashicorpCloudLocationLocation) ContextValidate(ctx context.Context, fo
 func (m *HashicorpCloudLocationLocation) contextValidateRegion(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Region != nil {
+
+		if swag.IsZero(m.Region) { // not required
+			return nil
+		}
+
 		if err := m.Region.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("region")

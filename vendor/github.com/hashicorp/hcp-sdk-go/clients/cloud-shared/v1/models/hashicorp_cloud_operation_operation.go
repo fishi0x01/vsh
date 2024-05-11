@@ -242,6 +242,11 @@ func (m *HashicorpCloudOperationOperation) ContextValidate(ctx context.Context, 
 func (m *HashicorpCloudOperationOperation) contextValidateError(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Error != nil {
+
+		if swag.IsZero(m.Error) { // not required
+			return nil
+		}
+
 		if err := m.Error.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("error")
@@ -258,6 +263,11 @@ func (m *HashicorpCloudOperationOperation) contextValidateError(ctx context.Cont
 func (m *HashicorpCloudOperationOperation) contextValidateLink(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Link != nil {
+
+		if swag.IsZero(m.Link) { // not required
+			return nil
+		}
+
 		if err := m.Link.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("link")
@@ -274,6 +284,11 @@ func (m *HashicorpCloudOperationOperation) contextValidateLink(ctx context.Conte
 func (m *HashicorpCloudOperationOperation) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Location != nil {
+
+		if swag.IsZero(m.Location) { // not required
+			return nil
+		}
+
 		if err := m.Location.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("location")
@@ -290,6 +305,11 @@ func (m *HashicorpCloudOperationOperation) contextValidateLocation(ctx context.C
 func (m *HashicorpCloudOperationOperation) contextValidateResponse(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Response != nil {
+
+		if swag.IsZero(m.Response) { // not required
+			return nil
+		}
+
 		if err := m.Response.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("response")
@@ -306,6 +326,11 @@ func (m *HashicorpCloudOperationOperation) contextValidateResponse(ctx context.C
 func (m *HashicorpCloudOperationOperation) contextValidateState(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.State != nil {
+
+		if swag.IsZero(m.State) { // not required
+			return nil
+		}
+
 		if err := m.State.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("state")

@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package mlock
 
 // This should be set by the OS-specific packages to tell whether LockMemory

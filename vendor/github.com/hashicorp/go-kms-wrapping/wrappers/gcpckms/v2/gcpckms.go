@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package gcpckms
 
 import (
@@ -72,13 +75,18 @@ func NewWrapper() *Wrapper {
 }
 
 // SetConfig sets the fields on the Wrapper object based on values from the
-// config parameter. Environment variables take precedence over values provided
+// config parameter.   Environment variables take precedence over values provided
 // in the config struct.
 //
 // Order of precedence for GCP credentials file:
 // * GOOGLE_CREDENTIALS environment variable
 // * `credentials` value from Value configuration file
-// * GOOGLE_APPLICATION_CREDENTIALS (https://developers.google.com/identity/protocols/application-default-credentials)
+// * GOOGLE_APPLICATION_CREDENTIALS
+// (https://developers.google.com/identity/protocols/application-default-credentials)
+//
+// Unless the WithKeyNotRequired(true) option is provided, as a result of
+// successful configuration, the wrapper's KeyId will be set to the primary
+// CryptoKeyVersion.
 func (s *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrapping.WrapperConfig, error) {
 	opts, err := getOpts(opt...)
 	if err != nil {
@@ -95,14 +103,14 @@ func (s *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrappin
 	// it error out there if none is found. This is here to establish precedence on
 	// non-default input methods.
 	switch {
-	case os.Getenv(EnvGcpCkmsWrapperCredsPath) != "":
+	case os.Getenv(EnvGcpCkmsWrapperCredsPath) != "" && !opts.Options.WithDisallowEnvVars:
 		s.credsPath = os.Getenv(EnvGcpCkmsWrapperCredsPath)
 	case opts.withCredentials != "":
 		s.credsPath = opts.withCredentials
 	}
 
 	switch {
-	case os.Getenv(EnvGcpCkmsWrapperProject) != "":
+	case os.Getenv(EnvGcpCkmsWrapperProject) != "" && !opts.Options.WithDisallowEnvVars:
 		s.project = os.Getenv(EnvGcpCkmsWrapperProject)
 	case opts.withProject != "":
 		s.project = opts.withProject
@@ -111,7 +119,7 @@ func (s *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrappin
 	}
 
 	switch {
-	case os.Getenv(EnvGcpCkmsWrapperLocation) != "":
+	case os.Getenv(EnvGcpCkmsWrapperLocation) != "" && !opts.Options.WithDisallowEnvVars:
 		s.location = os.Getenv(EnvGcpCkmsWrapperLocation)
 	case opts.withRegion != "":
 		s.location = opts.withRegion
@@ -120,9 +128,9 @@ func (s *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrappin
 	}
 
 	switch {
-	case os.Getenv(EnvGcpCkmsWrapperKeyRing) != "":
+	case os.Getenv(EnvGcpCkmsWrapperKeyRing) != "" && !opts.Options.WithDisallowEnvVars:
 		s.keyRing = os.Getenv(EnvGcpCkmsWrapperKeyRing)
-	case os.Getenv(EnvVaultGcpCkmsSealKeyRing) != "":
+	case os.Getenv(EnvVaultGcpCkmsSealKeyRing) != "" && !opts.Options.WithDisallowEnvVars:
 		s.keyRing = os.Getenv(EnvVaultGcpCkmsSealKeyRing)
 	case opts.withKeyRing != "":
 		s.keyRing = opts.withKeyRing
@@ -131,9 +139,9 @@ func (s *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrappin
 	}
 
 	switch {
-	case os.Getenv(EnvGcpCkmsWrapperCryptoKey) != "":
+	case os.Getenv(EnvGcpCkmsWrapperCryptoKey) != "" && !opts.Options.WithDisallowEnvVars:
 		s.cryptoKey = os.Getenv(EnvGcpCkmsWrapperCryptoKey)
-	case os.Getenv(EnvVaultGcpCkmsSealCryptoKey) != "":
+	case os.Getenv(EnvVaultGcpCkmsSealCryptoKey) != "" && !opts.Options.WithDisallowEnvVars:
 		s.cryptoKey = os.Getenv(EnvVaultGcpCkmsSealCryptoKey)
 	case opts.withCryptoKey != "":
 		s.cryptoKey = opts.withCryptoKey
@@ -157,10 +165,11 @@ func (s *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrappin
 		// Make sure user has permissions to encrypt or sign and check if key exists
 		if !s.keyNotRequired {
 			ctx := context.Background()
-			_, err := s.client.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: s.parentName})
+			k, err := s.client.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: s.parentName})
 			if err != nil {
 				return nil, fmt.Errorf("error checking key existence: %s", err)
 			}
+			s.currentKeyId.Store(k.GetPrimary().GetName())
 
 			permissions, err := s.client.ResourceIAM(s.parentName).TestPermissions(ctx, keyPermissions)
 			if err != nil {
@@ -191,7 +200,9 @@ func (s *Wrapper) Type(_ context.Context) (wrapping.WrapperType, error) {
 	return wrapping.WrapperTypeGcpCkms, nil
 }
 
-// KeyId returns the last known key id
+// KeyId returns the last known CryptoKeyVersion which is determined when the
+// wrappers is configured (Unless the WithKeyNotRequired(true) option is
+// provided during configuration) or after successful encryption operations.
 func (s *Wrapper) KeyId(_ context.Context) (string, error) {
 	return s.currentKeyId.Load().(string), nil
 }
@@ -199,6 +210,11 @@ func (s *Wrapper) KeyId(_ context.Context) (string, error) {
 // Encrypt is used to encrypt the master key using the the AWS CMK.
 // This returns the ciphertext, and/or any errors from this
 // call. This should be called after s.client has been instantiated.
+// After a successful call, the wrapper's KeyId will be set to the key's id +
+// it's version (example of the version appended at the very end of the key's id
+// projects/<proj-id>/locations/<location-id>/keyRings/<keyring-id>/cryptoKeys/<key-id>/cryptoKeyVersions/<key-version-id>).
+// Note: only the key's id (without it's version) is used when making GCP
+// Encrypt/Decrypt calls.
 func (s *Wrapper) Encrypt(ctx context.Context, plaintext []byte, opt ...wrapping.Option) (*wrapping.BlobInfo, error) {
 	if plaintext == nil {
 		return nil, errors.New("given plaintext for encryption is nil")

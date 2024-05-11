@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package awsutil
 
 import (
@@ -5,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hashicorp/go-hclog"
 )
@@ -28,22 +32,30 @@ type Option func(*options) error
 
 // options = how options are represented
 type options struct {
-	withEnvironmentCredentials bool
-	withSharedCredentials      bool
-	withAwsSession             *session.Session
-	withClientType             string
-	withUsername               string
-	withAccessKey              string
-	withSecretKey              string
-	withLogger                 hclog.Logger
-	withStsEndpoint            string
-	withIamEndpoint            string
-	withMaxRetries             *int
-	withRegion                 string
-	withHttpClient             *http.Client
-	withValidityCheckTimeout   time.Duration
-	withIAMAPIFunc             IAMAPIFunc
-	withSTSAPIFunc             STSAPIFunc
+	withEnvironmentCredentials  bool
+	withSharedCredentials       bool
+	withAwsSession              *session.Session
+	withClientType              string
+	withUsername                string
+	withAccessKey               string
+	withSecretKey               string
+	withLogger                  hclog.Logger
+	withStsEndpoint             string
+	withIamEndpoint             string
+	withMaxRetries              *int
+	withRegion                  string
+	withRoleArn                 string
+	withRoleSessionName         string
+	withRoleExternalId          string
+	withRoleTags                map[string]string
+	withWebIdentityTokenFile    string
+	withWebIdentityToken        string
+	withSkipWebIdentityValidity bool
+	withWebIdentityTokenFetcher stscreds.TokenFetcher
+	withHttpClient              *http.Client
+	withValidityCheckTimeout    time.Duration
+	withIAMAPIFunc              IAMAPIFunc
+	withSTSAPIFunc              STSAPIFunc
 }
 
 func getDefaultOptions() options {
@@ -51,6 +63,85 @@ func getDefaultOptions() options {
 		withEnvironmentCredentials: true,
 		withSharedCredentials:      true,
 		withClientType:             "iam",
+	}
+}
+
+// WithRoleArn allows passing a role arn to use when
+// creating either a web identity role provider
+// or a ec2-instance role provider.
+func WithRoleArn(with string) Option {
+	return func(o *options) error {
+		o.withRoleArn = with
+		return nil
+	}
+}
+
+// WithRoleSessionName allows passing a session name to use when
+// creating either a web identity role provider
+// or a ec2-instance role provider.
+// If set, the RoleARN must be set.
+func WithRoleSessionName(with string) Option {
+	return func(o *options) error {
+		o.withRoleSessionName = with
+		return nil
+	}
+}
+
+// WithRoleExternalId allows passing a external id to use when
+// creating a ec2-instance role provider.
+// If not set, the role will be assumed in the same account.
+// If set, the RoleARN must be set.
+func WithRoleExternalId(with string) Option {
+	return func(o *options) error {
+		o.withRoleExternalId = with
+		return nil
+	}
+}
+
+// WithRoleTags allows passing tags to use when
+// creating a ec2-instance role provider.
+// If set, the RoleARN must be set.
+func WithRoleTags(with map[string]string) Option {
+	return func(o *options) error {
+		o.withRoleTags = with
+		return nil
+	}
+}
+
+// WithWebIdentityTokenFile allows passing a web identity token file to use for
+// the assumed role. If set, the RoleARN must be set.
+func WithWebIdentityTokenFile(with string) Option {
+	return func(o *options) error {
+		o.withWebIdentityTokenFile = with
+		return nil
+	}
+}
+
+// WithWebIdentityToken allows passing a web identity token to use for the
+// assumed role. If set, the RoleARN must be set.
+func WithWebIdentityToken(with string) Option {
+	return func(o *options) error {
+		o.withWebIdentityToken = with
+		return nil
+	}
+}
+
+// WithWebIdentityTokenFetcher allows passing an STS TokenFetcher which
+// allows the AWS SDK client automatically to refresh the web identity token
+// from any source.
+func WithWebIdentityTokenFetcher(with stscreds.TokenFetcher) Option {
+	return func(o *options) error {
+		o.withWebIdentityTokenFetcher = with
+		return nil
+	}
+}
+
+// WithSkipWebIdentityValidity allows controlling whether the validity check is
+// skipped for the web identity provider
+func WithSkipWebIdentityValidity(with bool) Option {
+	return func(o *options) error {
+		o.withSkipWebIdentityValidity = with
+		return nil
 	}
 }
 

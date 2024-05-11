@@ -91,6 +91,11 @@ func (m *GrpcGatewayRuntimeError) contextValidateDetails(ctx context.Context, fo
 	for i := 0; i < len(m.Details); i++ {
 
 		if m.Details[i] != nil {
+
+			if swag.IsZero(m.Details[i]) { // not required
+				return nil
+			}
+
 			if err := m.Details[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("details" + "." + strconv.Itoa(i))

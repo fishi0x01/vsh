@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package awsutil
 
 import (
@@ -22,6 +25,8 @@ type MockIAM struct {
 	CreateAccessKeyOutput *iam.CreateAccessKeyOutput
 	CreateAccessKeyError  error
 	DeleteAccessKeyError  error
+	ListAccessKeysOutput  *iam.ListAccessKeysOutput
+	ListAccessKeysError   error
 	GetUserOutput         *iam.GetUserOutput
 	GetUserError          error
 }
@@ -52,6 +57,22 @@ func WithCreateAccessKeyError(e error) MockIAMOption {
 func WithDeleteAccessKeyError(e error) MockIAMOption {
 	return func(m *MockIAM) error {
 		m.DeleteAccessKeyError = e
+		return nil
+	}
+}
+
+// WithListAccessKeysOutput sets the output for the ListAccessKeys method.
+func WithListAccessKeysOutput(o *iam.ListAccessKeysOutput) MockIAMOption {
+	return func(m *MockIAM) error {
+		m.ListAccessKeysOutput = o
+		return nil
+	}
+}
+
+// WithListAccessKeysError sets the error output for the ListAccessKeys method.
+func WithListAccessKeysError(e error) MockIAMOption {
+	return func(m *MockIAM) error {
+		m.ListAccessKeysError = e
 		return nil
 	}
 }
@@ -97,6 +118,14 @@ func (m *MockIAM) CreateAccessKey(*iam.CreateAccessKeyInput) (*iam.CreateAccessK
 
 func (m *MockIAM) DeleteAccessKey(*iam.DeleteAccessKeyInput) (*iam.DeleteAccessKeyOutput, error) {
 	return &iam.DeleteAccessKeyOutput{}, m.DeleteAccessKeyError
+}
+
+func (m *MockIAM) ListAccessKeys(*iam.ListAccessKeysInput) (*iam.ListAccessKeysOutput, error) {
+	if m.ListAccessKeysError != nil {
+		return nil, m.ListAccessKeysError
+	}
+
+	return m.ListAccessKeysOutput, nil
 }
 
 func (m *MockIAM) GetUser(*iam.GetUserInput) (*iam.GetUserOutput, error) {

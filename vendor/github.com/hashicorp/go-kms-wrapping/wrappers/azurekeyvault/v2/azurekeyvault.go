@@ -1,18 +1,28 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package azurekeyvault
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
 	"strings"
 	"sync/atomic"
+	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
-	"github.com/Azure/go-autorest/autorest"
+	"golang.org/x/net/http2"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/go-hclog"
 	wrapping "github.com/hashicorp/go-kms-wrapping/v2"
@@ -42,7 +52,7 @@ type Wrapper struct {
 
 	environment    azure.Environment
 	resource       string
-	client         *keyvault.BaseClient
+	client         *azkeys.Client
 	logger         hclog.Logger
 	keyNotRequired bool
 	baseURL        string
@@ -67,7 +77,7 @@ func NewWrapper() *Wrapper {
 // * Environment variable
 // * Passed in config map
 // * Managed Service Identity for instance
-func (v *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrapping.WrapperConfig, error) {
+func (v *Wrapper) SetConfig(ctx context.Context, opt ...wrapping.Option) (*wrapping.WrapperConfig, error) {
 	opts, err := getOpts(opt...)
 	if err != nil {
 		return nil, err
@@ -156,21 +166,21 @@ func (v *Wrapper) SetConfig(_ context.Context, opt ...wrapping.Option) (*wrappin
 	v.baseURL = v.buildBaseURL()
 
 	if v.client == nil {
-		client, err := v.getKeyVaultClient()
+		client, err := v.getKeyVaultClient(nil)
 		if err != nil {
 			return nil, fmt.Errorf("error initializing Azure Key Vault wrapper client: %w", err)
 		}
 
 		if !v.keyNotRequired {
 			// Test the client connection using provided key ID
-			keyInfo, err := client.GetKey(context.Background(), v.baseURL, v.keyName, "")
+			keyInfo, err := client.GetKey(ctx, v.keyName, "", nil)
 			if err != nil {
 				return nil, fmt.Errorf("error fetching Azure Key Vault wrapper key information: %w", err)
 			}
 			if keyInfo.Key == nil {
 				return nil, errors.New("no key information returned")
 			}
-			v.currentKeyId.Store(ParseKeyVersion(to.String(keyInfo.Key.Kid)))
+			v.currentKeyId.Store(ParseKeyVersion(to.String((*string)(keyInfo.Key.KID))))
 		}
 
 		v.client = client
@@ -209,20 +219,20 @@ func (v *Wrapper) Encrypt(ctx context.Context, plaintext []byte, opt ...wrapping
 	if err != nil {
 		return nil, fmt.Errorf("error wrapping dat: %w", err)
 	}
-
 	// Encrypt the DEK using Key Vault
-	params := keyvault.KeyOperationsParameters{
-		Algorithm: keyvault.RSAOAEP256,
-		Value:     to.StringPtr(base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(env.Key)),
+	algo := azkeys.JSONWebKeyEncryptionAlgorithmRSAOAEP256
+	params := azkeys.KeyOperationsParameters{
+		Algorithm: &algo,
+		Value:     env.Key,
 	}
 	// Wrap key with the latest version for the key name
-	resp, err := v.client.WrapKey(ctx, v.buildBaseURL(), v.keyName, "", params)
+	resp, err := v.client.WrapKey(ctx, v.keyName, "", params, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	// Store the current key version
-	keyVersion := ParseKeyVersion(to.String(resp.Kid))
+	keyVersion := ParseKeyVersion(resp.KID.Version())
 	v.currentKeyId.Store(keyVersion)
 
 	ret := &wrapping.BlobInfo{
@@ -230,7 +240,7 @@ func (v *Wrapper) Encrypt(ctx context.Context, plaintext []byte, opt ...wrapping
 		Iv:         env.Iv,
 		KeyInfo: &wrapping.KeyInfo{
 			KeyId:      keyVersion,
-			WrappedKey: []byte(to.String(resp.Result)),
+			WrappedKey: resp.Result,
 		},
 	}
 
@@ -248,40 +258,25 @@ func (v *Wrapper) Decrypt(ctx context.Context, in *wrapping.BlobInfo, opt ...wra
 	}
 
 	// Unwrap the key
-	params := keyvault.KeyOperationsParameters{
-		Algorithm: keyvault.RSAOAEP256,
-		Value:     to.StringPtr(string(in.KeyInfo.WrappedKey)),
-	}
-	resp, err := v.client.UnwrapKey(ctx, v.buildBaseURL(), v.keyName, in.KeyInfo.KeyId, params)
+	wrappedBytes, err := base64.RawURLEncoding.DecodeString(string(in.KeyInfo.WrappedKey))
 	if err != nil {
-		return nil, err
+		// legacy unwrap as the key used to be stored base64 encoded and this is now handled in the json marshalling
+		// if it fails, the key is not encoded and can be used directly
+		wrappedBytes = in.KeyInfo.WrappedKey
+	}
+	algo := azkeys.JSONWebKeyEncryptionAlgorithmRSAOAEP256
+	params := azkeys.KeyOperationsParameters{
+		Algorithm: &algo,
+		Value:     wrappedBytes,
 	}
 
-	keyBytes, err := base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString(to.String(resp.Result))
+	resp, err := v.client.UnwrapKey(ctx, v.keyName, in.KeyInfo.KeyId, params, nil)
 	if err != nil {
 		return nil, err
-	}
-
-	// XXX: Workaround: Azure Managed HSM KeyVault's REST API request parser
-	// changes the encrypted key to include an extra NULL byte at the end.
-	// This looks like the base64 of the symmetric AES wrapping key above is
-	// changed from ...= to ...A. You'll get the error (when running Vault
-	// init / unseal operation):
-	// > failed to unseal barrier: failed to check for keyring: failed to create cipher: crypto/aes: invalid key size 33
-	// until this is fixed.
-	//  -> 16-byte / 128-bit AES key gets two padding characters, resulting
-	//     in two null bytes.
-	//  -> 24-byte / 196-bit AES key gets no padding and no null bytes.
-	//  -> 32-byte / 256-bit AES key (default) gets one padding character,
-	//     resulting in one null bytes.
-	if len(keyBytes) == 18 && keyBytes[16] == 0 && keyBytes[17] == 0 {
-		keyBytes = keyBytes[:16]
-	} else if len(keyBytes) == 33 && keyBytes[32] == 0 {
-		keyBytes = keyBytes[:32]
 	}
 
 	envInfo := &wrapping.EnvelopeInfo{
-		Key:        keyBytes,
+		Key:        resp.Result,
 		Iv:         in.Iv,
 		Ciphertext: in.Ciphertext,
 	}
@@ -292,39 +287,64 @@ func (v *Wrapper) buildBaseURL() string {
 	return fmt.Sprintf("https://%s.%s/", v.vaultName, v.environment.KeyVaultDNSSuffix)
 }
 
-func (v *Wrapper) getKeyVaultClient() (*keyvault.BaseClient, error) {
-	var authorizer autorest.Authorizer
+func (v *Wrapper) getKeyVaultClient(withCertPool *x509.CertPool) (*azkeys.Client, error) {
 	var err error
+	var cred azcore.TokenCredential
 
 	switch {
-	case v.clientID != "" && v.clientSecret != "":
-		config := auth.NewClientCredentialsConfig(v.clientID, v.clientSecret, v.tenantID)
-		config.AADEndpoint = v.environment.ActiveDirectoryEndpoint
-		config.Resource = strings.TrimSuffix(v.resource, "/")
-		authorizer, err = config.Authorizer()
+	// Use client secret if provided
+	case v.tenantID != "" && v.clientID != "" && v.clientSecret != "":
+		cred, err = azidentity.NewClientSecretCredential(v.tenantID, v.clientID, v.clientSecret, nil)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get client secret credentials %w", err)
 		}
-	// By default use MSI
+	// By default let Azure select existing credentials
 	default:
-		config := auth.NewMSIConfig()
-		config.Resource = strings.TrimSuffix(v.resource, "/")
-		if v.clientID != "" {
-			config.ClientID = v.clientID
-		}
-		authorizer, err = config.Authorizer()
+		cred, err = azidentity.NewDefaultAzureCredential(nil)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to acquire managed identity credentials %w", err)
 		}
 	}
 
-	client := keyvault.New()
-	client.Authorizer = authorizer
-	return &client, nil
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	customTransport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig: &tls.Config{
+			MinVersion:    tls.VersionTLS12,
+			Renegotiation: tls.RenegotiateFreelyAsClient,
+			RootCAs:       withCertPool,
+		},
+	}
+	if http2Transport, err := http2.ConfigureTransports(customTransport); err == nil {
+		// if the connection has been idle for 10 seconds, send a ping frame for a health check
+		http2Transport.ReadIdleTimeout = 10 * time.Second
+		// if there's no response to the ping within 2 seconds, close the connection
+		http2Transport.PingTimeout = 2 * time.Second
+	}
+
+	clientOpts := &azkeys.ClientOptions{
+		ClientOptions: azcore.ClientOptions{Transport: &http.Client{Transport: customTransport}},
+	}
+
+	client, err := azkeys.NewClient(v.baseURL, cred, clientOpts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create keyvault client %w", err)
+	}
+
+	return client, nil
 }
 
 // Client returns the AzureKeyVault client used by the wrapper.
-func (v *Wrapper) Client() *keyvault.BaseClient {
+func (v *Wrapper) Client() *azkeys.Client {
 	return v.client
 }
 

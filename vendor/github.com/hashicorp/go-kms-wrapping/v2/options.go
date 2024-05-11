@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package wrapping
 
 import (
@@ -61,6 +64,36 @@ func WithKeyId(with string) Option {
 	}
 }
 
+// WithKeyPurpose provides a common way to pass in a key purpose
+func WithKeyPurposes(purpose ...KeyPurpose) Option {
+	return func() interface{} {
+		return OptionFunc(func(o *Options) error {
+			o.WithKeyPurposes = purpose
+			return nil
+		})
+	}
+}
+
+// WithKeyType provides a common way to pass in a key type
+func WithKeyType(keyType KeyType) Option {
+	return func() interface{} {
+		return OptionFunc(func(o *Options) error {
+			o.WithKeyType = keyType
+			return nil
+		})
+	}
+}
+
+// WithRandomBytes provides a common way to pass in entropy
+func WithRandomBytes(b []byte) Option {
+	return func() interface{} {
+		return OptionFunc(func(o *Options) error {
+			o.WithRandomBytes = b
+			return nil
+		})
+	}
+}
+
 // WithConfigMap is an option accepted by wrappers at configuration time
 // and/or in other function calls to control wrapper-specific behavior.
 func WithConfigMap(with map[string]string) Option {
@@ -77,6 +110,46 @@ func WithIV(with []byte) Option {
 	return func() interface{} {
 		return OptionFunc(func(o *Options) error {
 			o.WithIv = with
+			return nil
+		})
+	}
+}
+
+// WithKeyEncoding provides a common way to pass in a key encoding
+func WithKeyEncoding(encoding KeyEncoding) Option {
+	return func() interface{} {
+		return OptionFunc(func(o *Options) error {
+			o.WithKeyEncoding = encoding
+			return nil
+		})
+	}
+}
+
+// WithWrappedKeyEncoding provides a common way to pass in a wrapped_key encoding
+func WithWrappedKeyEncoding(encoding KeyEncoding) Option {
+	return func() interface{} {
+		return OptionFunc(func(o *Options) error {
+			o.WithWrappedKeyEncoding = encoding
+			return nil
+		})
+	}
+}
+
+// WithDisallowEnvVars provides a common way to configure ignoring environment variables
+func WithDisallowEnvVars(disallowEnvVars bool) Option {
+	return func() interface{} {
+		return OptionFunc(func(o *Options) error {
+			o.WithDisallowEnvVars = disallowEnvVars
+			return nil
+		})
+	}
+}
+
+// WithoutHMAC disables the requirement for an HMAC to be included with the mechanism.
+func WithoutHMAC() Option {
+	return func() interface{} {
+		return OptionFunc(func(o *Options) error {
+			o.WithoutHmac = true
 			return nil
 		})
 	}
