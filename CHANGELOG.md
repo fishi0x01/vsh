@@ -2,11 +2,14 @@
 
 ## master - unreleased
 
+## v0.13.0 (May, 12, 2024)
+
 ENHANCEMENTS:
 
-* Support vault tls by cert path ([#112](https://github.com/fishi0x01/vsh/pull/112)) - Thank you [meridsa](https://github.com/meridsa)
+* support vault tls by cert path ([#112](https://github.com/fishi0x01/vsh/pull/112)) - Thank you [meridsa](https://github.com/meridsa)
 * shrink binary size ([#115](https://github.com/fishi0x01/vsh/pull/115)) - Thank you [kindy](https://github.com/kindy))
 * release minimized builds ([#116](https://github.com/fishi0x01/vsh/pull/116))
+* patch dependencies ([#118](https://github.com/fishi0x01/vsh/pull/118))
 
 ## v0.12.2 (February, 21, 2023)
 
