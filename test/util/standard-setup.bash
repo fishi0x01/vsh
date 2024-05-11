@@ -8,7 +8,7 @@ setup() {
         -e "VAULT_TOKEN=root" \
         -e "VAULT_DEV_ROOT_TOKEN_ID=root" \
         -e "VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200" \
-        "vault:${VAULT_VERSION}" &> /dev/null
+        "hashicorp/vault:${VAULT_VERSION}" &> /dev/null
     docker cp "$DIR/policy-no-root.hcl" ${VAULT_CONTAINER_NAME}:.
     docker cp "$DIR/policy-delete-only.hcl" ${VAULT_CONTAINER_NAME}:.
     # need some time for GH Actions CI
