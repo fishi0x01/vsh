@@ -1,9 +1,12 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package transit
 
 import (
+	"github.com/hashicorp/go-hclog"
 	"strconv"
 
-	"github.com/hashicorp/go-hclog"
 	wrapping "github.com/hashicorp/go-kms-wrapping/v2"
 )
 
@@ -70,6 +73,8 @@ func getOpts(opt ...wrapping.Option) (*options, error) {
 				if err != nil {
 					return nil, err
 				}
+			case "key_id_prefix":
+				opts.withKeyIdPrefix = v
 			case "token":
 				opts.withToken = v
 			}
@@ -108,6 +113,7 @@ type options struct {
 	withTlsServerName  string
 	withTlsSkipVerify  bool
 	withToken          string
+	withKeyIdPrefix    string
 
 	withLogger hclog.Logger
 }
@@ -241,6 +247,16 @@ func WithLogger(with hclog.Logger) wrapping.Option {
 	return func() interface{} {
 		return OptionFunc(func(o *options) error {
 			o.withLogger = with
+			return nil
+		})
+	}
+}
+
+// WithKeyIdPrefix specifies a prefix to prepend to the keyId (key version)
+func WithKeyIdPrefix(with string) wrapping.Option {
+	return func() interface{} {
+		return OptionFunc(func(o *options) error {
+			o.withKeyIdPrefix = with
 			return nil
 		})
 	}

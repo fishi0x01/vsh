@@ -1,9 +1,12 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 version: "3.8"
 
 services:
 
   vault-server:
-    image: vault:latest
+    image: vault:1.13.3
     ports:
       - "8200:8200"
     environment:

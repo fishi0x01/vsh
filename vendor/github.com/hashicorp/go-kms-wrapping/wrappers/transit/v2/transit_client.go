@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package transit
 
 import (
@@ -41,9 +44,9 @@ type TransitClient struct {
 func newTransitClient(logger hclog.Logger, opts *options) (*TransitClient, *wrapping.WrapperConfig, error) {
 	var mountPath, keyName string
 	switch {
-	case os.Getenv(EnvTransitWrapperMountPath) != "":
+	case os.Getenv(EnvTransitWrapperMountPath) != "" && !opts.Options.WithDisallowEnvVars:
 		mountPath = os.Getenv(EnvTransitWrapperMountPath)
-	case os.Getenv(EnvVaultTransitSealMountPath) != "":
+	case os.Getenv(EnvVaultTransitSealMountPath) != "" && !opts.Options.WithDisallowEnvVars:
 		mountPath = os.Getenv(EnvVaultTransitSealMountPath)
 	case opts.withMountPath != "":
 		mountPath = opts.withMountPath
@@ -52,9 +55,9 @@ func newTransitClient(logger hclog.Logger, opts *options) (*TransitClient, *wrap
 	}
 
 	switch {
-	case os.Getenv(EnvTransitWrapperKeyName) != "":
+	case os.Getenv(EnvTransitWrapperKeyName) != "" && !opts.Options.WithDisallowEnvVars:
 		keyName = os.Getenv(EnvTransitWrapperKeyName)
-	case os.Getenv(EnvVaultTransitSealKeyName) != "":
+	case os.Getenv(EnvVaultTransitSealKeyName) != "" && !opts.Options.WithDisallowEnvVars:
 		keyName = os.Getenv(EnvVaultTransitSealKeyName)
 	case opts.withKeyName != "":
 		keyName = opts.withKeyName
@@ -65,9 +68,9 @@ func newTransitClient(logger hclog.Logger, opts *options) (*TransitClient, *wrap
 	var disableRenewal bool
 	var disableRenewalRaw string
 	switch {
-	case os.Getenv(EnvTransitWrapperDisableRenewal) != "":
+	case os.Getenv(EnvTransitWrapperDisableRenewal) != "" && !opts.Options.WithDisallowEnvVars:
 		disableRenewalRaw = os.Getenv(EnvTransitWrapperDisableRenewal)
-	case os.Getenv(EnvVaultTransitSealDisableRenewal) != "":
+	case os.Getenv(EnvVaultTransitSealDisableRenewal) != "" && !opts.Options.WithDisallowEnvVars:
 		disableRenewalRaw = os.Getenv(EnvVaultTransitSealDisableRenewal)
 	case opts.withDisableRenewal != "":
 		disableRenewalRaw = opts.withDisableRenewal
@@ -82,7 +85,7 @@ func newTransitClient(logger hclog.Logger, opts *options) (*TransitClient, *wrap
 
 	var namespace string
 	switch {
-	case os.Getenv("VAULT_NAMESPACE") != "":
+	case os.Getenv("VAULT_NAMESPACE") != "" && !opts.Options.WithDisallowEnvVars:
 		namespace = os.Getenv("VAULT_NAMESPACE")
 	case opts.withNamespace != "":
 		namespace = opts.withNamespace

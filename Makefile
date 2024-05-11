@@ -41,10 +41,10 @@ get-bats: ## Download bats dependencies to test directory
 	mkdir -p test/bin/plugins/bats-assert
 	mkdir -p test/bin/plugins/bats-support
 	mkdir -p test/bin/plugins/bats-file
-	curl -sL https://github.com/bats-core/bats-core/archive/v1.2.0.tar.gz | tar xvz --strip 1 -C test/bin/core
+	curl -sL https://github.com/bats-core/bats-core/archive/v1.11.0.tar.gz | tar xvz --strip 1 -C test/bin/core
 	curl -sL https://github.com/bats-core/bats-assert/archive/v2.0.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-assert
 	curl -sL https://github.com/bats-core/bats-support/archive/v0.3.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-support
-	curl -sL https://github.com/bats-core/bats-file/archive/v0.2.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-file
+	curl -sL https://github.com/bats-core/bats-file/archive/v0.4.0.tar.gz | tar xvz --strip 1 -C test/bin/plugins/bats-file
 
 integration-tests: ## Run integration test suites (requires bats - see get-bats)
 	test/run-all-tests.sh
@@ -67,5 +67,13 @@ update-dependencies: ## Update all dependencies
 
 .PHONY: vendor
 vendor: ## synch dependencies in vendor/ directory
-	go mod tidy -compat=1.19
+	go mod tidy
 	go mod vendor
+
+reinit-go-mod: ## remove and re-create mod files and vendor dir
+	rm go.mod
+	rm go.sum
+	go mod init github.com/fishi0x01/vsh
+	go mod tidy
+	go mod vendor
+
