@@ -26,7 +26,7 @@ compile-releases: clean ## Compile vsh binaries for multiple platforms and archi
 	for GOOS in $(SUPPORTED_PLATFORMS); do \
 		for GOARCH in $(SUPPORTED_ARCHS); do \
 			GOOS=$$GOOS GOARCH=$$GOARCH \
-				go build -mod vendor -ldflags "-X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$${GOOS}_$${GOARCH}; \
+				go build -mod vendor -trimpath -ldflags "-s -w -X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$${GOOS}_$${GOARCH}; \
 				go build -mod vendor -tags 'notokenhelper' -trimpath -ldflags "-s -w -X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_notokenhelper_$${GOOS}_$${GOARCH}; \
 		done \
 	done
