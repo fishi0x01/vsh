@@ -43,6 +43,7 @@ setup() {
                     vault kv put ${kv_backend}/src/a/foo/bar value=2;
                     vault kv put ${kv_backend}/src/b/foo value=1;
                     vault kv put ${kv_backend}/src/b/foo/bar value=2;
+                    vault kv put ${kv_backend}/src/data data=2;
                     echo -n \"a spaced value\" | vault kv put ${kv_backend}/src/spaces/foo bar=-;
                     vault kv put ${kv_backend}/src/apostrophe/foo bar=steve\'s;
                     echo -n 'a \"quoted\" value' | vault kv put ${kv_backend}/src/quoted/foo bar=-"
