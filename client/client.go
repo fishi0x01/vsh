@@ -151,6 +151,16 @@ func (client *Client) List(absolutePath string) (result []string, err error) {
 	return result, err
 }
 
+// List elements at the given absolutePath, using the given client
+func (client *Client) ListAll(absolutePath string) (result []string, err error) {
+	if client.isTopLevelPath(absolutePath) {
+		result = client.topLevelTraverse()
+	} else {
+		result = client.lowLevelTraverse(normalizedVaultPath(absolutePath), false)
+	}
+	return result, err
+}
+
 // GetType returns the file type the given absolutePath points to. Possible return values are BACKEND, NODE, LEAF or NONE
 func (client *Client) GetType(absolutePath string) (kind PathKind) {
 	if client.isTopLevelPath(absolutePath) {
