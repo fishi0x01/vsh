@@ -120,7 +120,7 @@ func (cmd *AppendCommand) createDummySecret(target string) error {
 
 	dummy := make(map[string]interface{})
 	dummy["placeholder"] = struct{}{}
-	dummySecret := client.NewSecret(&api.Secret{Data: dummy})
+	dummySecret := client.NewSecret(&api.Secret{Data: dummy}, target)
 	if targetSecret == nil {
 		if err = cmd.client.Write(target, dummySecret); err != nil {
 			return err
@@ -150,7 +150,7 @@ func (cmd *AppendCommand) mergeSecrets(source string, target string) error {
 	}
 
 	// write
-	resultSecret := client.NewSecret(&api.Secret{Data: merged})
+	resultSecret := client.NewSecret(&api.Secret{Data: merged}, target)
 	if err := cmd.client.Write(target, resultSecret); err != nil {
 		fmt.Println(err)
 		return err
