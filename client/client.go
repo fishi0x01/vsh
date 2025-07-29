@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -50,6 +51,19 @@ func verifyClientPwd(client *Client) (*Client, error) {
 	return client, nil
 }
 
+func getMountOutput(path string, version int) (string, *api.MountOutput) {
+	if !strings.HasSuffix(path, "/") {
+		path = path + "/"
+	}
+	path = strings.TrimPrefix(path, "/")
+
+	return path, &api.MountOutput{
+		Type:        "kv",
+		Options:     map[string]string{"version": strconv.Itoa(version)},
+		Description: "KV version " + strconv.Itoa(version) + " mount",
+	}
+}
+
 // NewClient creates a new Client Vault wrapper
 func NewClient(conf *VaultConfig) (*Client, error) {
 	config := &api.Config{
@@ -72,11 +86,32 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 
 	permissions, err := vault.Sys().CapabilitiesSelf("sys/mounts")
 
-	var mounts map[string]*api.MountOutput
+	mounts := make(map[string]*api.MountOutput)
 	if sliceContains(permissions, "list") || sliceContains(permissions, "root") {
 		mounts, err = vault.Sys().ListMounts()
 	} else {
 		log.UserDebug("Cannot auto-discover mount backends: Token does not have list permission on sys/mounts")
+	}
+
+	if os.Getenv("VAULT_KV1_MOUNTS") != "" {
+		for _, mount := range strings.Split(os.Getenv("VAULT_KV1_MOUNTS"), ",") {
+			path, mountOutput := getMountOutput(mount, 1)
+			mounts[path] = mountOutput
+		}
+	}
+
+	if os.Getenv("VAULT_KV2_MOUNTS") != "" {
+		for _, mount := range strings.Split(os.Getenv("VAULT_KV2_MOUNTS"), ",") {
+			path, mountOutput := getMountOutput(mount, 2)
+			mounts[path] = mountOutput
+		}
+	}
+
+	if len(mounts) == 0 {
+		log.UserDebug("No KV mounts found or specified, adding default KV version 2 mount at /secrets")
+
+		// Add default KV version 2 mount at /secrets
+		_, mounts["secrets/"] = getMountOutput("secrets/", 2)
 	}
 
 	if err != nil {
