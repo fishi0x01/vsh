@@ -68,7 +68,10 @@ Commands which alter the data like `cp` or `mv`, additionally require `Read` and
 In order to reliably discover all available backends, ideally the vault token used by `vsh` has `List` permission on `sys/mount`. However, this is not a hard requirement.
 If the token doesn't have `List` permission on `sys/mount`, then `vsh` does not know the available backends beforehand.
 That means initially there won't be path auto-completion on the top (backend) level.
-Regardless, `vsh` will try with best-effort strategy to reliably determine the kv version of every entered path.
+
+You can manually specify a comma-delimited list of secrets mounts with the `VAULT_KV1_MOUNTS` and `VAULT_KV2_MOUNTS` environment variables.
+
+If none are found automatically or specified, a default KV2 mount at `secrets` will be configured.
 
 ## Interactive mode
 
