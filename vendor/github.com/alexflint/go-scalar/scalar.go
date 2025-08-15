@@ -108,13 +108,13 @@ func ParseValue(v reflect.Value, s string) error {
 		}
 		v.SetBool(x)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		x, err := strconv.ParseInt(s, 10, v.Type().Bits())
+		x, err := strconv.ParseInt(s, 0, v.Type().Bits())
 		if err != nil {
 			return err
 		}
 		v.SetInt(x)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		x, err := strconv.ParseUint(s, 10, v.Type().Bits())
+		x, err := strconv.ParseUint(s, 0, v.Type().Bits())
 		if err != nil {
 			return err
 		}
