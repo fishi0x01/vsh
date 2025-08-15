@@ -23,7 +23,7 @@ load ../../bin/plugins/bats-file/load
 
   echo "==== case: invalid verbosity level ===="
   run bash -c "VAULT_TOKEN=delete-only ${APP_BIN} -v NOTEXIST -c 'ls /KV2/src/a'"
-  assert_failure 255
+  assert_failure 2
   assert_line --partial "Not a valid verbosity level"
 
   echo "==== case: login with false token ===="

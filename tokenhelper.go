@@ -4,11 +4,11 @@
 package main
 
 import (
-	"github.com/hashicorp/vault/command/config"
+	"github.com/hashicorp/vault/api/cliconfig"
 )
 
 func getTokenFromHelper() (string, error) {
-	helper, err := config.DefaultTokenHelper()
+	helper, err := cliconfig.DefaultTokenHelper()
 	if err != nil {
 		return "", err
 	}

@@ -22,7 +22,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-
 	"github.com/go-jose/go-jose/v4/json"
 )
 
@@ -71,6 +70,12 @@ var (
 	// ErrUnprotectedNonce indicates that while parsing a JWS or JWE object, a
 	// nonce header parameter was included in an unprotected header object.
 	ErrUnprotectedNonce = errors.New("go-jose/go-jose: Nonce parameter included in unprotected header")
+
+	// ErrMissingX5cHeader indicates that the JWT header is missing x5c headers.
+	ErrMissingX5cHeader = errors.New("go-jose/go-jose: no x5c header present in message")
+
+	// ErrUnsupportedEllipticCurve indicates unsupported or unknown elliptic curve has been found.
+	ErrUnsupportedEllipticCurve = errors.New("go-jose/go-jose: unsupported/unknown elliptic curve")
 )
 
 // Key management algorithms
@@ -199,7 +204,7 @@ type Header struct {
 // not be validated with the given verify options.
 func (h Header) Certificates(opts x509.VerifyOptions) ([][]*x509.Certificate, error) {
 	if len(h.certificates) == 0 {
-		return nil, errors.New("go-jose/go-jose: no x5c header present in message")
+		return nil, ErrMissingX5cHeader
 	}
 
 	leaf := h.certificates[0]
@@ -501,7 +506,7 @@ func curveName(crv elliptic.Curve) (string, error) {
 	case elliptic.P521():
 		return "P-521", nil
 	default:
-		return "", fmt.Errorf("go-jose/go-jose: unsupported/unknown elliptic curve")
+		return "", ErrUnsupportedEllipticCurve
 	}
 }
 
