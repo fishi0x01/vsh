@@ -84,7 +84,7 @@ func (cmd *RemoveCommand) Run() int {
 			}
 		}
 	default:
-		log.UserError("Not a valid path for operation: %s", newPwd)
+		log.UserError("not a valid path for operation: %s", newPwd)
 		return 1
 	}
 

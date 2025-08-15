@@ -99,7 +99,7 @@ func transportSecrets(c *client.Client, source string, target string, transport 
 	case client.NODE:
 		runCommandWithTraverseTwoPaths(c, newSrcPwd, newTargetPwd, transport)
 	default:
-		log.UserError("Not a valid path for operation: %s", newSrcPwd)
+		log.UserError("not a valid path for operation: %s", newSrcPwd)
 		return 1
 	}
 

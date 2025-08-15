@@ -78,13 +78,13 @@ func (cmd *AddCommand) Run() int {
 
 	pathType := cmd.client.GetType(path)
 	if pathType != client.LEAF {
-		log.UserError("Not a valid path for operation: %s", path)
+		log.UserError("not a valid path for operation: %s", path)
 		return 1
 	}
 
 	err := cmd.addKeyValue(cmd.args.Path, cmd.args.Key, cmd.args.Value)
 	if err != nil {
-		log.UserError("Add failed: " + err.Error())
+		log.UserError("%s", err.Error())
 		return 1
 	}
 

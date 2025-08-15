@@ -101,7 +101,7 @@ func (cmd *AppendCommand) Run() int {
 
 	src := cmd.client.GetType(newSrcPwd)
 	if src != client.LEAF {
-		log.UserError("Not a valid path for operation: %s", newSrcPwd)
+		log.UserError("not a valid path for operation: %s", newSrcPwd)
 		return 1
 	}
 

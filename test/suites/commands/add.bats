@@ -23,7 +23,7 @@ load ../../bin/plugins/bats-assert/load
   echo "==== case: add existing key to existing path ===="
   run ${APP_BIN} -c "add --confirm value another ${KV_BACKEND}/src/a/foo"
   assert_failure
-  assert_output --partial "Key already exists at path: ${KV_BACKEND}/src/a/foo"
+  assert_output --partial "key already exists at path: ${KV_BACKEND}/src/a/foo"
 
   #######################################
   echo "==== case: overwrite existing key to existing path ===="
