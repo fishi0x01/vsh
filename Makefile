@@ -21,6 +21,12 @@ endif
 help: ## Prints help for targets with comments
 	@grep -E '^[a-zA-Z0-9.\ _-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+lint: ## Run golangci-lint for linting code
+	golangci-lint run
+
+format: ## format go code
+	gofmt -s -w $(shell find . -name '*.go' -not -path "./vendor/*")
+
 compile-releases: clean ## Compile vsh binaries for multiple platforms and architectures strictly using vendor directory
 	mkdir -p ./build/
 	for GOOS in $(SUPPORTED_PLATFORMS); do \

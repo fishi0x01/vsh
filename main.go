@@ -19,7 +19,6 @@ var completerInstance *completer.Completer
 
 var (
 	vshVersion    = ""
-	verbosity     = "INFO"
 	isInteractive = true
 )
 
@@ -50,7 +49,10 @@ func executor(in string) {
 
 	// edge cases
 	if len(args) == 0 {
-		fmt.Fprint(os.Stdout, "")
+		_, err := fmt.Fprint(os.Stdout, "")
+		if err != nil {
+			fmt.Printf("Error printing: %v", err)
+		}
 		if !isInteractive {
 			os.Exit(1)
 		}

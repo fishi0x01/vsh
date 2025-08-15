@@ -92,7 +92,7 @@ func NewSearcher(cmd SearchingCommand) (*Searcher, error) {
 			return nil, fmt.Errorf("cannot parse regex pattern")
 		}
 	}
-	if params.KeySelector != "" && params.IsRegexp == true {
+	if params.KeySelector != "" && params.IsRegexp {
 		keySelectorRe, err = regexp.Compile(params.KeySelector)
 		if err != nil {
 			return nil, fmt.Errorf("key-selector: %s", err)
@@ -154,19 +154,28 @@ func (match *Match) print(out io.Writer, format MatchOutput) {
 	case MatchOutputInline:
 		coloredKey := colorizeLineDiff(diff.CharacterDiff(match.key, match.replacedKey))
 		coloredValue := colorizeLineDiff(diff.CharacterDiff(match.value, match.replacedValue))
-		fmt.Fprintf(out, "%s> %s = %s\n", match.path, coloredKey, coloredValue)
+		_, err := fmt.Fprintf(out, "%s> %s = %s\n", match.path, coloredKey, coloredValue)
+		if err != nil {
+			fmt.Printf("Error printing: %v", err)
+		}
 	case MatchOutputDiff:
 		before := fmt.Sprintf(" %s> %s = %s\n", match.path, match.key, match.value)
 		after := fmt.Sprintf(" %s> %s = %s\n", match.path, match.replacedKey, match.replacedValue)
-		fmt.Fprint(out, diff.LineDiff(before, after)+"\n")
+		_, err := fmt.Fprint(out, diff.LineDiff(before, after)+"\n")
+		if err != nil {
+			fmt.Printf("Error printing: %v", err)
+		}
 	case MatchOutputHighlight:
-		fmt.Fprintf(out, "%s> %s = %s\n", match.path, highlightMatches(match.key, match.keyIndex), highlightMatches(match.value, match.valueIndex))
+		_, err := fmt.Fprintf(out, "%s> %s = %s\n", match.path, highlightMatches(match.key, match.keyIndex), highlightMatches(match.value, match.valueIndex))
+		if err != nil {
+			fmt.Printf("Error printing: %v", err)
+		}
 	}
 }
 
 // keySelectorMatches provides an array of start and end indexes of key selector matches
 func (s *Searcher) keySelectorMatches(k string) (matches [][]int) {
-	if s.cmd.GetSearchParams().IsRegexp == true {
+	if s.cmd.GetSearchParams().IsRegexp {
 		return s.keySelectorRe.FindAllStringIndex(k, -1)
 	}
 	if k == s.cmd.GetSearchParams().KeySelector {
@@ -240,7 +249,6 @@ func (s *Searcher) regexpMatchData(subject string, re *regexp.Regexp) (matchPair
 
 func (s *Searcher) matchData(subject string) (matchPairs [][]int, replaced string) {
 	replaced = subject
-	matchPairs = make([][]int, 0)
 
 	if s.cmd.GetSearchParams().IsRegexp {
 		matchPairs = s.regexpMatchData(subject, s.regexp)

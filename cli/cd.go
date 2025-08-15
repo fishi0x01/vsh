@@ -72,12 +72,12 @@ func (cmd *CdCommand) Run() int {
 	t := cmd.client.GetType(newPwd)
 
 	if t == client.NONE {
-		log.UserError("Not a valid path for operation: %s", newPwd)
+		log.UserError("not a valid path for operation: %s", newPwd)
 		return 1
 	}
 
 	if t == client.LEAF {
-		log.UserError("Not a valid path for operation: %s", newPwd)
+		log.UserError("not a valid path for operation: %s", newPwd)
 		return 1
 	}
 

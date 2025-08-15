@@ -79,7 +79,7 @@ func (cmd *CatCommand) Run() int {
 			log.UserInfo("%s = %s", k, v)
 		}
 	} else {
-		log.UserError("Not a valid path for operation: %s", absPath)
+		log.UserError("not a valid path for operation: %s", absPath)
 		return 1
 	}
 	return 0

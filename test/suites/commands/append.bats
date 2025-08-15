@@ -31,7 +31,7 @@ load ../../bin/plugins/bats-assert/load
   assert_failure 1
 
   echo "ensure proper error message"
-  assert_line --partial "Not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
+  assert_line --partial "not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
 
   #######################################
   echo "==== case: append value to existing destination with conflicting keys (default merge strategy) ===="

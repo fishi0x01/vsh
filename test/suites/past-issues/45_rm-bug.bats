@@ -13,7 +13,7 @@ load ../../bin/plugins/bats-assert/load
 
   run bash -c "VAULT_TOKEN=delete-only ${APP_BIN} -c 'ls /KV2/src/a/foo'"
   assert_failure 1
-  assert_line --partial "Not a valid path for operation: /KV2/src/a/foo"
+  assert_line --partial "not a valid path for operation: /KV2/src/a/foo"
 
   run bash -c "VAULT_TOKEN=delete-only ${APP_BIN} -c 'ls /KV2/src/a/foo/'"
   assert_success

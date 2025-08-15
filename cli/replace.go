@@ -88,16 +88,16 @@ func (cmd *ReplaceCommand) Parse(args []string) error {
 	if cmd.args.Path == "" {
 		cmd.args.Path = cmd.client.Pwd
 	}
-	if cmd.args.Keys == true {
+	if cmd.args.Keys {
 		cmd.Mode |= ModeKeys
 	}
-	if cmd.args.Values == true {
+	if cmd.args.Values {
 		cmd.Mode |= ModeValues
 	}
 	if cmd.Mode == 0 {
 		cmd.Mode = ModeKeys + ModeValues
 	}
-	if cmd.args.DryRun == true && cmd.args.Confirm == true {
+	if cmd.args.DryRun && cmd.args.Confirm {
 		cmd.args.Confirm = false
 	}
 
@@ -139,7 +139,7 @@ func (cmd *ReplaceCommand) findMatches(filePaths []string) (matchesByPath map[st
 		}
 		if len(matches) > 0 {
 			_, ok := matchesByPath[curPath]
-			if ok == false {
+			if !ok {
 				matchesByPath[curPath] = make([]*Match, 0)
 			}
 			matchesByPath[curPath] = append(matchesByPath[curPath], matches...)
@@ -150,19 +150,22 @@ func (cmd *ReplaceCommand) findMatches(filePaths []string) (matchesByPath map[st
 
 func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int {
 	if len(matchesByPath) > 0 {
-		if cmd.args.Confirm == false && cmd.args.DryRun == false {
+		if !cmd.args.Confirm && !cmd.args.DryRun {
 			result, err := askForConfirmation("Write changes to Vault?")
 			if err != nil {
 				return 1
 			}
 			cmd.args.Confirm = result
 		}
-		if cmd.args.Confirm == false {
+		if !cmd.args.Confirm {
 			fmt.Println("Skipping write.")
 			return 0
 		}
 		fmt.Println("Writing!")
-		cmd.WriteReplacements(matchesByPath)
+		err := cmd.WriteReplacements(matchesByPath)
+		if err != nil {
+			fmt.Printf("Error writing replacement %s", err)
+		}
 	} else {
 		fmt.Println("No matches found to replace.")
 	}

@@ -3,7 +3,6 @@
 [![Latest release](https://img.shields.io/github/release/fishi0x01/vsh.svg)](https://github.com/fishi0x01/vsh/releases/latest)
 ![CI](https://github.com/fishi0x01/vsh/workflows/CI/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fishi0x01/vsh)](https://goreportcard.com/report/github.com/fishi0x01/vsh)
-[![Code Climate](https://codeclimate.com/github/fishi0x01/vsh/badges/gpa.svg)](https://codeclimate.com/github/fishi0x01/vsh)
 
 ![vsh usage](https://user-images.githubusercontent.com/10799507/66355982-9872a980-e969-11e9-8ca4-6a2ff215f835.gif)
 
@@ -143,6 +142,8 @@ make compile
 make get-bats
 make integration-tests
 ```
+
+Further, we provide a [`.mise.toml`](https://mise.jdx.dev/getting-started.html) to quickly setup the go environment.
 
 ### Debugging
 

@@ -65,7 +65,7 @@ func (cmd *AddCommand) Parse(args []string) error {
 	if err != nil {
 		return err
 	}
-	if cmd.args.DryRun == true && cmd.args.Confirm == true {
+	if cmd.args.DryRun && cmd.args.Confirm {
 		cmd.args.Confirm = false
 	}
 
@@ -78,13 +78,13 @@ func (cmd *AddCommand) Run() int {
 
 	pathType := cmd.client.GetType(path)
 	if pathType != client.LEAF {
-		log.UserError("Not a valid path for operation: %s", path)
+		log.UserError("not a valid path for operation: %s", path)
 		return 1
 	}
 
 	err := cmd.addKeyValue(cmd.args.Path, cmd.args.Key, cmd.args.Value)
 	if err != nil {
-		log.UserError("Add failed: " + err.Error())
+		log.UserError("%s", err.Error())
 		return 1
 	}
 
@@ -94,22 +94,22 @@ func (cmd *AddCommand) Run() int {
 func (cmd *AddCommand) addKeyValue(path string, key string, value string) error {
 	secret, err := cmd.client.Read(path)
 	if err != nil {
-		return fmt.Errorf("Read failed: %s", err)
+		return fmt.Errorf("read failed: %v", err)
 	}
 	data := secret.GetData()
 	if _, ok := data[key]; ok && !cmd.args.Force {
-		return fmt.Errorf("Key already exists at path: %s", path)
+		return fmt.Errorf("key already exists at path: %s", path)
 	}
 	data[key] = value
 	secret.SetData(data)
-	if cmd.args.Confirm == false && cmd.args.DryRun == false {
+	if !cmd.args.Confirm && !cmd.args.DryRun {
 		result, err := askForConfirmation("Write changes to Vault?")
 		if err != nil {
-			return fmt.Errorf("Error prompting for confirmation")
+			return fmt.Errorf("error prompting for confirmation: %v", err)
 		}
 		cmd.args.Confirm = result
 	}
-	if cmd.args.Confirm == false {
+	if !cmd.args.Confirm {
 		fmt.Println("Skipping write.")
 		return nil
 	}

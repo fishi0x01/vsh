@@ -84,11 +84,11 @@ func (cmd *AppendCommand) Parse(args []string) error {
 		return err
 	}
 
-	if cmd.args.Skip == true {
+	if cmd.args.Skip {
 		cmd.Mode = ModeSkip
-	} else if cmd.args.Force == true {
+	} else if cmd.args.Force {
 		cmd.Mode = ModeOverwrite
-	} else if cmd.args.Rename == true {
+	} else if cmd.args.Rename {
 		cmd.Mode = ModeRename
 	}
 	return nil
@@ -101,12 +101,12 @@ func (cmd *AppendCommand) Run() int {
 
 	src := cmd.client.GetType(newSrcPwd)
 	if src != client.LEAF {
-		log.UserError("Not a valid path for operation: %s", newSrcPwd)
+		log.UserError("not a valid path for operation: %s", newSrcPwd)
 		return 1
 	}
 
 	if err := cmd.mergeSecrets(newSrcPwd, newTargetPwd); err != nil {
-		log.AppError("Append failed: " + err.Error())
+		log.AppError("Append failed: %v", err)
 		return 1
 	}
 	return 0
@@ -134,7 +134,10 @@ func (cmd *AppendCommand) mergeSecrets(source string, target string) error {
 	if err != nil {
 		return err
 	}
-	cmd.createDummySecret(target)
+	err = cmd.createDummySecret(target)
+	if err != nil {
+		return err
+	}
 	targetSecret, err := cmd.client.Read(target)
 	if err != nil {
 		return err
