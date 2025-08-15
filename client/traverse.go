@@ -1,8 +1,9 @@
 package client
 
 import (
-	"github.com/fishi0x01/vsh/log"
 	"strings"
+
+	"github.com/fishi0x01/vsh/log"
 )
 
 func (client *Client) topLevelTraverse() (result []string) {
@@ -27,7 +28,7 @@ func (client *Client) lowLevelTraverse(path string, shallow bool) (result []stri
 				// prevent ambiguous dir/file to be added twice
 				if strings.HasSuffix(val, "/") {
 					// dir
-					if shallow == false {
+					if !shallow {
 						result = append(result, client.lowLevelTraverse(path+"/"+val, false)...)
 					}
 				} else {

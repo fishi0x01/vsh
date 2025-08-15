@@ -1,8 +1,9 @@
 package client
 
 import (
-	"github.com/hashicorp/vault/api"
 	"strings"
+
+	"github.com/hashicorp/vault/api"
 )
 
 func (client *Client) discoverMountBackend(backend string) {
@@ -73,10 +74,7 @@ func (client *Client) getKVDataPath(path string) string {
 }
 
 func (client *Client) isTopLevelPath(absolutePath string) bool {
-	if strings.Count(absolutePath, "/") < 2 {
-		return true
-	}
-	return false
+	return strings.Count(absolutePath, "/") < 2
 }
 
 func isValidKV2Data(secret *api.Secret) bool {

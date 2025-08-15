@@ -1,0 +1,20 @@
+# https://golangci-lint.run/docs/configuration/file
+version: "2"
+linters:
+  default: standard
+formatters:
+  enable:
+  - gofmt
+  # TODO: enable
+  #- gci
+  #- gofumpt
+  #- goimports
+  #- golines
+#issues:
+#  option: value
+#output:
+#  option: value
+#run:
+#  option: value
+#severity:
+#  option: value

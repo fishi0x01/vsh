@@ -71,10 +71,10 @@ func (cmd *GrepCommand) Parse(args []string) error {
 	if cmd.args.Path == "" {
 		cmd.args.Path = cmd.client.Pwd
 	}
-	if cmd.args.Keys == true {
+	if cmd.args.Keys {
 		cmd.Mode |= ModeKeys
 	}
-	if cmd.args.Values == true {
+	if cmd.args.Values {
 		cmd.Mode |= ModeValues
 	}
 	if cmd.Mode == 0 {

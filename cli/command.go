@@ -83,8 +83,6 @@ func runCommandWithTraverseTwoPaths(client *client.Client, source string, target
 			return
 		}
 	}
-
-	return
 }
 
 func transportSecrets(c *client.Client, source string, target string, transport func(string, string) error) int {
@@ -93,7 +91,11 @@ func transportSecrets(c *client.Client, source string, target string, transport 
 
 	switch t := c.GetType(newSrcPwd); t {
 	case client.LEAF:
-		transport(filepath.Clean(newSrcPwd), newTargetPwd)
+		err := transport(filepath.Clean(newSrcPwd), newTargetPwd)
+		if err != nil {
+			log.UserError("Error during operation: %s", err)
+			return 1
+		}
 	case client.NODE:
 		runCommandWithTraverseTwoPaths(c, newSrcPwd, newTargetPwd, transport)
 	default:

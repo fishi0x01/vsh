@@ -143,6 +143,8 @@ make get-bats
 make integration-tests
 ```
 
+Further, we provide a [`.mise.toml`](https://mise.jdx.dev/getting-started.html) to quickly setup the go environment.
+
 ### Debugging
 
 `-v DEBUG` sets debug log level, which also creates a `vsh_trace.log` file to log any error object from the vault API.

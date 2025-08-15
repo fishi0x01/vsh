@@ -15,18 +15,22 @@ func askForConfirmation(s string) (bool, error) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for i := 0; i < 2; i++ {
-		c.Printf("%s [y/N]: ", s)
+		_, err := c.Printf("%s [y/N]: ", s)
+		if err != nil {
+			return false, fmt.Errorf("error printing user prompt: %v", err)
+		}
 
 		response, err := reader.ReadString('\n')
 		if err != nil {
-			return false, fmt.Errorf("Error reading input")
+			return false, fmt.Errorf("error reading input: %v", err)
 		}
 
 		response = strings.ToLower(strings.TrimSpace(response))
 
-		if response == "y" || response == "yes" {
+		switch response {
+		case "y", "yes":
 			return true, nil
-		} else if response == "n" || response == "no" {
+		case "n", "no":
 			return false, nil
 		}
 	}

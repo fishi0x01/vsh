@@ -77,6 +77,6 @@ func (cmd *ListCommand) Run() int {
 		log.UserError("Not a valid path for operation: %s", newPwd)
 		return 1
 	}
-	log.UserInfo(strings.Join(result, "\n"))
+	log.UserInfo("%s", strings.Join(result, "\n"))
 	return 0
 }

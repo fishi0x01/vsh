@@ -70,11 +70,16 @@ func (cmd *RemoveCommand) Run() int {
 
 	switch t := cmd.client.GetType(newPwd); t {
 	case client.LEAF:
-		cmd.removeSecret(newPwd)
+		err := cmd.removeSecret(newPwd)
+		if err != nil {
+			fmt.Printf("Error removing secret: %v", err)
+			return 1
+		}
 	case client.NODE:
 		for _, path := range cmd.client.Traverse(newPwd, false) {
 			err := cmd.removeSecret(path)
 			if err != nil {
+				fmt.Printf("Error removing dir: %v", err)
 				return 1
 			}
 		}

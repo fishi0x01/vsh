@@ -71,10 +71,14 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	}
 
 	if len(conf.CertificatePath) > 0 {
-		log.UserDebug("Configuring TLS to be " + conf.CertificatePath)
-		config.ConfigureTLS(&api.TLSConfig{
+		log.UserDebug("Configuring TLS to be %s", conf.CertificatePath)
+		err := config.ConfigureTLS(&api.TLSConfig{
 			CAPath: conf.CertificatePath,
 		})
+		if err != nil {
+			fmt.Printf("Error configuring TLS: %v", err)
+			return nil, err
+		}
 	}
 
 	vault, err := api.NewClient(config)
@@ -221,7 +225,7 @@ func (client *Client) SubpathsForPath(path string, shallow bool) (filePaths []st
 			filePaths = append(filePaths, traversedPath)
 		}
 	default:
-		return filePaths, fmt.Errorf("Not a valid path for operation: %s", path)
+		return filePaths, fmt.Errorf("not a valid path for operation: %s", path)
 	}
 	return filePaths, nil
 }
