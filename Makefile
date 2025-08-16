@@ -26,6 +26,9 @@ lint: ## Run golangci-lint for linting code
 
 format: ## format go code
 	gofmt -s -w $(shell find . -name '*.go' -not -path "./vendor/*")
+	gci write $(shell find . -name '*.go' -not -path "./vendor/*")
+	golines -w $(shell find . -name '*.go' -not -path "./vendor/*")
+	goimports -w $(shell find . -name '*.go' -not -path "./vendor/*")
 
 compile-releases: clean ## Compile vsh binaries for multiple platforms and architectures strictly using vendor directory
 	mkdir -p ./build/

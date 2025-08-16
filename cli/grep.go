@@ -22,10 +22,10 @@ type GrepCommand struct {
 type GrepCommandArgs struct {
 	Search  string `arg:"positional,required"`
 	Path    string `arg:"positional"`
-	Keys    bool   `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
-	Regexp  bool   `arg:"-e,--regexp" help:"Treat search string as a regexp"`
-	Shallow bool   `arg:"-S,--shallow" help:"Only search leaf nodes of the path rather than recurse deeper"`
-	Values  bool   `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
+	Keys    bool   `arg:"-k,--keys"           help:"Match against keys (true if -v is not specified)"`
+	Regexp  bool   `arg:"-e,--regexp"         help:"Treat search string as a regexp"`
+	Shallow bool   `arg:"-S,--shallow"        help:"Only search leaf nodes of the path rather than recurse deeper"`
+	Values  bool   `arg:"-v,--values"         help:"Match against values (true if -k is not specified)"`
 }
 
 // Description provides detail on what the command does

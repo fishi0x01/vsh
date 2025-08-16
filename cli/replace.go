@@ -23,14 +23,14 @@ type ReplaceCommandArgs struct {
 	Search      string         `arg:"positional,required"`
 	Replacement string         `arg:"positional,required"`
 	Path        string         `arg:"positional"`
-	Confirm     bool           `arg:"-y,--confirm" help:"Write results without prompt"`
-	DryRun      bool           `arg:"-n,--dry-run" help:"Skip writing results without prompt"`
-	KeySelector string         `arg:"-s,--key-selector" help:"Limit replacements to specified key" placeholder:"PATTERN"`
-	Keys        bool           `arg:"-k,--keys" help:"Match against keys (true if -v is not specified)"`
-	Output      MatchOutputArg `arg:"-o,--output" help:"Present changes as 'inline' with color or traditional 'diff'" default:"inline"`
-	Regexp      bool           `arg:"-e,--regexp" help:"Treat search string and selector as a regexp"`
-	Shallow     bool           `arg:"-S,--shallow" help:"Only search leaf nodes of the path rather than recurse deeper"`
-	Values      bool           `arg:"-v,--values" help:"Match against values (true if -k is not specified)"`
+	Confirm     bool           `arg:"-y,--confirm"        help:"Write results without prompt"`
+	DryRun      bool           `arg:"-n,--dry-run"        help:"Skip writing results without prompt"`
+	KeySelector string         `arg:"-s,--key-selector"   help:"Limit replacements to specified key"                           placeholder:"PATTERN"`
+	Keys        bool           `arg:"-k,--keys"           help:"Match against keys (true if -v is not specified)"`
+	Output      MatchOutputArg `arg:"-o,--output"         help:"Present changes as 'inline' with color or traditional 'diff'"                        default:"inline"`
+	Regexp      bool           `arg:"-e,--regexp"         help:"Treat search string and selector as a regexp"`
+	Shallow     bool           `arg:"-S,--shallow"        help:"Only search leaf nodes of the path rather than recurse deeper"`
+	Values      bool           `arg:"-v,--values"         help:"Match against values (true if -k is not specified)"`
 }
 
 // Description provides detail on what the command does
@@ -127,7 +127,9 @@ func (cmd *ReplaceCommand) Run() int {
 	return cmd.commitMatches(allMatches)
 }
 
-func (cmd *ReplaceCommand) findMatches(filePaths []string) (matchesByPath map[string][]*Match, err error) {
+func (cmd *ReplaceCommand) findMatches(
+	filePaths []string,
+) (matchesByPath map[string][]*Match, err error) {
 	matchesByPath = make(map[string][]*Match, 0)
 	for _, curPath := range filePaths {
 		matches, err := cmd.FindReplacements(cmd.args.Search, cmd.args.Replacement, curPath)
@@ -173,7 +175,11 @@ func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int 
 }
 
 // FindReplacements will find the matches for a given search string to be replaced
-func (cmd *ReplaceCommand) FindReplacements(search string, replacement string, path string) (matches []*Match, err error) {
+func (cmd *ReplaceCommand) FindReplacements(
+	search string,
+	replacement string,
+	path string,
+) (matches []*Match, err error) {
 	if cmd.client.GetType(path) == client.LEAF {
 		secret, err := cmd.client.Read(path)
 		if err != nil {

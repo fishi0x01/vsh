@@ -1,8 +1,9 @@
 package client
 
 import (
-	"github.com/hashicorp/vault/api"
 	"sync"
+
+	"github.com/hashicorp/vault/api"
 )
 
 // Cache is a thread-safe cache for vault queries

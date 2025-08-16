@@ -1,3 +1,6 @@
 [tools]
 golang = "1.24.5"
 golangci-lint = "latest"
+"go:github.com/daixiang0/gci" = { version = "latest"}
+"go:github.com/segmentio/golines" = { version = "latest"}
+"go:golang.org/x/tools/cmd/goimports" = { version = "latest"}

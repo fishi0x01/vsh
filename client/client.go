@@ -112,7 +112,9 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	}
 
 	if len(mounts) == 0 {
-		log.UserDebug("No KV mounts found or specified, adding default KV version 2 mount at /secrets")
+		log.UserDebug(
+			"No KV mounts found or specified, adding default KV version 2 mount at /secrets",
+		)
 
 		// Add default KV version 2 mount at /secrets
 		_, mounts["secrets/"] = getMountOutput("secrets/", 2)

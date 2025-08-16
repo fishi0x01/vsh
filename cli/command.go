@@ -74,7 +74,12 @@ func cmdPath(pwd string, arg string) (result string) {
 	return result
 }
 
-func runCommandWithTraverseTwoPaths(client *client.Client, source string, target string, f func(string, string) error) {
+func runCommandWithTraverseTwoPaths(
+	client *client.Client,
+	source string,
+	target string,
+	f func(string, string) error,
+) {
 	source = filepath.Clean(source) // remove potential trailing '/'
 	for _, path := range client.Traverse(source, false) {
 		target := strings.Replace(path, source, target, 1)
@@ -85,7 +90,12 @@ func runCommandWithTraverseTwoPaths(client *client.Client, source string, target
 	}
 }
 
-func transportSecrets(c *client.Client, source string, target string, transport func(string, string) error) int {
+func transportSecrets(
+	c *client.Client,
+	source string,
+	target string,
+	transport func(string, string) error,
+) int {
 	newSrcPwd := cmdPath(c.Pwd, source)
 	newTargetPwd := cmdPath(c.Pwd, target)
 
