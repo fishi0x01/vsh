@@ -20,9 +20,9 @@ type AddCommandArgs struct {
 	Key     string `arg:"positional,required"`
 	Value   string `arg:"positional,required"`
 	Path    string `arg:"positional,required"`
-	Force   bool   `arg:"-f,--force" help:"Overwrite key if exists"`
-	Confirm bool   `arg:"-y,--confirm" help:"Write results without prompt"`
-	DryRun  bool   `arg:"-n,--dry-run" help:"Skip writing results without prompt"`
+	Force   bool   `arg:"-f,--force"          help:"Overwrite key if exists"`
+	Confirm bool   `arg:"-y,--confirm"        help:"Write results without prompt"`
+	DryRun  bool   `arg:"-n,--dry-run"        help:"Skip writing results without prompt"`
 }
 
 // Description provides detail on what the command does

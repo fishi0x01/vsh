@@ -1,13 +1,13 @@
 package completer
 
 import (
-	"github.com/fishi0x01/vsh/log"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
 	"github.com/fatih/structs"
 	"github.com/fishi0x01/vsh/cli"
 	"github.com/fishi0x01/vsh/client"
+	"github.com/fishi0x01/vsh/log"
 )
 
 // Completer struct for tab completion
@@ -133,7 +133,13 @@ func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
 		val := f.Value().(cli.Command)
 		result = append(result, prompt.Suggest{Text: val.GetName(), Description: cli.Usage(val)})
 	}
-	result = append(result, prompt.Suggest{Text: "toggle-auto-completion", Description: "toggle path auto-completion on/off"})
+	result = append(
+		result,
+		prompt.Suggest{
+			Text:        "toggle-auto-completion",
+			Description: "toggle path auto-completion on/off",
+		},
+	)
 
 	filtered := prompt.FilterHasPrefix(result, arg, true)
 	if len(filtered) > 0 {

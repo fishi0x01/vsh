@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+
 	"github.com/fishi0x01/vsh/log"
 	"github.com/hashicorp/vault/api"
 )

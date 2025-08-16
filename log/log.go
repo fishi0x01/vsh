@@ -2,12 +2,13 @@ package log
 
 import (
 	"fmt"
-	au "github.com/logrusorgru/aurora"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
+
+	au "github.com/logrusorgru/aurora"
 )
 
 const (

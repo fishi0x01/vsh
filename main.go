@@ -23,9 +23,9 @@ var (
 )
 
 type args struct {
-	CmdString             string `arg:"-c,--cmd" help:"subcommand to run"`
+	CmdString             string `arg:"-c,--cmd"                  help:"subcommand to run"`
 	DisableAutoCompletion bool   `arg:"--disable-auto-completion" help:"disable auto-completion on paths"`
-	Verbosity             string `arg:"-v,--log-level" help:"DEBUG | INFO | WARN | ERROR - debug option creates vsh_trace.log" default:"INFO" placeholder:"LEVEL"`
+	Verbosity             string `arg:"-v,--log-level"            help:"DEBUG | INFO | WARN | ERROR - debug option creates vsh_trace.log" default:"INFO" placeholder:"LEVEL"`
 }
 
 func (args) Version() string {
@@ -152,7 +152,9 @@ func main() {
 
 	vaultClient, err = client.NewClient(conf)
 	if err != nil {
-		log.UserError("Error initializing vault client | Is VAULT_ADDR properly set? Do you provide a proper token?")
+		log.UserError(
+			"Error initializing vault client | Is VAULT_ADDR properly set? Do you provide a proper token?",
+		)
 		log.UserError("%v", err)
 		os.Exit(1)
 	}

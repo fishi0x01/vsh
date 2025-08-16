@@ -166,7 +166,13 @@ func (match *Match) print(out io.Writer, format MatchOutput) {
 			fmt.Printf("Error printing: %v", err)
 		}
 	case MatchOutputHighlight:
-		_, err := fmt.Fprintf(out, "%s> %s = %s\n", match.path, highlightMatches(match.key, match.keyIndex), highlightMatches(match.value, match.valueIndex))
+		_, err := fmt.Fprintf(
+			out,
+			"%s> %s = %s\n",
+			match.path,
+			highlightMatches(match.key, match.keyIndex),
+			highlightMatches(match.value, match.valueIndex),
+		)
 		if err != nil {
 			fmt.Printf("Error printing: %v", err)
 		}

@@ -5,11 +5,9 @@ linters:
 formatters:
   enable:
   - gofmt
-  # TODO: enable
-  #- gci
-  #- gofumpt
-  #- goimports
-  #- golines
+  - gci
+  - goimports
+  - golines
 #issues:
 #  option: value
 #output:

@@ -37,9 +37,9 @@ type AppendCommand struct {
 type AppendCommandArgs struct {
 	Source string `arg:"positional,required"`
 	Target string `arg:"positional,required"`
-	Force  bool   `arg:"-f,--force" help:"Overwrite key if exists"`
-	Skip   bool   `arg:"-s,--skip" help:"Skip key if exists (default)"`
-	Rename bool   `arg:"-r,--rename" help:"Rename key if exists"`
+	Force  bool   `arg:"-f,--force"          help:"Overwrite key if exists"`
+	Skip   bool   `arg:"-s,--skip"           help:"Skip key if exists (default)"`
+	Rename bool   `arg:"-r,--rename"         help:"Rename key if exists"`
 }
 
 // Description provides detail on what the command does
@@ -160,12 +160,21 @@ func (cmd *AppendCommand) mergeSecrets(source string, target string) error {
 	}
 	log.UserDebug("Appended values from %s to %s", source, target)
 	if len(skippedKeys) > 0 {
-		log.UserDebug("Handled conflicting keys according to the '%s' strategy. Keys: %s", onConflict, strings.Join(skippedKeys, ", "))
+		log.UserDebug(
+			"Handled conflicting keys according to the '%s' strategy. Keys: %s",
+			onConflict,
+			strings.Join(skippedKeys, ", "),
+		)
 	}
 	return nil
 }
 
-func addKey(merged map[string]interface{}, onConflict AppendMode, key string, value interface{}) []string {
+func addKey(
+	merged map[string]interface{},
+	onConflict AppendMode,
+	key string,
+	value interface{},
+) []string {
 	skippedKeys := make([]string, 0)
 	// if this key is already present in the destination
 	if _, ok := merged[key]; ok {
