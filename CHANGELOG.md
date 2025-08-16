@@ -2,6 +2,13 @@
 
 ## master - unreleased
 
+## v0.14.0 (August, 16 2025)
+
+ENHANCEMENTS:
+
+* allow secret mounts to be specified by env var ([#121](https://github.com/fishi0x01/vsh/pull/121)) - Thank you [mattlqx](https://github.com/mattlqx))
+* patch dependencies - reduce dependency footprint - smaller binaries ([#122](https://github.com/fishi0x01/vsh/pull/122))
+
 ## v0.13.0 (May, 12, 2024)
 
 ENHANCEMENTS:
