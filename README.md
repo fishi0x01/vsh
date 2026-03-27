@@ -4,9 +4,10 @@
 ![CI](https://github.com/fishi0x01/vsh/workflows/CI/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fishi0x01/vsh)](https://goreportcard.com/report/github.com/fishi0x01/vsh)
 
-![vsh usage](https://user-images.githubusercontent.com/10799507/66355982-9872a980-e969-11e9-8ca4-6a2ff215f835.gif)
+![vsh usage](demo/demo.gif)
 
-`vsh` is an interactive [HashiCorp Vault](https://www.vaultproject.io/) shell and cli tool. It comes with multiple common operations and treats paths like directories and files.
+`vsh` is an interactive [HashiCorp Vault](https://www.vaultproject.io/) shell and CLI tool. It comes with multiple common operations and treats paths like directories and files.
+
 Core features are:
 
 - recursive operations on paths for many operations, e.g., `cp`, `rm`, `mv`
@@ -44,7 +45,7 @@ Download latest static binaries from [release page](https://github.com/fishi0x01
 - [grep](doc/commands/grep.md) searches for substrings or regular expressions (allows recursive operation on paths)
 - [ls](doc/commands/ls.md) shows the subpaths of a given path
 - [mv](doc/commands/mv.md) moves secrets from one location to another (allows recursive operation on paths)
-- [replace](doc/commands/replace.md) substrings or regular expressions (allows recursive operation on paths)
+- [replace](doc/commands/replace.md) replaces substrings or regular expressions (allows recursive operation on paths)
 - [rm](doc/commands/rm.md) removes secret(s) (allows recursive operation on paths)
 
 ## Setting the vault token
@@ -54,7 +55,7 @@ That means `vsh` supports setting vault tokens via `~/.vault-token`, `VAULT_TOKE
 
 ## TLS
 
-Add tls certificate for server by setting `VAULT_CACERT` environment variable to the `pem` certificate path.
+Add a TLS certificate for the server by setting the `VAULT_CACERT` environment variable to the `pem` certificate path.
 
 ## Token permission requirements
 
@@ -70,7 +71,7 @@ That means initially there won't be path auto-completion on the top (backend) le
 
 You can manually specify a comma-delimited list of secrets mounts with the `VAULT_KV1_MOUNTS` and `VAULT_KV2_MOUNTS` environment variables.
 
-If none are found automatically or specified, a default KV2 mount at `secrets` will be configured.
+If none are found automatically or specified, a default KV2 mount at `secret` will be configured.
 
 ## Interactive mode
 
@@ -89,7 +90,7 @@ If your token has a limited number of uses, then consider using the non-interact
 
 ### Toggle auto-completion
 
-To reduce the number of queries against vault, you can disable path auto-completion in 2 ways:
+To reduce the number of queries against vault, you can disable path auto-completion in two ways:
 
 1. Disable at start time:
 
@@ -115,13 +116,13 @@ export VAULT_TOKEN=<token>
 ./vsh -c "rm secret/dir/to/remove/"
 ```
 
-## Some words about the quality
+## Quality
 
-Working on vault secrets can be critical, making quality and correct behavior a first class citizen for `vsh`.
+Working on vault secrets can be critical, making quality and correct behavior a first-class citizen for `vsh`.
 That being said, `vsh` is still a small open source project, meaning we cannot give any guarantees.
 However, we put strong emphasis on test-driven development.
 Every PR is tested with an extensive [suite](test/suites) of integration tests.
-Vast majority of tests run on KV1 and KV2 and every test runs against vault `1.13.4` and `1.20.2`, i.e., vault versions in between are likely to be compatible too.
+The vast majority of tests run on KV1 and KV2 and every test runs against vault `1.13.4` and `1.20.2`, i.e., vault versions in between are likely to be compatible too.
 
 :warning: In general, using `vsh` is at your own risk. We do not hold any responsibility and do not give any guarantees.
 
@@ -143,7 +144,7 @@ make get-bats
 make integration-tests
 ```
 
-Further, we provide a [`.mise.toml`](https://mise.jdx.dev/getting-started.html) to quickly setup the go environment.
+Further, we provide a [`.mise.toml`](https://mise.jdx.dev/getting-started.html) to quickly set up the go environment.
 
 ### Debugging
 
