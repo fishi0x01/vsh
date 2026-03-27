@@ -9,8 +9,9 @@ import (
 
 // CopyCommand container for all 'cp' parameters
 type CopyCommand struct {
-	name string
-	args *CopyCommandArgs
+	name        string
+	args        *CopyCommandArgs
+	workerCount int
 
 	client *client.Client
 }
@@ -27,11 +28,12 @@ func (CopyCommandArgs) Description() string {
 }
 
 // NewCopyCommand creates a new CopyCommand parameter container
-func NewCopyCommand(c *client.Client) *CopyCommand {
+func NewCopyCommand(c *client.Client, workerCount int) *CopyCommand {
 	return &CopyCommand{
-		name:   "cp",
-		client: c,
-		args:   &CopyCommandArgs{},
+		name:        "cp",
+		client:      c,
+		args:        &CopyCommandArgs{},
+		workerCount: workerCount,
 	}
 }
 
@@ -67,7 +69,9 @@ func (cmd *CopyCommand) Parse(args []string) error {
 
 // Run executes 'cp' with given CopyCommand's parameters
 func (cmd *CopyCommand) Run() int {
-	return transportSecrets(cmd.client, cmd.args.Source, cmd.args.Target, cmd.copySecret)
+	return transportSecrets(
+		cmd.client, cmd.args.Source, cmd.args.Target, cmd.copySecret, cmd.workerCount,
+	)
 }
 
 func (cmd *CopyCommand) copySecret(source string, target string) error {

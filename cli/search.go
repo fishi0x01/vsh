@@ -266,7 +266,9 @@ func (s *Searcher) matchData(subject string) (matchPairs [][]int, replaced strin
 		if s.cmd.GetSearchParams().IsRegexp {
 			replaced = s.regexp.ReplaceAllString(subject, *s.cmd.GetSearchParams().Replacement)
 		} else {
-			replaced = strings.ReplaceAll(subject, s.cmd.GetSearchParams().Search, *s.cmd.GetSearchParams().Replacement)
+			replaced = strings.ReplaceAll(
+				subject, s.cmd.GetSearchParams().Search, *s.cmd.GetSearchParams().Replacement,
+			)
 		}
 	}
 

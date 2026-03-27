@@ -94,7 +94,9 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	if sliceContains(permissions, "list") || sliceContains(permissions, "root") {
 		mounts, err = vault.Sys().ListMounts()
 	} else {
-		log.UserDebug("Cannot auto-discover mount backends: Token does not have list permission on sys/mounts")
+		log.UserDebug(
+			"Cannot auto-discover mount backends: Token does not have list permission on sys/mounts",
+		)
 	}
 
 	if os.Getenv("VAULT_KV1_MOUNTS") != "" {
