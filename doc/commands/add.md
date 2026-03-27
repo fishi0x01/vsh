@@ -15,7 +15,7 @@ value = 1
 other = thing
 
 > add fizz buzz secret/path
-> cat /secret/to
+> cat secret/path
 
 value = 1
 fizz = buzz
