@@ -9,8 +9,9 @@ import (
 
 // MoveCommand container for all 'mv' parameters
 type MoveCommand struct {
-	name string
-	args *MoveCommandArgs
+	name        string
+	args        *MoveCommandArgs
+	workerCount int
 
 	client *client.Client
 }
@@ -27,11 +28,12 @@ func (MoveCommandArgs) Description() string {
 }
 
 // NewMoveCommand creates a new MoveCommand parameter container
-func NewMoveCommand(c *client.Client) *MoveCommand {
+func NewMoveCommand(c *client.Client, workerCount int) *MoveCommand {
 	return &MoveCommand{
-		name:   "mv",
-		client: c,
-		args:   &MoveCommandArgs{},
+		name:        "mv",
+		client:      c,
+		args:        &MoveCommandArgs{},
+		workerCount: workerCount,
 	}
 }
 
@@ -67,7 +69,9 @@ func (cmd *MoveCommand) Parse(args []string) error {
 
 // Run executes 'mv' with given MoveCommand's parameters
 func (cmd *MoveCommand) Run() int {
-	return transportSecrets(cmd.client, cmd.args.Source, cmd.args.Target, cmd.moveSecret)
+	return transportSecrets(
+		cmd.client, cmd.args.Source, cmd.args.Target, cmd.moveSecret, cmd.workerCount,
+	)
 }
 
 func (cmd *MoveCommand) moveSecret(source string, target string) error {

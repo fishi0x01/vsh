@@ -3,6 +3,7 @@ package cli
 import (
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/fatih/structs"
 	"github.com/fishi0x01/vsh/client"
@@ -44,18 +45,18 @@ func (cmds *Commands) Get(cmd string) Command {
 }
 
 // NewCommands returns a Commands struct with all available commands
-func NewCommands(client *client.Client) *Commands {
+func NewCommands(client *client.Client, workerCount int) *Commands {
 	return &Commands{
 		Add:     NewAddCommand(client),
 		Append:  NewAppendCommand(client),
 		Cat:     NewCatCommand(client),
 		Cd:      NewCdCommand(client),
-		Cp:      NewCopyCommand(client),
+		Cp:      NewCopyCommand(client, workerCount),
 		Grep:    NewGrepCommand(client),
 		Ls:      NewListCommand(client),
-		Mv:      NewMoveCommand(client),
+		Mv:      NewMoveCommand(client, workerCount),
 		Replace: NewReplaceCommand(client),
-		Rm:      NewRemoveCommand(client),
+		Rm:      NewRemoveCommand(client, workerCount),
 	}
 }
 
@@ -78,16 +79,27 @@ func runCommandWithTraverseTwoPaths(
 	client *client.Client,
 	source string,
 	target string,
+	workerCount int,
 	f func(string, string) error,
 ) {
 	source = filepath.Clean(source) // remove potential trailing '/'
-	for _, path := range client.Traverse(source, false) {
-		target := strings.Replace(path, source, target, 1)
-		err := f(path, target)
-		if err != nil {
-			return
-		}
+	paths := client.Traverse(source, false)
+
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, workerCount)
+	for _, path := range paths {
+		targetPath := strings.Replace(path, source, target, 1)
+		wg.Add(1)
+		go func(p, t string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			if err := f(p, t); err != nil {
+				log.UserError("Error during operation on %s: %s", p, err)
+			}
+		}(path, targetPath)
 	}
+	wg.Wait()
 }
 
 func transportSecrets(
@@ -95,6 +107,7 @@ func transportSecrets(
 	source string,
 	target string,
 	transport func(string, string) error,
+	workerCount int,
 ) int {
 	newSrcPwd := cmdPath(c.Pwd, source)
 	newTargetPwd := cmdPath(c.Pwd, target)
@@ -107,7 +120,7 @@ func transportSecrets(
 			return 1
 		}
 	case client.NODE:
-		runCommandWithTraverseTwoPaths(c, newSrcPwd, newTargetPwd, transport)
+		runCommandWithTraverseTwoPaths(c, newSrcPwd, newTargetPwd, workerCount, transport)
 	default:
 		log.UserError("not a valid path for operation: %s", newSrcPwd)
 		return 1

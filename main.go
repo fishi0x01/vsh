@@ -16,6 +16,7 @@ import (
 
 var vaultClient *client.Client
 var completerInstance *completer.Completer
+var workerCount int
 
 var (
 	vshVersion    = ""
@@ -26,6 +27,7 @@ type args struct {
 	CmdString             string `arg:"-c,--cmd"                  help:"subcommand to run"`
 	DisableAutoCompletion bool   `arg:"--disable-auto-completion" help:"disable auto-completion on paths"`
 	Verbosity             string `arg:"-v,--log-level"            help:"DEBUG | INFO | WARN | ERROR - debug option creates vsh_trace.log" default:"INFO" placeholder:"LEVEL"`
+	WorkerCount           int    `arg:"--worker-count"            help:"concurrent workers for recursive ops"                             default:"10"`
 }
 
 func (args) Version() string {
@@ -63,7 +65,7 @@ func executor(in string) {
 		log.UserError("%v", err)
 		return
 	}
-	commands := cli.NewCommands(vaultClient)
+	commands := cli.NewCommands(vaultClient, workerCount)
 	var cmd cli.Command
 
 	// parse command
@@ -129,6 +131,8 @@ func main() {
 	default:
 		p.Fail("Not a valid verbosity level")
 	}
+
+	workerCount = args.WorkerCount
 
 	var err error
 	err = log.Init(args.Verbosity)

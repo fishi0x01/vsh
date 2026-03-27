@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/log"
@@ -9,8 +10,9 @@ import (
 
 // RemoveCommand container for all 'rm' parameters
 type RemoveCommand struct {
-	name string
-	args *RemoveCommandArgs
+	name        string
+	args        *RemoveCommandArgs
+	workerCount int
 
 	client *client.Client
 }
@@ -26,11 +28,12 @@ func (RemoveCommandArgs) Description() string {
 }
 
 // NewRemoveCommand creates a new RemoveCommand parameter container
-func NewRemoveCommand(c *client.Client) *RemoveCommand {
+func NewRemoveCommand(c *client.Client, workerCount int) *RemoveCommand {
 	return &RemoveCommand{
-		name:   "rm",
-		client: c,
-		args:   &RemoveCommandArgs{},
+		name:        "rm",
+		client:      c,
+		args:        &RemoveCommandArgs{},
+		workerCount: workerCount,
 	}
 }
 
@@ -76,12 +79,27 @@ func (cmd *RemoveCommand) Run() int {
 			return 1
 		}
 	case client.NODE:
+		var wg sync.WaitGroup
+		sem := make(chan struct{}, cmd.workerCount)
+		failed := make(chan struct{}, 1)
 		for _, path := range cmd.client.Traverse(newPwd, false) {
-			err := cmd.removeSecret(path)
-			if err != nil {
-				fmt.Printf("Error removing dir: %v", err)
-				return 1
-			}
+			wg.Add(1)
+			go func(p string) {
+				defer wg.Done()
+				sem <- struct{}{}
+				defer func() { <-sem }()
+				if err := cmd.removeSecret(p); err != nil {
+					fmt.Printf("Error removing dir: %v", err)
+					select {
+					case failed <- struct{}{}:
+					default:
+					}
+				}
+			}(path)
+		}
+		wg.Wait()
+		if len(failed) > 0 {
+			return 1
 		}
 	default:
 		log.UserError("not a valid path for operation: %s", newPwd)
