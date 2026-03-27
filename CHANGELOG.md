@@ -2,6 +2,10 @@
 
 ## master - unreleased
 
+ENHANCEMENTS:
+
+* concurrent recursive operations for `cp`, `mv` and `rm` via goroutine pool, tunable with `--worker-count` flag (default: 10) ([#126](https://github.com/fishi0x01/vsh/pull/126))
+
 ## v0.14.0 (August, 16 2025)
 
 ENHANCEMENTS:
