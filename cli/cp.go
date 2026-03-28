@@ -18,8 +18,9 @@ type CopyCommand struct {
 
 // CopyCommandArgs provides a struct for go-arg parsing
 type CopyCommandArgs struct {
-	Source string `arg:"positional,required" help:"path to copy from"`
-	Target string `arg:"positional,required" help:"path to copy to"`
+	Recursive bool   `arg:"-r" help:"recursively copy a directory"`
+	Source    string `arg:"positional,required" help:"path to copy from"`
+	Target    string `arg:"positional,required" help:"path to copy to"`
 }
 
 // Description provides detail on what the command does
@@ -69,6 +70,11 @@ func (cmd *CopyCommand) Parse(args []string) error {
 
 // Run executes 'cp' with given CopyCommand's parameters
 func (cmd *CopyCommand) Run() int {
+	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.args.Source)
+	if cmd.client.GetType(newSrcPwd) == client.NODE && !cmd.args.Recursive {
+		log.UserError("use -r to copy directories")
+		return 1
+	}
 	return transportSecrets(
 		cmd.client, cmd.args.Source, cmd.args.Target, cmd.copySecret, cmd.workerCount,
 	)

@@ -27,6 +27,14 @@ load ../../bin/plugins/bats-assert/load
   assert_line --partial "not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
 
   #######################################
+  echo "==== case: remove directory without -r flag should fail ===="
+  run ${APP_BIN} -c "rm ${KV_BACKEND}/src/dev"
+  assert_failure 1
+
+  echo "ensure proper error message"
+  assert_line --partial "use -r to remove directories"
+
+  #######################################
   echo "==== case: remove single directory ===="
   run get_vault_value "value" "${KV_BACKEND}/src/dev/1"
   assert_success
@@ -40,7 +48,7 @@ load ../../bin/plugins/bats-assert/load
   assert_success
   assert_output "3"
 
-  run ${APP_BIN} -c "rm ${KV_BACKEND}/src/dev"
+  run ${APP_BIN} -c "rm -r ${KV_BACKEND}/src/dev"
   assert_success
 
   echo "ensure the directory got removed"
@@ -66,7 +74,7 @@ load ../../bin/plugins/bats-assert/load
   assert_success
   assert_output "v2"
 
-  run ${APP_BIN} -c "rm \"${KV_BACKEND}/src/staging/all/\""
+  run ${APP_BIN} -c "rm -r \"${KV_BACKEND}/src/staging/all/\""
   assert_success
 
   echo "ensure the directory got removed"
@@ -112,7 +120,7 @@ load ../../bin/plugins/bats-assert/load
   assert_success
   assert_output "1"
 
-  run ${APP_BIN} -c "rm ${KV_BACKEND}/src/ambivalence/1/"
+  run ${APP_BIN} -c "rm -r ${KV_BACKEND}/src/ambivalence/1/"
   assert_success
 
   echo "ensure the directory got removed"

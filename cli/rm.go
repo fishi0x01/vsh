@@ -19,7 +19,8 @@ type RemoveCommand struct {
 
 // RemoveCommandArgs provides a struct for go-arg parsing
 type RemoveCommandArgs struct {
-	Path string `arg:"positional,required" help:"path to remove"`
+	Recursive bool   `arg:"-r" help:"recursively remove a directory"`
+	Path      string `arg:"positional,required" help:"path to remove"`
 }
 
 // Description provides detail on what the command does
@@ -79,6 +80,10 @@ func (cmd *RemoveCommand) Run() int {
 			return 1
 		}
 	case client.NODE:
+		if !cmd.args.Recursive {
+			log.UserError("use -r to remove directories")
+			return 1
+		}
 		var wg sync.WaitGroup
 		sem := make(chan struct{}, cmd.workerCount)
 		failed := make(chan struct{}, 1)
