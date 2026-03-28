@@ -16,9 +16,9 @@ jobs:
         with:
           go-version: 1.26
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.1
+          version: latest
 
   test:
     runs-on: ubuntu-latest
