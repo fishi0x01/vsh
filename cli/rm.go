@@ -19,7 +19,7 @@ type RemoveCommand struct {
 
 // RemoveCommandArgs provides a struct for go-arg parsing
 type RemoveCommandArgs struct {
-	Recursive bool   `arg:"-r" help:"recursively remove a directory"`
+	Recursive bool   `arg:"-r"                  help:"recursively remove a directory"`
 	Path      string `arg:"positional,required" help:"path to remove"`
 }
 

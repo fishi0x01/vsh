@@ -18,7 +18,7 @@ type CopyCommand struct {
 
 // CopyCommandArgs provides a struct for go-arg parsing
 type CopyCommandArgs struct {
-	Recursive bool   `arg:"-r" help:"recursively copy a directory"`
+	Recursive bool   `arg:"-r"                  help:"recursively copy a directory"`
 	Source    string `arg:"positional,required" help:"path to copy from"`
 	Target    string `arg:"positional,required" help:"path to copy to"`
 }
