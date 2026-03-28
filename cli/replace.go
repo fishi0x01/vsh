@@ -166,7 +166,7 @@ func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int 
 		fmt.Println("Writing!")
 		err := cmd.WriteReplacements(matchesByPath)
 		if err != nil {
-			fmt.Printf("Error writing replacement %s", err)
+			log.UserError("Error writing replacement: %v", err)
 		}
 	} else {
 		fmt.Println("No matches found to replace.")

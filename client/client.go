@@ -76,7 +76,7 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 			CAPath: conf.CertificatePath,
 		})
 		if err != nil {
-			fmt.Printf("Error configuring TLS: %v", err)
+			log.UserError("Error configuring TLS: %v", err)
 			return nil, err
 		}
 	}

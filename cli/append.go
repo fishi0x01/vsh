@@ -118,13 +118,15 @@ func (cmd *AppendCommand) createDummySecret(target string) error {
 		return nil
 	}
 
+	if err != nil {
+		return err
+	}
+
 	dummy := make(map[string]interface{})
 	dummy["placeholder"] = struct{}{}
 	dummySecret := client.NewSecret(&api.Secret{Data: dummy})
-	if targetSecret == nil {
-		if err = cmd.client.Write(target, dummySecret); err != nil {
-			return err
-		}
+	if err = cmd.client.Write(target, dummySecret); err != nil {
+		return err
 	}
 	return nil
 }
