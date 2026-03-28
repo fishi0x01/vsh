@@ -6,7 +6,7 @@ load ../../bin/plugins/bats-assert/load
 @test "vault-${VAULT_VERSION} concurrency 'rm'" {
   #######################################
   echo "==== case: remove large directory tree ===="
-  run ${APP_BIN} -c "rm /KV2/src/"
+  run ${APP_BIN} -c "rm -r /KV2/src/"
   assert_success
 
   echo "ensure at least one src file got removed"
