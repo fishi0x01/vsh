@@ -46,7 +46,10 @@ func (client *Client) getDirFiles(path string) (result map[string]int) {
 	if err == nil && s != nil {
 		if keysInterface, ok := s.Data["keys"]; ok {
 			for _, valInterface := range keysInterface.([]interface{}) {
-				val := valInterface.(string)
+				val, ok := valInterface.(string)
+				if !ok {
+					continue
+				}
 				result[val] = 1
 			}
 		}

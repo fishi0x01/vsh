@@ -37,7 +37,11 @@ type Commands struct {
 // Get returns the Command that matches the string
 func (cmds *Commands) Get(cmd string) Command {
 	for _, f := range structs.Fields(cmds) {
-		if c := f.Value().(Command); cmd == c.GetName() {
+		c, ok := f.Value().(Command)
+		if !ok {
+			continue
+		}
+		if cmd == c.GetName() {
 			return c
 		}
 	}
@@ -81,12 +85,13 @@ func runCommandWithTraverseTwoPaths(
 	target string,
 	workerCount int,
 	f func(string, string) error,
-) {
+) int {
 	source = filepath.Clean(source) // remove potential trailing '/'
 	paths := client.Traverse(source, false)
 
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, workerCount)
+	failed := make(chan struct{}, 1)
 	for _, path := range paths {
 		targetPath := strings.Replace(path, source, target, 1)
 		wg.Add(1)
@@ -96,10 +101,18 @@ func runCommandWithTraverseTwoPaths(
 			defer func() { <-sem }()
 			if err := f(p, t); err != nil {
 				log.UserError("Error during operation on %s: %s", p, err)
+				select {
+				case failed <- struct{}{}:
+				default:
+				}
 			}
 		}(path, targetPath)
 	}
 	wg.Wait()
+	if len(failed) > 0 {
+		return 1
+	}
+	return 0
 }
 
 func transportSecrets(
@@ -120,7 +133,7 @@ func transportSecrets(
 			return 1
 		}
 	case client.NODE:
-		runCommandWithTraverseTwoPaths(c, newSrcPwd, newTargetPwd, workerCount, transport)
+		return runCommandWithTraverseTwoPaths(c, newSrcPwd, newTargetPwd, workerCount, transport)
 	default:
 		log.UserError("not a valid path for operation: %s", newSrcPwd)
 		return 1

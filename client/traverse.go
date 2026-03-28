@@ -24,7 +24,10 @@ func (client *Client) lowLevelTraverse(path string, shallow bool) (result []stri
 	if s != nil {
 		if keysInterface, ok := s.Data["keys"]; ok {
 			for _, valInterface := range keysInterface.([]interface{}) {
-				val := valInterface.(string)
+				val, ok := valInterface.(string)
+				if !ok {
+					continue
+				}
 				// prevent ambiguous dir/file to be added twice
 				if strings.HasSuffix(val, "/") {
 					// dir

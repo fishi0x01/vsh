@@ -19,6 +19,7 @@ const (
 )
 
 var verbosityLevel int
+var logFile *os.File
 
 var (
 	appDebug   *log.Logger
@@ -51,8 +52,9 @@ func Init(verbosity string) error {
 	if verbosityLevel <= debugLvl {
 		file, err := os.OpenFile("vsh_trace.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("failed to open trace log: %w", err)
 		}
+		logFile = file
 
 		appDebug = log.New(file,
 			"debugLvl: ",
@@ -87,41 +89,36 @@ func Init(verbosity string) error {
 	return nil
 }
 
-func getCustomPrefix(logger *log.Logger) string {
+func callerLoc() string {
 	_, fi, line, _ := runtime.Caller(2)
-	loc := filepath.Base(fi) + ":" + strconv.Itoa(line)
-	return logger.Prefix() + loc + " "
+	return filepath.Base(fi) + ":" + strconv.Itoa(line)
 }
 
 // AppTrace log application trace
 func AppTrace(f string, args ...interface{}) {
 	if appDebug != nil {
-		appDebug.SetPrefix(getCustomPrefix(appDebug))
-		appDebug.Printf(f, args...)
+		appDebug.Printf(callerLoc()+" "+f, args...)
 	}
 }
 
 // AppInfo log application infoLvl
 func AppInfo(f string, args ...interface{}) {
 	if appInfo != nil {
-		appInfo.SetPrefix(getCustomPrefix(appInfo))
-		appInfo.Printf(f, args...)
+		appInfo.Printf(callerLoc()+" "+f, args...)
 	}
 }
 
 // AppWarning log application warning
 func AppWarning(f string, args ...interface{}) {
 	if appWarning != nil {
-		appWarning.SetPrefix(getCustomPrefix(appWarning))
-		appWarning.Printf(f, args...)
+		appWarning.Printf(callerLoc()+" "+f, args...)
 	}
 }
 
 // AppError log application error
 func AppError(f string, args ...interface{}) {
 	if appError != nil {
-		appError.SetPrefix(getCustomPrefix(appError))
-		appError.Printf(f, args...)
+		appError.Printf(callerLoc()+" "+f, args...)
 	}
 }
 
@@ -141,4 +138,11 @@ func UserInfo(f string, args ...interface{}) {
 func UserError(f string, args ...interface{}) {
 	message := au.Red(au.Sprintf(f, args...))
 	userError.Println(au.Sprintf(message))
+}
+
+// Close releases any resources held by the log package (e.g. the trace log file).
+func Close() {
+	if logFile != nil {
+		_ = logFile.Close()
+	}
 }

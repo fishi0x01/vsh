@@ -76,7 +76,7 @@ func (cmd *RemoveCommand) Run() int {
 	case client.LEAF:
 		err := cmd.removeSecret(newPwd)
 		if err != nil {
-			fmt.Printf("Error removing secret: %v", err)
+			log.UserError("Error removing secret: %v", err)
 			return 1
 		}
 	case client.NODE:
@@ -94,7 +94,7 @@ func (cmd *RemoveCommand) Run() int {
 				sem <- struct{}{}
 				defer func() { <-sem }()
 				if err := cmd.removeSecret(p); err != nil {
-					fmt.Printf("Error removing dir: %v", err)
+					log.UserError("Error removing dir: %v", err)
 					select {
 					case failed <- struct{}{}:
 					default:

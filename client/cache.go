@@ -45,14 +45,18 @@ func (cache *Cache) List(path string) (result *api.Secret, err error) {
 	}
 
 	// not found in cache -> query vault
-	// NOTE: this part is not mutexed
 	result, err = cache.vaultClient.Logical().List(path)
 
-	// update cache
+	// update cache; re-check under lock in case another goroutine
+	// raced us and already populated this entry.
 	cache.mutex.Lock()
-	cache.listQueries[path] = &cacheElement{
-		Secret: result,
-		Err:    err,
+	if existing, hit := cache.listQueries[path]; hit {
+		result, err = existing.Secret, existing.Err
+	} else {
+		cache.listQueries[path] = &cacheElement{
+			Secret: result,
+			Err:    err,
+		}
 	}
 	cache.mutex.Unlock()
 	return result, err

@@ -53,7 +53,7 @@ func executor(in string) {
 	if len(args) == 0 {
 		_, err := fmt.Fprint(os.Stdout, "")
 		if err != nil {
-			fmt.Printf("Error printing: %v", err)
+			log.UserError("Error printing: %v", err)
 		}
 		if !isInteractive {
 			os.Exit(1)
@@ -139,6 +139,7 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
+	defer log.Close()
 
 	token, ve := getVaultToken()
 	if ve != nil {
