@@ -82,7 +82,7 @@ func (cmd *AddCommand) Run() int {
 		return 1
 	}
 
-	err := cmd.addKeyValue(cmd.args.Path, cmd.args.Key, cmd.args.Value)
+	err := cmd.addKeyValue(path, cmd.args.Key, cmd.args.Value)
 	if err != nil {
 		log.UserError("%s", err.Error())
 		return 1
