@@ -14,6 +14,10 @@ BUG FIXES:
 * fix variable shadowing in `SetData` causing KV2 branch to be dead code ([#132](https://github.com/fishi0x01/vsh/pull/132))
 * fix concurrency and error handling issues: cache race condition, swallowed errors in recursive operations, logger data race, and resource leak in debug logging ([#133](https://github.com/fishi0x01/vsh/pull/133))
 
+DEPENDENCIES:
+
+* bump Go to 1.26 and update dependencies ([#134](https://github.com/fishi0x01/vsh/pull/134))
+
 ## v0.14.0 (August, 16 2025)
 
 ENHANCEMENTS:
