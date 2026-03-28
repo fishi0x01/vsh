@@ -8,6 +8,11 @@ ENHANCEMENTS:
 * update README and add `make demo` target to generate demo gif ([#127](https://github.com/fishi0x01/vsh/pull/127))
 * require `-r` flag for recursive `cp` and `rm` operations on directories ([#128](https://github.com/fishi0x01/vsh/pull/128))
 
+BUG FIXES:
+
+* fix `add` using unresolved relative path when `cwd` is set via `VAULT_PATH` ([#131](https://github.com/fishi0x01/vsh/pull/131))
+* fix variable shadowing in `SetData` causing KV2 branch to be dead code ([#132](https://github.com/fishi0x01/vsh/pull/132))
+
 ## v0.14.0 (August, 16 2025)
 
 ENHANCEMENTS:
