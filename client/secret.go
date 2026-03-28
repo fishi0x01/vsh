@@ -42,15 +42,13 @@ func (secret *Secret) GetData() map[string]interface{} {
 
 // SetData set given data as vault secret data and is KV agnostic
 func (secret *Secret) SetData(data map[string]interface{}) {
-	isKV2 := false
 	if val, hasData := secret.vaultSecret.Data["data"]; hasData {
-		if _, isKV2 := val.(map[string]interface{}); isKV2 {
+		if _, ok := val.(map[string]interface{}); ok {
 			// KV2
 			secret.vaultSecret.Data["data"] = data
+			return
 		}
 	}
-	if !isKV2 {
-		// KV1
-		secret.vaultSecret.Data = data
-	}
+	// KV1
+	secret.vaultSecret.Data = data
 }
