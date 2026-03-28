@@ -27,7 +27,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: copy single directory from KV1 to KV2 ===="
-  run ${APP_BIN} -c "cp KV1/src/dev KV2/dest/dev"
+  run ${APP_BIN} -c "cp -r KV1/src/dev KV2/dest/dev"
   assert_success
 
   echo "ensure the directory got copied to destination"
@@ -79,7 +79,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: copy single directory from KV2 to KV1 ===="
-  run ${APP_BIN} -c "cp KV2/src/dev KV1/dest/dev"
+  run ${APP_BIN} -c "cp -r KV2/src/dev KV1/dest/dev"
   assert_success
 
   echo "ensure the directory got copied to destination"

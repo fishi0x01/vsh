@@ -6,7 +6,7 @@ load ../../bin/plugins/bats-assert/load
 @test "vault-${VAULT_VERSION} concurrency 'cp'" {
   #######################################
   echo "==== case: copy large directory tree ===="
-  run ${APP_BIN} -c "cp /KV2/src/ /KV2/dest/"
+  run ${APP_BIN} -c "cp -r /KV2/src/ /KV2/dest/"
   assert_success
 
   echo "ensure at least one file got copied to destination"

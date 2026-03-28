@@ -59,7 +59,7 @@ Enter
 Sleep 2000ms
 
 # ── Copy prod → dr (uses goroutine worker pool) ───────────────────────────────
-Type "cp /secret/prod /secret/dr"
+Type "cp -r /secret/prod /secret/dr"
 Enter
 Sleep 2500ms
 

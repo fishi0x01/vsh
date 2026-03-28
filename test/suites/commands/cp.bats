@@ -55,8 +55,16 @@ load ../../bin/plugins/bats-assert/load
   assert_line --partial "not a valid path for operation: /${KV_BACKEND}/src/does/not/exist"
 
   #######################################
-  echo "==== case: copy single directory without trailing '/' ===="
+  echo "==== case: copy directory without -r flag should fail ===="
   run ${APP_BIN} -c "cp '${KV_BACKEND}/src/dev' '${KV_BACKEND}/dest/dev'"
+  assert_failure 1
+
+  echo "ensure proper error message"
+  assert_line --partial "use -r to copy directories"
+
+  #######################################
+  echo "==== case: copy single directory without trailing '/' ===="
+  run ${APP_BIN} -c "cp -r '${KV_BACKEND}/src/dev' '${KV_BACKEND}/dest/dev'"
   assert_success
 
   echo "ensure the directory got copied to destination"
@@ -83,7 +91,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: copy single directory with trailing '/' ===="
-  run ${APP_BIN} -c "cp \"${KV_BACKEND}/src/dev/\" \"${KV_BACKEND}/dest/dev.copy\""
+  run ${APP_BIN} -c "cp -r \"${KV_BACKEND}/src/dev/\" \"${KV_BACKEND}/dest/dev.copy\""
   assert_success
 
   echo "ensure the directory got copied to destination"
@@ -110,7 +118,7 @@ load ../../bin/plugins/bats-assert/load
 
   ######################################
   echo "==== case: copy single directory with dest trailing '/' ===="
-  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev ${KV_BACKEND}/dest/dev.copy2/"
+  run ${APP_BIN} -c "cp -r ${KV_BACKEND}/src/dev ${KV_BACKEND}/dest/dev.copy2/"
   assert_success
 
   echo "ensure the directory got copied to destination"
@@ -137,7 +145,7 @@ load ../../bin/plugins/bats-assert/load
 
   ######################################
   echo "==== case: copy single directory with src and dest trailing '/' ===="
-  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/dev/ ${KV_BACKEND}/dest/dev.copy3/"
+  run ${APP_BIN} -c "cp -r ${KV_BACKEND}/src/dev/ ${KV_BACKEND}/dest/dev.copy3/"
   assert_success
 
   echo "ensure the directory got copied to destination"
@@ -164,7 +172,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: copy ambiguous directory ===="
-  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/staging/all/ ${KV_BACKEND}/dest/staging/all/"
+  run ${APP_BIN} -c "cp -r ${KV_BACKEND}/src/staging/all/ ${KV_BACKEND}/dest/staging/all/"
   assert_success
 
   echo "ensure the directory got copied"
@@ -214,7 +222,7 @@ load ../../bin/plugins/bats-assert/load
 
   #######################################
   echo "==== case: copy ambiguous directory parent ===="
-  run ${APP_BIN} -c "cp ${KV_BACKEND}/src/staging/ ${KV_BACKEND}/dest/staging5/"
+  run ${APP_BIN} -c "cp -r ${KV_BACKEND}/src/staging/ ${KV_BACKEND}/dest/staging5/"
   assert_success
 
   echo "ensure ambiguous file got copied"
