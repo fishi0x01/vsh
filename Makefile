@@ -67,6 +67,11 @@ local-vault-standard-test-instance: ## Start a local vault container with standa
 local-vault-concurrency-test-instance: ## Start a local vault container with concurrency setup provisioning
 	bash -c ". test/util/common.bash && . test/util/concurrency-setup.bash && setup"
 
+.PHONY: demo
+demo: compile ## Generate demo/demo.gif from demo/demo.tape (requires vhs)
+	bash demo/setup.sh
+	PATH="$(CURDIR)/build:$(PATH)" vhs demo/demo.tape
+
 clean: ## Remove builds and vsh related docker containers
 	docker rm -f vsh-integration-test-vault || true
 	rm ./build/* || true
