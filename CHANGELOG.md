@@ -12,6 +12,7 @@ BUG FIXES:
 
 * fix `add` using unresolved relative path when `cwd` is set via `VAULT_PATH` ([#131](https://github.com/fishi0x01/vsh/pull/131))
 * fix variable shadowing in `SetData` causing KV2 branch to be dead code ([#132](https://github.com/fishi0x01/vsh/pull/132))
+* fix concurrency and error handling issues: cache race condition, swallowed errors in recursive operations, logger data race, and resource leak in debug logging ([#133](https://github.com/fishi0x01/vsh/pull/133))
 
 ## v0.14.0 (August, 16 2025)
 
