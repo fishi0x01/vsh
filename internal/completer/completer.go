@@ -5,9 +5,9 @@ import (
 
 	"github.com/c-bata/go-prompt"
 	"github.com/fatih/structs"
-	"github.com/fishi0x01/vsh/cli"
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/cli"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // Completer struct for tab completion
@@ -27,7 +27,7 @@ func NewCompleter(client *client.Client, disableAutoCompletion bool) *Completer 
 // TogglePathCompletion enable/disable path auto-completion
 func (c *Completer) TogglePathCompletion() {
 	c.pathCompletionToggle = !c.pathCompletionToggle
-	log.UserInfo("Use path auto-completion: %t", c.pathCompletionToggle)
+	logger.UserInfo("Use path auto-completion: %t", c.pathCompletionToggle)
 }
 
 func (c *Completer) getAbsoluteTopLevelSuggestions() []prompt.Suggest {
@@ -58,7 +58,7 @@ func (c *Completer) absolutePathSuggestions(arg string) (result []prompt.Suggest
 		options, err = c.client.List(queryPath)
 
 		if err != nil {
-			log.UserError("Error during auto-completion: %s", err)
+			logger.UserError("Error during auto-completion: %s", err)
 			return result
 		}
 

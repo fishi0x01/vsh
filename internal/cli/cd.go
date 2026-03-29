@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // CdCommand container for all 'cd' parameters
@@ -72,12 +72,12 @@ func (cmd *CdCommand) Run() int {
 	t := cmd.client.GetType(newPwd)
 
 	if t == client.NONE {
-		log.UserError("not a valid path for operation: %s", newPwd)
+		logger.UserError("not a valid path for operation: %s", newPwd)
 		return 1
 	}
 
 	if t == client.LEAF {
-		log.UserError("not a valid path for operation: %s", newPwd)
+		logger.UserError("not a valid path for operation: %s", newPwd)
 		return 1
 	}
 

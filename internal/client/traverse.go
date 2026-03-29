@@ -3,7 +3,7 @@ package client
 import (
 	"strings"
 
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 func (client *Client) topLevelTraverse() (result []string) {
@@ -17,7 +17,7 @@ func (client *Client) topLevelTraverse() (result []string) {
 func (client *Client) lowLevelTraverse(path string, shallow bool) (result []string) {
 	s, err := client.cache.List(client.getKVMetaDataPath(path))
 	if err != nil {
-		log.AppTrace("%+v", err)
+		logger.AppTrace("%+v", err)
 		return
 	}
 

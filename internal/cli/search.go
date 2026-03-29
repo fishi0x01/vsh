@@ -10,7 +10,7 @@ import (
 
 	"github.com/andreyvit/diff"
 	"github.com/fatih/color"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // SearchingCommand interface to describe a command that performs a search operation
@@ -157,14 +157,14 @@ func (match *Match) print(out io.Writer, format MatchOutput) {
 		coloredValue := colorizeLineDiff(diff.CharacterDiff(match.value, match.replacedValue))
 		_, err := fmt.Fprintf(out, "%s> %s = %s\n", match.path, coloredKey, coloredValue)
 		if err != nil {
-			log.UserError("Error printing: %v", err)
+			logger.UserError("Error printing: %v", err)
 		}
 	case MatchOutputDiff:
 		before := fmt.Sprintf(" %s> %s = %s\n", match.path, match.key, match.value)
 		after := fmt.Sprintf(" %s> %s = %s\n", match.path, match.replacedKey, match.replacedValue)
 		_, err := fmt.Fprint(out, diff.LineDiff(before, after)+"\n")
 		if err != nil {
-			log.UserError("Error printing: %v", err)
+			logger.UserError("Error printing: %v", err)
 		}
 	case MatchOutputHighlight:
 		_, err := fmt.Fprintf(
@@ -175,7 +175,7 @@ func (match *Match) print(out io.Writer, format MatchOutput) {
 			highlightMatches(match.value, match.valueIndex),
 		)
 		if err != nil {
-			log.UserError("Error printing: %v", err)
+			logger.UserError("Error printing: %v", err)
 		}
 	}
 }

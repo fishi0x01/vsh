@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // MoveCommand container for all 'mv' parameters
@@ -93,7 +93,7 @@ func (cmd *MoveCommand) moveSecret(source string, target string) error {
 		return err
 	}
 
-	log.UserDebug("Moved %s to %s", source, target)
+	logger.UserDebug("Moved %s to %s", source, target)
 
 	return nil
 }

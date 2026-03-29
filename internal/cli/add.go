@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // AddCommand container for all 'append' parameters
@@ -78,13 +78,13 @@ func (cmd *AddCommand) Run() int {
 
 	pathType := cmd.client.GetType(path)
 	if pathType != client.LEAF {
-		log.UserError("not a valid path for operation: %s", path)
+		logger.UserError("not a valid path for operation: %s", path)
 		return 1
 	}
 
 	err := cmd.addKeyValue(path, cmd.args.Key, cmd.args.Value)
 	if err != nil {
-		log.UserError("%s", err.Error())
+		logger.UserError("%s", err.Error())
 		return 1
 	}
 
