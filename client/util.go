@@ -74,7 +74,7 @@ func (client *Client) getKVDataPath(path string) string {
 }
 
 func (client *Client) isTopLevelPath(absolutePath string) bool {
-	return strings.Count(absolutePath, "/") < 2
+	return absolutePath == "/"
 }
 
 func isValidKV2Data(secret *api.Secret) bool {
