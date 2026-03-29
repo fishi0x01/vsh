@@ -90,6 +90,7 @@ All PRs must pass the CI lint check. Run `make lint` before submitting.
 
 - **Always run `make lint` before pushing a commit.** All PRs must pass the CI lint check.
 - **Always use `make compile` to check if the code compiles.** Do not use `go build` directly.
+- **Always update `CHANGELOG.md` after opening a PR or pushing new commits to a PR.** Add an entry under the appropriate category (`ENHANCEMENTS`, `BUG FIXES`, `DEPENDENCIES`) in the `## master - unreleased` section, linking to the PR number (e.g. `[#135](https://github.com/fishi0x01/vsh/pull/135)`).
 - **Never modify vendored code** in `vendor/`. Run `make vendor` after changing `go.mod`/`go.sum`.
 - **Always vendor changes**: the release builds use `-mod vendor`; tests will fail if `vendor/` is out of sync.
 - **Integration tests are the source of truth** — unit tests are minimal; correctness is verified by the bats suites against a real Vault.
