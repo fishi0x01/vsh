@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/alexflint/go-arg"
-	"github.com/hashicorp/vault/api/cliconfig"
 	"github.com/c-bata/go-prompt"
 	"github.com/cosiner/argv"
 	"github.com/fishi0x01/vsh/cli"
 	"github.com/fishi0x01/vsh/client"
 	"github.com/fishi0x01/vsh/completer"
 	"github.com/fishi0x01/vsh/log"
+	"github.com/hashicorp/vault/api/cliconfig"
 )
 
 var vaultClient *client.Client
