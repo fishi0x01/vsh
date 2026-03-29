@@ -15,8 +15,7 @@ Key design goals:
 ## Repository layout
 
 ```
-main.go              # Entry point; flag parsing, REPL loop
-tokenhelper.go       # Vault token-helper integration (build-tag guarded)
+main.go              # Entry point; flag parsing, REPL loop, token resolution
 cli/                 # One file per command (cp.go, mv.go, …); shared args/confirmation helpers
 client/              # Vault API client abstraction (read, write, delete, list, traverse)
 completer/           # Path auto-completion logic for interactive mode
@@ -89,6 +88,8 @@ All PRs must pass the CI lint check. Run `make lint` before submitting.
 
 ## Important notes for agents
 
+- **Always run `make lint` before pushing a commit.** All PRs must pass the CI lint check.
+- **Always use `make compile` to check if the code compiles.** Do not use `go build` directly.
 - **Never modify vendored code** in `vendor/`. Run `make vendor` after changing `go.mod`/`go.sum`.
 - **Always vendor changes**: the release builds use `-mod vendor`; tests will fail if `vendor/` is out of sync.
 - **Integration tests are the source of truth** — unit tests are minimal; correctness is verified by the bats suites against a real Vault.
