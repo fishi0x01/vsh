@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/alexflint/go-arg"
+	"github.com/hashicorp/vault/api/cliconfig"
 	"github.com/c-bata/go-prompt"
 	"github.com/cosiner/argv"
 	"github.com/fishi0x01/vsh/cli"
@@ -113,7 +114,11 @@ func getCommand(args []string, commands *cli.Commands) (cmd cli.Command, err err
 func getVaultToken() (token string, err error) {
 	token = os.Getenv("VAULT_TOKEN")
 	if token == "" {
-		tok, err := getTokenFromHelper()
+		helper, err := cliconfig.DefaultTokenHelper()
+		if err != nil {
+			return "", err
+		}
+		tok, err := helper.Get()
 		if err != nil {
 			return "", err
 		}
