@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // ListCommand container for 'ls' parameters
@@ -74,9 +74,9 @@ func (cmd *ListCommand) Run() int {
 	result, err := cmd.client.List(newPwd)
 
 	if err != nil {
-		log.UserError("not a valid path for operation: %s", newPwd)
+		logger.UserError("not a valid path for operation: %s", newPwd)
 		return 1
 	}
-	log.UserInfo("%s", strings.Join(result, "\n"))
+	logger.UserInfo("%s", strings.Join(result, "\n"))
 	return 0
 }

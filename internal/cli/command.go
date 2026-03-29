@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/fatih/structs"
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // Command interface to describe a command structure
@@ -100,7 +100,7 @@ func runCommandWithTraverseTwoPaths(
 			sem <- struct{}{}
 			defer func() { <-sem }()
 			if err := f(p, t); err != nil {
-				log.UserError("Error during operation on %s: %s", p, err)
+				logger.UserError("Error during operation on %s: %s", p, err)
 				select {
 				case failed <- struct{}{}:
 				default:
@@ -129,13 +129,13 @@ func transportSecrets(
 	case client.LEAF:
 		err := transport(filepath.Clean(newSrcPwd), newTargetPwd)
 		if err != nil {
-			log.UserError("Error during operation: %s", err)
+			logger.UserError("Error during operation: %s", err)
 			return 1
 		}
 	case client.NODE:
 		return runCommandWithTraverseTwoPaths(c, newSrcPwd, newTargetPwd, workerCount, transport)
 	default:
-		log.UserError("not a valid path for operation: %s", newSrcPwd)
+		logger.UserError("not a valid path for operation: %s", newSrcPwd)
 		return 1
 	}
 

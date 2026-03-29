@@ -8,21 +8,21 @@ import (
 	"github.com/alexflint/go-arg"
 	"github.com/c-bata/go-prompt"
 	"github.com/cosiner/argv"
-	"github.com/fishi0x01/vsh/cli"
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/completer"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/cli"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/completer"
+	"github.com/fishi0x01/vsh/internal/logger"
 	"github.com/hashicorp/vault/api/cliconfig"
 )
 
-var vaultClient *client.Client
-var completerInstance *completer.Completer
-var workerCount int
+var vshVersion = ""
 
-var (
-	vshVersion    = ""
-	isInteractive = true
-)
+type app struct {
+	vaultClient   *client.Client
+	completer     *completer.Completer
+	workerCount   int
+	isInteractive bool
+}
 
 type args struct {
 	CmdString             string `arg:"-c,--cmd"                  help:"subcommand to run"`
@@ -39,10 +39,10 @@ func (args) Description() string {
 	return "vsh - Shell for Hashicorp Vault"
 }
 
-func executor(in string) {
+func (a *app) executor(in string) {
 	// Every command can change the vault content
 	// i.e., the cache should be cleared after a command got executed
-	defer vaultClient.ClearCache()
+	defer a.vaultClient.ClearCache()
 
 	// Split the input separate the command and the arguments.
 	in = strings.TrimSpace(in)
@@ -54,25 +54,25 @@ func executor(in string) {
 	if len(args) == 0 {
 		_, err := fmt.Fprint(os.Stdout, "")
 		if err != nil {
-			log.UserError("Error printing: %v", err)
+			logger.UserError("Error printing: %v", err)
 		}
-		if !isInteractive {
+		if !a.isInteractive {
 			os.Exit(1)
 		}
 		return
 	}
 
 	if err != nil {
-		log.UserError("%v", err)
+		logger.UserError("%v", err)
 		return
 	}
-	commands := cli.NewCommands(vaultClient, workerCount)
+	commands := cli.NewCommands(a.vaultClient, a.workerCount)
 	var cmd cli.Command
 
 	// parse command
 	switch args[0][0] {
 	case "toggle-auto-completion":
-		completerInstance.TogglePathCompletion()
+		a.completer.TogglePathCompletion()
 		return
 	case "exit":
 		os.Exit(0)
@@ -84,19 +84,19 @@ func executor(in string) {
 	}
 
 	if err != nil {
-		log.UserError("%v", err)
+		logger.UserError("%v", err)
 		if cmd != nil {
 			cmd.PrintUsage()
 		}
 	}
 
-	if err != nil && !isInteractive {
+	if err != nil && !a.isInteractive {
 		os.Exit(1)
 	}
 
 	if err == nil && cmd.IsSane() {
 		ret := cmd.Run()
-		if !isInteractive {
+		if !a.isInteractive {
 			os.Exit(ret)
 		}
 	}
@@ -137,19 +137,17 @@ func main() {
 		p.Fail("Not a valid verbosity level")
 	}
 
-	workerCount = args.WorkerCount
-
 	var err error
-	err = log.Init(args.Verbosity)
+	err = logger.Init(args.Verbosity)
 	if err != nil {
 		os.Exit(1)
 	}
-	defer log.Close()
+	defer logger.Close()
 
 	token, ve := getVaultToken()
 	if ve != nil {
-		log.AppError("Error getting vault token")
-		log.AppError("%v", ve)
+		logger.AppError("Error getting vault token")
+		logger.AppError("%v", ve)
 		return
 	}
 
@@ -160,27 +158,32 @@ func main() {
 		CertificatePath: os.Getenv("VAULT_CACERT"),
 	}
 
-	vaultClient, err = client.NewClient(conf)
+	a := &app{
+		workerCount:   args.WorkerCount,
+		isInteractive: true,
+	}
+
+	a.vaultClient, err = client.NewClient(conf)
 	if err != nil {
-		log.UserError(
+		logger.UserError(
 			"Error initializing vault client | Is VAULT_ADDR properly set? Do you provide a proper token?",
 		)
-		log.UserError("%v", err)
+		logger.UserError("%v", err)
 		os.Exit(1)
 	}
 
 	if args.CmdString != "" {
 		// Run non-interactive mode
-		isInteractive = false
-		executor(args.CmdString)
+		a.isInteractive = false
+		a.executor(args.CmdString)
 	} else {
 		// Run interactive mode
-		completerInstance = completer.NewCompleter(vaultClient, args.DisableAutoCompletion)
+		a.completer = completer.NewCompleter(a.vaultClient, args.DisableAutoCompletion)
 		p := prompt.New(
-			executor,
-			completerInstance.Complete,
+			a.executor,
+			a.completer.Complete,
 			prompt.OptionTitle("vsh - interactive vault shell"),
-			prompt.OptionLivePrefix(completerInstance.PromptPrefix),
+			prompt.OptionLivePrefix(a.completer.PromptPrefix),
 			prompt.OptionInputTextColor(prompt.Yellow),
 			prompt.OptionShowCompletionAtStart(),
 		)

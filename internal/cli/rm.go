@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // RemoveCommand container for all 'rm' parameters
@@ -76,12 +76,12 @@ func (cmd *RemoveCommand) Run() int {
 	case client.LEAF:
 		err := cmd.removeSecret(newPwd)
 		if err != nil {
-			log.UserError("Error removing secret: %v", err)
+			logger.UserError("Error removing secret: %v", err)
 			return 1
 		}
 	case client.NODE:
 		if !cmd.args.Recursive {
-			log.UserError("use -r to remove directories")
+			logger.UserError("use -r to remove directories")
 			return 1
 		}
 		var wg sync.WaitGroup
@@ -94,7 +94,7 @@ func (cmd *RemoveCommand) Run() int {
 				sem <- struct{}{}
 				defer func() { <-sem }()
 				if err := cmd.removeSecret(p); err != nil {
-					log.UserError("Error removing dir: %v", err)
+					logger.UserError("Error removing dir: %v", err)
 					select {
 					case failed <- struct{}{}:
 					default:
@@ -107,7 +107,7 @@ func (cmd *RemoveCommand) Run() int {
 			return 1
 		}
 	default:
-		log.UserError("not a valid path for operation: %s", newPwd)
+		logger.UserError("not a valid path for operation: %s", newPwd)
 		return 1
 	}
 
@@ -121,7 +121,7 @@ func (cmd *RemoveCommand) removeSecret(path string) error {
 		return err
 	}
 
-	log.UserDebug("Removed %s", path)
+	logger.UserDebug("Removed %s", path)
 
 	return nil
 }

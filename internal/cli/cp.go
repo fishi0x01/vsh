@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // CopyCommand container for all 'cp' parameters
@@ -72,7 +72,7 @@ func (cmd *CopyCommand) Parse(args []string) error {
 func (cmd *CopyCommand) Run() int {
 	newSrcPwd := cmdPath(cmd.client.Pwd, cmd.args.Source)
 	if cmd.client.GetType(newSrcPwd) == client.NODE && !cmd.args.Recursive {
-		log.UserError("use -r to copy directories")
+		logger.UserError("use -r to copy directories")
 		return 1
 	}
 	return transportSecrets(
@@ -94,7 +94,7 @@ func (cmd *CopyCommand) copySecret(source string, target string) error {
 		return err
 	}
 
-	log.UserDebug("Copied %s to %s", source, target)
+	logger.UserDebug("Copied %s to %s", source, target)
 
 	return nil
 }

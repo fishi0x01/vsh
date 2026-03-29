@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // CatCommand container for all 'cat' parameters
@@ -76,10 +76,10 @@ func (cmd *CatCommand) Run() int {
 		}
 
 		for k, v := range secret.GetData() {
-			log.UserInfo("%s = %s", k, v)
+			logger.UserInfo("%s = %s", k, v)
 		}
 	} else {
-		log.UserError("not a valid path for operation: %s", absPath)
+		logger.UserError("not a valid path for operation: %s", absPath)
 		return 1
 	}
 	return 0

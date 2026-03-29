@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/logger"
 	"github.com/hashicorp/vault/api"
 )
 
@@ -71,12 +71,12 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	}
 
 	if len(conf.CertificatePath) > 0 {
-		log.UserDebug("Configuring TLS to be %s", conf.CertificatePath)
+		logger.UserDebug("Configuring TLS to be %s", conf.CertificatePath)
 		err := config.ConfigureTLS(&api.TLSConfig{
 			CAPath: conf.CertificatePath,
 		})
 		if err != nil {
-			log.UserError("Error configuring TLS: %v", err)
+			logger.UserError("Error configuring TLS: %v", err)
 			return nil, err
 		}
 	}
@@ -94,7 +94,7 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	if sliceContains(permissions, "list") || sliceContains(permissions, "root") {
 		mounts, err = vault.Sys().ListMounts()
 	} else {
-		log.UserDebug(
+		logger.UserDebug(
 			"Cannot auto-discover mount backends: Token does not have list permission on sys/mounts",
 		)
 	}
@@ -114,7 +114,7 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	}
 
 	if len(mounts) == 0 {
-		log.UserDebug(
+		logger.UserDebug(
 			"No KV mounts found or specified, adding default KV version 2 mount at /secrets",
 		)
 
@@ -123,7 +123,7 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	}
 
 	if err != nil {
-		log.AppTrace("%+v", err)
+		logger.AppTrace("%+v", err)
 		return nil, err
 	}
 
@@ -135,7 +135,7 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 				return nil, err
 			}
 			backends[path] = v
-			log.UserDebug("Found KV backend '%v' with version '%v'", path, v)
+			logger.UserDebug("Found KV backend '%v' with version '%v'", path, v)
 		}
 	}
 

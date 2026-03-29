@@ -3,7 +3,7 @@ package client
 import (
 	"errors"
 
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 func (client *Client) topLevelDelete(path string) error {
@@ -13,7 +13,7 @@ func (client *Client) topLevelDelete(path string) error {
 func (client *Client) lowLevelDelete(path string) (err error) {
 	_, err = client.Vault.Logical().Delete(client.getKVMetaDataPath(path))
 	if err != nil {
-		log.AppTrace("%+v", err)
+		logger.AppTrace("%+v", err)
 	}
 	return err
 }

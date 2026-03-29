@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // ReplaceCommand container for all 'replace' parameters
@@ -115,13 +115,13 @@ func (cmd *ReplaceCommand) Run() int {
 	path := cmdPath(cmd.client.Pwd, cmd.args.Path)
 	filePaths, err := cmd.client.SubpathsForPath(path, cmd.args.Shallow)
 	if err != nil {
-		log.UserError(fmt.Sprintf("%s", err))
+		logger.UserError(fmt.Sprintf("%s", err))
 		return 1
 	}
 
 	allMatches, err := cmd.findMatches(filePaths)
 	if err != nil {
-		log.UserError(fmt.Sprintf("%s", err))
+		logger.UserError(fmt.Sprintf("%s", err))
 		return 1
 	}
 	return cmd.commitMatches(allMatches)
@@ -166,7 +166,7 @@ func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int 
 		fmt.Println("Writing!")
 		err := cmd.WriteReplacements(matchesByPath)
 		if err != nil {
-			log.UserError("Error writing replacement: %v", err)
+			logger.UserError("Error writing replacement: %v", err)
 		}
 	} else {
 		fmt.Println("No matches found to replace.")

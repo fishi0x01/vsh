@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 )
 
 // GrepCommand container for all 'grep' parameters
@@ -95,7 +95,7 @@ func (cmd *GrepCommand) Run() int {
 	path := cmdPath(cmd.client.Pwd, cmd.args.Path)
 	filePaths, err := cmd.client.SubpathsForPath(path, cmd.args.Shallow)
 	if err != nil {
-		log.UserError(fmt.Sprintf("%s", err))
+		logger.UserError(fmt.Sprintf("%s", err))
 		return 1
 	}
 

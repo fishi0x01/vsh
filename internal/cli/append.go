@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fishi0x01/vsh/client"
-	"github.com/fishi0x01/vsh/log"
+	"github.com/fishi0x01/vsh/internal/client"
+	"github.com/fishi0x01/vsh/internal/logger"
 	"github.com/hashicorp/vault/api"
 )
 
@@ -101,12 +101,12 @@ func (cmd *AppendCommand) Run() int {
 
 	src := cmd.client.GetType(newSrcPwd)
 	if src != client.LEAF {
-		log.UserError("not a valid path for operation: %s", newSrcPwd)
+		logger.UserError("not a valid path for operation: %s", newSrcPwd)
 		return 1
 	}
 
 	if err := cmd.mergeSecrets(newSrcPwd, newTargetPwd); err != nil {
-		log.AppError("Append failed: %v", err)
+		logger.AppError("Append failed: %v", err)
 		return 1
 	}
 	return 0
@@ -160,9 +160,9 @@ func (cmd *AppendCommand) mergeSecrets(source string, target string) error {
 		fmt.Println(err)
 		return err
 	}
-	log.UserDebug("Appended values from %s to %s", source, target)
+	logger.UserDebug("Appended values from %s to %s", source, target)
 	if len(skippedKeys) > 0 {
-		log.UserDebug(
+		logger.UserDebug(
 			"Handled conflicting keys according to the '%s' strategy. Keys: %s",
 			onConflict,
 			strings.Join(skippedKeys, ", "),
