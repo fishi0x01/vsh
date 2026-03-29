@@ -20,6 +20,10 @@ DEPENDENCIES:
 * bump Go to 1.26 and update dependencies ([#134](https://github.com/fishi0x01/vsh/pull/134))
 * remove `notokenhelper` release variant — inline token helper logic into `main.go` ([#135](https://github.com/fishi0x01/vsh/pull/135))
 
+REFACTORING:
+
+* move `cli`, `client`, `completer`, `log` packages under `internal/` to prevent unintended external imports, rename `log` package to `logger` to avoid shadowing stdlib, and replace package-level globals in `main.go` with an `app` struct ([#137](https://github.com/fishi0x01/vsh/pull/137))
+
 ## v0.14.0 (August, 16 2025)
 
 ENHANCEMENTS:
