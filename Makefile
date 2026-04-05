@@ -66,6 +66,10 @@ local-vault-standard-test-instance: ## Start a local vault container with standa
 local-vault-concurrency-test-instance: ## Start a local vault container with concurrency setup provisioning
 	bash -c ". test/util/common.bash && . test/util/concurrency-setup.bash && setup"
 
+manual-test: compile ## Start vault with large nested dir tree and open vsh shell for manual testing
+	bash -c ". test/util/common.bash && . test/util/concurrency-setup.bash && setup"
+	VAULT_ADDR=http://localhost:8888 VAULT_TOKEN=root ./build/vsh_$(shell uname | tr '[:upper:]' '[:lower:]')_$(ARCH)
+
 .PHONY: demo
 demo: compile ## Generate demo/demo.gif from demo/demo.tape (requires vhs)
 	bash demo/setup.sh

@@ -58,7 +58,6 @@ func (c *Completer) absolutePathSuggestions(arg string) (result []prompt.Suggest
 		options, err = c.client.List(queryPath)
 
 		if err != nil {
-			logger.UserError("Error during auto-completion: %s", err)
 			return result
 		}
 
