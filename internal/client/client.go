@@ -228,6 +228,15 @@ func (client *Client) SubpathsForPath(path string, shallow bool) (filePaths []st
 			}
 			filePaths = append(filePaths, traversedPath)
 		}
+	case BACKEND:
+		// topLevelTraverse returns paths without leading '/', e.g. "KV1/"
+		for _, backendPath := range client.Traverse(path, shallow) {
+			subPaths, subErr := client.SubpathsForPath("/"+backendPath, shallow)
+			if subErr != nil {
+				continue
+			}
+			filePaths = append(filePaths, subPaths...)
+		}
 	default:
 		return filePaths, fmt.Errorf("not a valid path for operation: %s", path)
 	}

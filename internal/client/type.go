@@ -58,6 +58,12 @@ func (client *Client) getDirFiles(path string) (result map[string]int) {
 }
 
 func (client *Client) lowLevelType(path string) (result PathKind) {
+	// A path that is itself a known backend root (e.g. "kv1/") is always a
+	// traversable node, regardless of whether it currently holds any secrets.
+	if _, ok := client.KVBackends[strings.TrimSuffix(path, "/")+"/"]; ok {
+		return NODE
+	}
+
 	dirFiles := client.getDirFiles(path)
 	if client.isAmbiguous(path, dirFiles) {
 		if strings.HasSuffix(path, "/") {
@@ -67,7 +73,7 @@ func (client *Client) lowLevelType(path string) (result PathKind) {
 		}
 	} else {
 		hasNode := false
-		kvPath := client.getKVMetaDataPath(path + "/")
+		kvPath := client.getKVMetaDataPath(strings.TrimSuffix(path, "/") + "/")
 		s, err := client.cache.List(kvPath)
 		if err == nil && s != nil {
 			if _, ok := s.Data["keys"]; ok {
