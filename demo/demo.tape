@@ -32,6 +32,10 @@ Sleep 1500ms
 # ── Launch vsh ────────────────────────────────────────────────────────────────
 Type "vsh"
 Enter
+Sleep 500ms
+
+Type " "
+Backspace
 Sleep 2500ms
 
 # ── Explore top-level paths ───────────────────────────────────────────────────

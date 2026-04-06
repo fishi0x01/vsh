@@ -3,12 +3,17 @@ package completer
 import (
 	"strings"
 
-	"github.com/c-bata/go-prompt"
 	"github.com/fatih/structs"
 	"github.com/fishi0x01/vsh/internal/cli"
 	"github.com/fishi0x01/vsh/internal/client"
 	"github.com/fishi0x01/vsh/internal/logger"
 )
+
+// Suggestion holds a completion candidate with an optional description.
+type Suggestion struct {
+	Text        string
+	Description string
+}
 
 // Completer struct for tab completion
 type Completer struct {
@@ -30,72 +35,80 @@ func (c *Completer) TogglePathCompletion() {
 	logger.UserInfo("Use path auto-completion: %t", c.pathCompletionToggle)
 }
 
-func (c *Completer) getAbsoluteTopLevelSuggestions() []prompt.Suggest {
-	var suggestions []prompt.Suggest
+func filterHasPrefix(suggestions []Suggestion, prefix string) []Suggestion {
+	if prefix == "" {
+		return suggestions
+	}
+	lower := strings.ToLower(prefix)
+	var result []Suggestion
+	for _, s := range suggestions {
+		if strings.HasPrefix(strings.ToLower(s.Text), lower) {
+			result = append(result, s)
+		}
+	}
+	return result
+}
+
+func (c *Completer) getAbsoluteTopLevelSuggestions() []Suggestion {
+	var suggestions []Suggestion
 	for k := range c.client.KVBackends {
-		suggestions = append(suggestions, prompt.Suggest{Text: "/" + k})
+		suggestions = append(suggestions, Suggestion{Text: "/" + k})
 	}
 	return suggestions
 }
 
-func (c *Completer) getRelativeTopLevelSuggestions() []prompt.Suggest {
-	var suggestions []prompt.Suggest
+func (c *Completer) getRelativeTopLevelSuggestions() []Suggestion {
+	var suggestions []Suggestion
 	for k := range c.client.KVBackends {
-		suggestions = append(suggestions, prompt.Suggest{Text: k})
+		suggestions = append(suggestions, Suggestion{Text: k})
 	}
 	return suggestions
 }
 
-func (c *Completer) absolutePathSuggestions(arg string) (result []prompt.Suggest) {
+func (c *Completer) absolutePathSuggestions(arg string) (result []Suggestion) {
 	if strings.Count(arg, "/") < 2 {
 		result = c.getAbsoluteTopLevelSuggestions()
 	} else {
 		li := strings.LastIndex(arg, "/")
 		queryPath := arg[0 : li+1]
 
-		var options []string
-		var err error
-		options, err = c.client.List(queryPath)
-
+		options, err := c.client.List(queryPath)
 		if err != nil {
 			return result
 		}
 
 		options = append(options, "../")
 		for _, node := range options {
-			result = append(result, prompt.Suggest{Text: queryPath + node})
+			result = append(result, Suggestion{Text: queryPath + node})
 		}
 	}
 
-	filtered := prompt.FilterHasPrefix(result, arg, true)
+	filtered := filterHasPrefix(result, arg)
 	if len(filtered) > 0 {
 		result = filtered
 	}
 	return result
 }
 
-func (c *Completer) relativePathSuggestions(arg string) (result []prompt.Suggest) {
+func (c *Completer) relativePathSuggestions(arg string) (result []Suggestion) {
 	if c.client.Pwd == "/" && strings.Count(arg, "/") < 1 {
 		result = c.getRelativeTopLevelSuggestions()
 	} else {
 		li := strings.LastIndex(arg, "/")
 		queryPath := arg[0 : li+1]
 
-		var options []string
-		var err error
-		options, err = c.client.List(c.client.Pwd + queryPath)
-
+		options, err := c.client.List(c.client.Pwd + queryPath)
 		if err != nil {
 			return result
 		}
 
 		options = append(options, "../")
 		for _, node := range options {
-			result = append(result, prompt.Suggest{Text: queryPath + node})
+			result = append(result, Suggestion{Text: queryPath + node})
 		}
 	}
 
-	filtered := prompt.FilterHasPrefix(result, arg, true)
+	filtered := filterHasPrefix(result, arg)
 	if len(filtered) > 0 {
 		result = filtered
 	}
@@ -125,46 +138,52 @@ func isCommand(p string) bool {
 	return len(strings.Split(p, " ")) < 2
 }
 
-func (c *Completer) commandSuggestions(arg string) (result []prompt.Suggest) {
-	result = make([]prompt.Suggest, 0)
+func (c *Completer) commandSuggestions(arg string) []Suggestion {
+	result := make([]Suggestion, 0)
 	commands := cli.NewCommands(c.client, 1)
 	for _, f := range structs.Fields(commands) {
 		val := f.Value().(cli.Command)
-		result = append(result, prompt.Suggest{Text: val.GetName(), Description: cli.Usage(val)})
+		result = append(result, Suggestion{Text: val.GetName(), Description: cli.Usage(val)})
 	}
-	result = append(
-		result,
-		prompt.Suggest{
-			Text:        "toggle-auto-completion",
-			Description: "toggle path auto-completion on/off",
-		},
-	)
+	result = append(result, Suggestion{
+		Text:        "toggle-auto-completion",
+		Description: "toggle path auto-completion on/off",
+	})
 
-	filtered := prompt.FilterHasPrefix(result, arg, true)
+	filtered := filterHasPrefix(result, arg)
 	if len(filtered) > 0 {
 		result = filtered
 	}
 	return result
 }
 
-// Complete suggestions for completion
-func (c *Completer) Complete(in prompt.Document) (result []prompt.Suggest) {
-	p := in.TextBeforeCursor()
-	if isCommand(p) {
-		result = c.commandSuggestions(in.GetWordBeforeCursor())
-	} else if c.isCommandArgument(p) && c.pathCompletionToggle {
-		cur := in.GetWordBeforeCursor()
-		if isAbsolutePath(cur) {
-			result = c.absolutePathSuggestions(cur)
-		} else {
-			result = c.relativePathSuggestions(cur)
+// Complete returns completion suggestions for the given input text.
+func (c *Completer) Complete(text string) []Suggestion {
+	if isCommand(text) {
+		// word before cursor is the partial command name
+		word := text
+		if idx := strings.LastIndex(text, " "); idx >= 0 {
+			word = text[idx+1:]
 		}
+		return c.commandSuggestions(word)
 	}
 
-	return result
+	if c.isCommandArgument(text) && c.pathCompletionToggle {
+		// word before cursor is the partial path argument
+		word := text
+		if idx := strings.LastIndex(text, " "); idx >= 0 {
+			word = text[idx+1:]
+		}
+		if isAbsolutePath(word) {
+			return c.absolutePathSuggestions(word)
+		}
+		return c.relativePathSuggestions(word)
+	}
+
+	return nil
 }
 
-// PromptPrefix returns the currently active prompt prefix
-func (c *Completer) PromptPrefix() (string, bool) {
-	return c.client.Name + " " + c.client.Pwd + "> ", true
+// PromptPrefix returns the currently active prompt prefix string.
+func (c *Completer) PromptPrefix() string {
+	return c.client.Name + " " + c.client.Pwd + "> "
 }

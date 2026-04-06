@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/alexflint/go-arg"
-	"github.com/c-bata/go-prompt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cosiner/argv"
 	"github.com/fishi0x01/vsh/internal/cli"
 	"github.com/fishi0x01/vsh/internal/client"
 	"github.com/fishi0x01/vsh/internal/completer"
 	"github.com/fishi0x01/vsh/internal/logger"
+	"github.com/fishi0x01/vsh/internal/tui"
 	"github.com/hashicorp/vault/api/cliconfig"
 )
 
@@ -177,16 +178,27 @@ func main() {
 		a.isInteractive = false
 		a.executor(args.CmdString)
 	} else {
-		// Run interactive mode
+		// Run interactive mode — quit/restart loop so executor output reaches
+		// the terminal freely between bubbletea sessions.
 		a.completer = completer.NewCompleter(a.vaultClient, args.DisableAutoCompletion)
-		p := prompt.New(
-			a.executor,
-			a.completer.Complete,
-			prompt.OptionTitle("vsh - interactive vault shell"),
-			prompt.OptionLivePrefix(a.completer.PromptPrefix),
-			prompt.OptionInputTextColor(prompt.Yellow),
-			prompt.OptionShowCompletionAtStart(),
-		)
-		p.Run()
+		var history []string
+		for {
+			m := tui.NewModel(a.completer.Complete, a.completer.PromptPrefix, history)
+			result, err := tea.NewProgram(m).Run()
+			if err != nil {
+				logger.AppError("Error running TUI: %v", err)
+				os.Exit(1)
+			}
+			final := result.(tui.Model)
+			history = final.History()
+			if final.Quitting() {
+				break
+			}
+			cmd := final.LastCommand()
+			fmt.Printf("%s%s\n", tui.RenderPrefix(a.completer.PromptPrefix()), cmd)
+			if cmd != "" {
+				a.executor(cmd)
+			}
+		}
 	}
 }
