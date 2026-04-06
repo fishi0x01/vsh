@@ -197,7 +197,7 @@ func main() {
 			cmd := final.LastCommand()
 			fmt.Printf("%s%s\n", tui.RenderPrefix(a.completer.PromptPrefix()), cmd)
 			if cmd != "" {
-				a.executor(cmd)
+				tui.RunWithSpinner(func() { a.executor(cmd) })
 			}
 		}
 	}

@@ -7,6 +7,7 @@ ENHANCEMENTS:
 * concurrent recursive operations for `cp`, `mv` and `rm` via goroutine pool, tunable with `--worker-count` flag (default: 10) ([#126](https://github.com/fishi0x01/vsh/pull/126))
 * update README and add `make demo` target to generate demo gif ([#127](https://github.com/fishi0x01/vsh/pull/127))
 * require `-r` flag for recursive `cp` and `rm` operations on directories ([#128](https://github.com/fishi0x01/vsh/pull/128))
+* replace unmaintained `c-bata/go-prompt` with `charmbracelet/bubbletea` for a richer interactive TUI: styled completion dropdown with selection marker, stable prompt prefix colour, history navigation, and a braille spinner during long-running operations ([#139](https://github.com/fishi0x01/vsh/pull/139))
 
 BUG FIXES:
 
@@ -19,6 +20,7 @@ DEPENDENCIES:
 
 * bump Go to 1.26 and update dependencies ([#134](https://github.com/fishi0x01/vsh/pull/134))
 * remove `notokenhelper` release variant — inline token helper logic into `main.go` ([#135](https://github.com/fishi0x01/vsh/pull/135))
+* replace `c-bata/go-prompt` with `charmbracelet/bubbletea`, `charmbracelet/bubbles`, and `charmbracelet/lipgloss` ([#139](https://github.com/fishi0x01/vsh/pull/139))
 
 REFACTORING:
 
