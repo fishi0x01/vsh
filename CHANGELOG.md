@@ -18,6 +18,7 @@ BUG FIXES:
 
 DEPENDENCIES:
 
+* set `CGO_ENABLED=0` in `make compile-releases` to guarantee truly static release binaries ([#139](https://github.com/fishi0x01/vsh/pull/139))
 * bump Go to 1.26 and update dependencies ([#134](https://github.com/fishi0x01/vsh/pull/134))
 * remove `notokenhelper` release variant — inline token helper logic into `main.go` ([#135](https://github.com/fishi0x01/vsh/pull/135))
 * replace `c-bata/go-prompt` with `charmbracelet/bubbletea`, `charmbracelet/bubbles`, and `charmbracelet/lipgloss` ([#139](https://github.com/fishi0x01/vsh/pull/139))

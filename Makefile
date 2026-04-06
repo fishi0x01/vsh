@@ -34,7 +34,7 @@ compile-releases: clean ## Compile vsh binaries for multiple platforms and archi
 	mkdir -p ./build/
 	for GOOS in $(SUPPORTED_PLATFORMS); do \
 		for GOARCH in $(SUPPORTED_ARCHS); do \
-			GOOS=$$GOOS GOARCH=$$GOARCH \
+			CGO_ENABLED=0 GOOS=$$GOOS GOARCH=$$GOARCH \
 				go build -mod vendor -trimpath -ldflags "-s -w -X main.vshVersion=$(VERSION)" -o build/${APP_NAME}_$${GOOS}_$${GOARCH}; \
 		done \
 	done
