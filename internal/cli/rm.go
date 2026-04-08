@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 	"sync"
 
 	"github.com/fishi0x01/vsh/internal/client"
@@ -13,6 +16,7 @@ type RemoveCommand struct {
 	name        string
 	args        *RemoveCommandArgs
 	workerCount int
+	interactive bool
 
 	client *client.Client
 }
@@ -20,6 +24,7 @@ type RemoveCommand struct {
 // RemoveCommandArgs provides a struct for go-arg parsing
 type RemoveCommandArgs struct {
 	Recursive bool   `arg:"-r"                  help:"recursively remove a directory"`
+	Force     bool   `arg:"-f"                  help:"skip confirmation prompt for recursive removal"`
 	Path      string `arg:"positional,required" help:"path to remove"`
 }
 
@@ -29,12 +34,13 @@ func (RemoveCommandArgs) Description() string {
 }
 
 // NewRemoveCommand creates a new RemoveCommand parameter container
-func NewRemoveCommand(c *client.Client, workerCount int) *RemoveCommand {
+func NewRemoveCommand(c *client.Client, workerCount int, interactive bool) *RemoveCommand {
 	return &RemoveCommand{
 		name:        "rm",
 		client:      c,
 		args:        &RemoveCommandArgs{},
 		workerCount: workerCount,
+		interactive: interactive,
 	}
 }
 
@@ -83,6 +89,15 @@ func (cmd *RemoveCommand) Run() int {
 		if !cmd.args.Recursive {
 			logger.UserError("use -r to remove directories")
 			return 1
+		}
+		if cmd.interactive && !cmd.args.Force {
+			fmt.Printf("Remove entire subtree at '%s'? [y/N] ", newPwd)
+			reader := bufio.NewReader(os.Stdin)
+			answer, _ := reader.ReadString('\n')
+			if strings.ToLower(strings.TrimSpace(answer)) != "y" {
+				fmt.Println("Aborted.")
+				return 0
+			}
 		}
 		var wg sync.WaitGroup
 		sem := make(chan struct{}, cmd.workerCount)

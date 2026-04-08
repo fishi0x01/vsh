@@ -49,7 +49,7 @@ func (cmds *Commands) Get(cmd string) Command {
 }
 
 // NewCommands returns a Commands struct with all available commands
-func NewCommands(client *client.Client, workerCount int) *Commands {
+func NewCommands(client *client.Client, workerCount int, interactive bool) *Commands {
 	return &Commands{
 		Add:     NewAddCommand(client),
 		Append:  NewAppendCommand(client),
@@ -60,7 +60,7 @@ func NewCommands(client *client.Client, workerCount int) *Commands {
 		Ls:      NewListCommand(client),
 		Mv:      NewMoveCommand(client, workerCount),
 		Replace: NewReplaceCommand(client),
-		Rm:      NewRemoveCommand(client, workerCount),
+		Rm:      NewRemoveCommand(client, workerCount, interactive),
 	}
 }
 

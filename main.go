@@ -67,7 +67,7 @@ func (a *app) executor(in string) {
 		logger.UserError("%v", err)
 		return
 	}
-	commands := cli.NewCommands(a.vaultClient, a.workerCount)
+	commands := cli.NewCommands(a.vaultClient, a.workerCount, a.isInteractive)
 	var cmd cli.Command
 
 	// parse command

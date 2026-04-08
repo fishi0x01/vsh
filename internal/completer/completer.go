@@ -125,7 +125,7 @@ func (c *Completer) isCommandArgument(p string) bool {
 		return false
 	}
 
-	commands := cli.NewCommands(c.client, 1)
+	commands := cli.NewCommands(c.client, 1, false)
 	for _, f := range structs.Fields(commands) {
 		if words[0] == f.Value().(cli.Command).GetName() || words[0] == "toggle-auto-completion" {
 			return true
@@ -140,7 +140,7 @@ func isCommand(p string) bool {
 
 func (c *Completer) commandSuggestions(arg string) []Suggestion {
 	result := make([]Suggestion, 0)
-	commands := cli.NewCommands(c.client, 1)
+	commands := cli.NewCommands(c.client, 1, false)
 	for _, f := range structs.Fields(commands) {
 		val := f.Value().(cli.Command)
 		result = append(result, Suggestion{Text: val.GetName(), Description: cli.Usage(val)})
