@@ -17,7 +17,8 @@ BUG FIXES:
 * fix variable shadowing in `SetData` causing KV2 branch to be dead code ([#132](https://github.com/fishi0x01/vsh/pull/132))
 * fix concurrency and error handling issues: cache race condition, swallowed errors in recursive operations, logger data race, and resource leak in debug logging ([#133](https://github.com/fishi0x01/vsh/pull/133))
 * fix `ls <arg>` from root incorrectly listing all backends when argument is not a valid path ([#136](https://github.com/fishi0x01/vsh/pull/136))
-* fix `rm -r` confirmation prompt garbled by spinner; fix spurious blank lines between completion dropdown entries; fix `add` and `replace` confirmation prompts garbled by spinner ([#141](https://github.com/fishi0x01/vsh/pull/141))
+* fix `rm -r` confirmation prompt garbled by spinner; fix spurious blank lines between completion dropdown entries ([#141](https://github.com/fishi0x01/vsh/pull/141))
+* fix `add` and `replace` confirmation prompts garbled by spinner ([#142](https://github.com/fishi0x01/vsh/pull/142))
 
 DEPENDENCIES:
 
