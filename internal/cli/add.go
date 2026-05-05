@@ -12,7 +12,16 @@ type AddCommand struct {
 	name string
 	args *AddCommandArgs
 
-	client *client.Client
+	client        *client.Client
+	pauseSpinner  func()
+	resumeSpinner func()
+}
+
+// SetSpinnerControl satisfies SpinnerAware so the spinner can be paused
+// while askForConfirmation is reading stdin.
+func (cmd *AddCommand) SetSpinnerControl(pause, resume func()) {
+	cmd.pauseSpinner = pause
+	cmd.resumeSpinner = resume
 }
 
 // AddCommandArgs provides a struct for go-arg parsing
@@ -103,7 +112,13 @@ func (cmd *AddCommand) addKeyValue(path string, key string, value string) error 
 	data[key] = value
 	secret.SetData(data)
 	if !cmd.args.Confirm && !cmd.args.DryRun {
+		if cmd.pauseSpinner != nil {
+			cmd.pauseSpinner()
+		}
 		result, err := askForConfirmation("Write changes to Vault?")
+		if cmd.resumeSpinner != nil {
+			cmd.resumeSpinner()
+		}
 		if err != nil {
 			return fmt.Errorf("error prompting for confirmation: %v", err)
 		}

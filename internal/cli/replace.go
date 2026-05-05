@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/fishi0x01/vsh/internal/client"
 	"github.com/fishi0x01/vsh/internal/logger"
@@ -10,12 +11,22 @@ import (
 
 // ReplaceCommand container for all 'replace' parameters
 type ReplaceCommand struct {
-	name string
-	args *ReplaceCommandArgs
+	name        string
+	args        *ReplaceCommandArgs
+	workerCount int
 
-	client   *client.Client
-	searcher *Searcher
-	Mode     KeyValueMode
+	client        *client.Client
+	searcher      *Searcher
+	Mode          KeyValueMode
+	pauseSpinner  func()
+	resumeSpinner func()
+}
+
+// SetSpinnerControl satisfies SpinnerAware so the spinner can be paused
+// while askForConfirmation is reading stdin.
+func (cmd *ReplaceCommand) SetSpinnerControl(pause, resume func()) {
+	cmd.pauseSpinner = pause
+	cmd.resumeSpinner = resume
 }
 
 // ReplaceCommandArgs provides a struct for go-arg parsing
@@ -39,11 +50,12 @@ func (ReplaceCommandArgs) Description() string {
 }
 
 // NewReplaceCommand creates a new ReplaceCommand parameter container
-func NewReplaceCommand(c *client.Client) *ReplaceCommand {
+func NewReplaceCommand(c *client.Client, workerCount int) *ReplaceCommand {
 	return &ReplaceCommand{
-		name:   "replace",
-		client: c,
-		args:   &ReplaceCommandArgs{},
+		name:        "replace",
+		client:      c,
+		args:        &ReplaceCommandArgs{},
+		workerCount: workerCount,
 	}
 }
 
@@ -130,21 +142,37 @@ func (cmd *ReplaceCommand) Run() int {
 func (cmd *ReplaceCommand) findMatches(
 	filePaths []string,
 ) (matchesByPath map[string][]*Match, err error) {
-	matchesByPath = make(map[string][]*Match, 0)
-	for _, curPath := range filePaths {
-		matches, err := cmd.FindReplacements(cmd.args.Search, cmd.args.Replacement, curPath)
-		if err != nil {
-			return matchesByPath, err
+	type result struct {
+		path    string
+		matches []*Match
+		err     error
+	}
+	results := make([]result, len(filePaths))
+
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, cmd.workerCount)
+	for i, curPath := range filePaths {
+		wg.Add(1)
+		go func(idx int, p string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			matches, err := cmd.FindReplacements(cmd.args.Search, cmd.args.Replacement, p)
+			results[idx] = result{p, matches, err}
+		}(i, curPath)
+	}
+	wg.Wait()
+
+	matchesByPath = make(map[string][]*Match)
+	for _, r := range results {
+		if r.err != nil {
+			return matchesByPath, r.err
 		}
-		for _, match := range matches {
+		for _, match := range r.matches {
 			match.print(os.Stdout, cmd.args.Output.Value)
 		}
-		if len(matches) > 0 {
-			_, ok := matchesByPath[curPath]
-			if !ok {
-				matchesByPath[curPath] = make([]*Match, 0)
-			}
-			matchesByPath[curPath] = append(matchesByPath[curPath], matches...)
+		if len(r.matches) > 0 {
+			matchesByPath[r.path] = append(matchesByPath[r.path], r.matches...)
 		}
 	}
 	return matchesByPath, nil
@@ -153,7 +181,13 @@ func (cmd *ReplaceCommand) findMatches(
 func (cmd *ReplaceCommand) commitMatches(matchesByPath map[string][]*Match) int {
 	if len(matchesByPath) > 0 {
 		if !cmd.args.Confirm && !cmd.args.DryRun {
+			if cmd.pauseSpinner != nil {
+				cmd.pauseSpinner()
+			}
 			result, err := askForConfirmation("Write changes to Vault?")
+			if cmd.resumeSpinner != nil {
+				cmd.resumeSpinner()
+			}
 			if err != nil {
 				return 1
 			}
@@ -194,32 +228,56 @@ func (cmd *ReplaceCommand) FindReplacements(
 	return matches, nil
 }
 
-// WriteReplacements will write replacement data back to Vault
+// WriteReplacements will write replacement data back to Vault concurrently
 func (cmd *ReplaceCommand) WriteReplacements(groupedMatches map[string][]*Match) error {
-	// process matches by vault path
+	failed := make(chan error, 1)
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, cmd.workerCount)
+
 	for path, matches := range groupedMatches {
-		secret, err := cmd.client.Read(path)
-		if err != nil {
-			return err
-		}
-		data := secret.GetData()
+		wg.Add(1)
+		go func(p string, m []*Match) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
 
-		// update secret with changes. remove key w/ prior names, add renamed keys, update values.
-		for _, match := range matches {
-			if path != match.path {
-				return fmt.Errorf("match path does not equal group path")
+			secret, err := cmd.client.Read(p)
+			if err != nil {
+				select {
+				case failed <- err:
+				default:
+				}
+				return
 			}
-			if match.replacedKey != match.key {
-				delete(data, match.key)
+			data := secret.GetData()
+			for _, match := range m {
+				if p != match.path {
+					select {
+					case failed <- fmt.Errorf("match path does not equal group path"):
+					default:
+					}
+					return
+				}
+				if match.replacedKey != match.key {
+					delete(data, match.key)
+				}
+				data[match.replacedKey] = match.replacedValue
 			}
-			data[match.replacedKey] = match.replacedValue
-		}
-		secret.SetData(data)
-
-		err = cmd.client.Write(path, secret)
-		if err != nil {
-			return err
-		}
+			secret.SetData(data)
+			if err := cmd.client.Write(p, secret); err != nil {
+				select {
+				case failed <- err:
+				default:
+				}
+			}
+		}(path, matches)
 	}
-	return nil
+	wg.Wait()
+
+	select {
+	case err := <-failed:
+		return err
+	default:
+		return nil
+	}
 }

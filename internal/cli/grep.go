@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/fishi0x01/vsh/internal/client"
 	"github.com/fishi0x01/vsh/internal/logger"
@@ -10,8 +11,9 @@ import (
 
 // GrepCommand container for all 'grep' parameters
 type GrepCommand struct {
-	name string
-	args *GrepCommandArgs
+	name        string
+	args        *GrepCommandArgs
+	workerCount int
 
 	client   *client.Client
 	searcher *Searcher
@@ -34,11 +36,12 @@ func (GrepCommandArgs) Description() string {
 }
 
 // NewGrepCommand creates a new GrepCommand parameter container
-func NewGrepCommand(c *client.Client) *GrepCommand {
+func NewGrepCommand(c *client.Client, workerCount int) *GrepCommand {
 	return &GrepCommand{
-		name:   "grep",
-		client: c,
-		args:   &GrepCommandArgs{},
+		name:        "grep",
+		client:      c,
+		args:        &GrepCommandArgs{},
+		workerCount: workerCount,
 	}
 }
 
@@ -99,12 +102,31 @@ func (cmd *GrepCommand) Run() int {
 		return 1
 	}
 
-	for _, curPath := range filePaths {
-		matches, err := cmd.grepFile(cmd.args.Search, curPath)
-		if err != nil {
+	type result struct {
+		matches []*Match
+		err     error
+	}
+	results := make([]result, len(filePaths))
+
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, cmd.workerCount)
+	for i, curPath := range filePaths {
+		wg.Add(1)
+		go func(idx int, p string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			matches, err := cmd.grepFile(cmd.args.Search, p)
+			results[idx] = result{matches, err}
+		}(i, curPath)
+	}
+	wg.Wait()
+
+	for _, r := range results {
+		if r.err != nil {
 			return 1
 		}
-		for _, match := range matches {
+		for _, match := range r.matches {
 			match.print(os.Stdout, MatchOutputHighlight)
 		}
 	}

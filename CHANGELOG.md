@@ -9,6 +9,7 @@ ENHANCEMENTS:
 * require `-r` flag for recursive `cp` and `rm` operations on directories ([#128](https://github.com/fishi0x01/vsh/pull/128))
 * replace unmaintained `c-bata/go-prompt` with `charmbracelet/bubbletea` for a richer interactive TUI: styled completion dropdown with selection marker, stable prompt prefix colour, history navigation, and a braille spinner during long-running operations ([#139](https://github.com/fishi0x01/vsh/pull/139))
 * prompt confirmation before recursive `rm -r` in interactive mode; use `-f` to skip the prompt ([#140](https://github.com/fishi0x01/vsh/pull/140))
+* concurrent reads for `grep` and `replace` (find phase) and concurrent writes for `replace`, tunable with `--worker-count` flag (default: 10) ([#141](https://github.com/fishi0x01/vsh/pull/141))
 
 BUG FIXES:
 
@@ -16,7 +17,7 @@ BUG FIXES:
 * fix variable shadowing in `SetData` causing KV2 branch to be dead code ([#132](https://github.com/fishi0x01/vsh/pull/132))
 * fix concurrency and error handling issues: cache race condition, swallowed errors in recursive operations, logger data race, and resource leak in debug logging ([#133](https://github.com/fishi0x01/vsh/pull/133))
 * fix `ls <arg>` from root incorrectly listing all backends when argument is not a valid path ([#136](https://github.com/fishi0x01/vsh/pull/136))
-* fix `rm -r` confirmation prompt garbled by spinner; fix spurious blank lines between completion dropdown entries ([#141](https://github.com/fishi0x01/vsh/pull/141))
+* fix `rm -r` confirmation prompt garbled by spinner; fix spurious blank lines between completion dropdown entries; fix `add` and `replace` confirmation prompts garbled by spinner ([#141](https://github.com/fishi0x01/vsh/pull/141))
 
 DEPENDENCIES:
 

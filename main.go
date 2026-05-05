@@ -96,6 +96,11 @@ func (a *app) executor(in string) {
 	}
 
 	if err == nil && cmd.IsSane() {
+		if a.isInteractive {
+			if sa, ok := cmd.(cli.SpinnerAware); ok {
+				sa.SetSpinnerControl(tui.PauseSpinner, tui.ResumeSpinner)
+			}
+		}
 		ret := cmd.Run()
 		if !a.isInteractive {
 			os.Exit(ret)

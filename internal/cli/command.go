@@ -26,6 +26,12 @@ type Confirmer interface {
 	Confirm() bool
 }
 
+// SpinnerAware is implemented by commands that call interactive prompts
+// mid-execution and need to pause the spinner to avoid corrupted output.
+type SpinnerAware interface {
+	SetSpinnerControl(pause, resume func())
+}
+
 // Commands contains all available commands
 type Commands struct {
 	Add     *AddCommand
@@ -62,10 +68,10 @@ func NewCommands(client *client.Client, workerCount int, interactive bool) *Comm
 		Cat:     NewCatCommand(client),
 		Cd:      NewCdCommand(client),
 		Cp:      NewCopyCommand(client, workerCount),
-		Grep:    NewGrepCommand(client),
+		Grep:    NewGrepCommand(client, workerCount),
 		Ls:      NewListCommand(client),
 		Mv:      NewMoveCommand(client, workerCount),
-		Replace: NewReplaceCommand(client),
+		Replace: NewReplaceCommand(client, workerCount),
 		Rm:      NewRemoveCommand(client, workerCount, interactive),
 	}
 }
