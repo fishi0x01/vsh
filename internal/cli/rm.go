@@ -74,6 +74,24 @@ func (cmd *RemoveCommand) Parse(args []string) error {
 	return nil
 }
 
+// Confirm prompts the user before a recursive removal. It returns false when the
+// user declines, which causes the caller to skip Run(). Called outside
+// RunWithSpinner so the spinner never races with the stdin read.
+func (cmd *RemoveCommand) Confirm() bool {
+	if !cmd.args.Recursive || cmd.args.Force || !cmd.interactive {
+		return true
+	}
+	newPwd := cmdPath(cmd.client.Pwd, cmd.args.Path)
+	fmt.Printf("Remove entire subtree at '%s'? [y/N] ", newPwd)
+	reader := bufio.NewReader(os.Stdin)
+	answer, _ := reader.ReadString('\n')
+	if strings.ToLower(strings.TrimSpace(answer)) != "y" {
+		fmt.Println("Aborted.")
+		return false
+	}
+	return true
+}
+
 // Run executes 'rm' with given RemoveCommand's parameters
 func (cmd *RemoveCommand) Run() int {
 	newPwd := cmdPath(cmd.client.Pwd, cmd.args.Path)
@@ -89,15 +107,6 @@ func (cmd *RemoveCommand) Run() int {
 		if !cmd.args.Recursive {
 			logger.UserError("use -r to remove directories")
 			return 1
-		}
-		if cmd.interactive && !cmd.args.Force {
-			fmt.Printf("Remove entire subtree at '%s'? [y/N] ", newPwd)
-			reader := bufio.NewReader(os.Stdin)
-			answer, _ := reader.ReadString('\n')
-			if strings.ToLower(strings.TrimSpace(answer)) != "y" {
-				fmt.Println("Aborted.")
-				return 0
-			}
 		}
 		var wg sync.WaitGroup
 		sem := make(chan struct{}, cmd.workerCount)

@@ -8,6 +8,7 @@ ENHANCEMENTS:
 * update README and add `make demo` target to generate demo gif ([#127](https://github.com/fishi0x01/vsh/pull/127))
 * require `-r` flag for recursive `cp` and `rm` operations on directories ([#128](https://github.com/fishi0x01/vsh/pull/128))
 * replace unmaintained `c-bata/go-prompt` with `charmbracelet/bubbletea` for a richer interactive TUI: styled completion dropdown with selection marker, stable prompt prefix colour, history navigation, and a braille spinner during long-running operations ([#139](https://github.com/fishi0x01/vsh/pull/139))
+* prompt confirmation before recursive `rm -r` in interactive mode; use `-f` to skip the prompt ([#140](https://github.com/fishi0x01/vsh/pull/140))
 
 BUG FIXES:
 

@@ -112,6 +112,26 @@ func getCommand(args []string, commands *cli.Commands) (cmd cli.Command, err err
 	return cmd, err
 }
 
+// parseOnly parses the command line and returns the Command without running it.
+// Returns nil if parsing fails or the input is a built-in (exit, toggle-...).
+// Used to check for Confirmer before starting RunWithSpinner.
+func (a *app) parseOnly(in string) cli.Command {
+	in = strings.TrimSpace(in)
+	cmdArgs, err := argv.Argv(in, func(s string) (string, error) { return s, nil }, nil)
+	if err != nil || len(cmdArgs) == 0 {
+		return nil
+	}
+	commands := cli.NewCommands(a.vaultClient, a.workerCount, a.isInteractive)
+	cmd, err := getCommand(cmdArgs[0], commands)
+	if err != nil {
+		return nil
+	}
+	if err = cmd.Parse(cmdArgs[0]); err != nil {
+		return nil
+	}
+	return cmd
+}
+
 func getVaultToken() (token string, err error) {
 	token = os.Getenv("VAULT_TOKEN")
 	if token == "" {
@@ -197,7 +217,12 @@ func main() {
 			cmd := final.LastCommand()
 			fmt.Printf("%s%s\n", tui.RenderPrefix(a.completer.PromptPrefix()), cmd)
 			if cmd != "" {
-				tui.RunWithSpinner(func() { a.executor(cmd) })
+				parsed := a.parseOnly(cmd)
+				if c, ok := parsed.(cli.Confirmer); ok && !c.Confirm() {
+					a.vaultClient.ClearCache()
+				} else {
+					tui.RunWithSpinner(func() { a.executor(cmd) })
+				}
 			}
 		}
 	}

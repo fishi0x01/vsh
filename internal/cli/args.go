@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/alexflint/go-arg"
 )
@@ -32,7 +33,7 @@ func Usage(cmd Command) string {
 	var b bytes.Buffer
 	p, _ := argParser([]string{cmd.GetName()}, cmd)
 	p.WriteUsage(&b)
-	return b.String()
+	return strings.TrimRight(b.String(), "\n")
 }
 
 // Help returns extended usage information

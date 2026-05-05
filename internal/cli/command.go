@@ -20,6 +20,12 @@ type Command interface {
 	Parse(args []string) error
 }
 
+// Confirmer is implemented by commands that must prompt the user before running.
+// Confirm() is called outside RunWithSpinner so the spinner never races with stdin.
+type Confirmer interface {
+	Confirm() bool
+}
+
 // Commands contains all available commands
 type Commands struct {
 	Add     *AddCommand
