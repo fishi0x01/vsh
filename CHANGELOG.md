@@ -1,6 +1,6 @@
 # Changelog
 
-## master - unreleased
+## v1.0.0 (May 25, 2026)
 
 ENHANCEMENTS:
 
