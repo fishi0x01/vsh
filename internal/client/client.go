@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -64,6 +65,46 @@ func getMountOutput(path string, version int) (string, *api.MountOutput) {
 	}
 }
 
+// listUIMounts lists the secret mounts visible to the token via sys/internal/ui/mounts.
+// Unlike sys/mounts, this endpoint needs no explicit policy grant; Vault only returns
+// mounts the token has some access to. This is what the official `vault kv` CLI uses.
+func listUIMounts(vault *api.Client) (map[string]*api.MountOutput, error) {
+	secret, err := vault.Logical().Read("sys/internal/ui/mounts")
+	if err != nil {
+		return nil, err
+	}
+	if secret == nil || secret.Data == nil {
+		return nil, errors.New("empty response from sys/internal/ui/mounts")
+	}
+
+	raw, err := json.Marshal(secret.Data["secret"])
+	if err != nil {
+		return nil, err
+	}
+	mounts := make(map[string]*api.MountOutput)
+	if err := json.Unmarshal(raw, &mounts); err != nil {
+		return nil, err
+	}
+	return mounts, nil
+}
+
+// kvVersion returns the KV version of the given mount, or false if it is not a KV mount.
+// KV mounts without a version option (including legacy 'generic' mounts) are version 1.
+func kvVersion(mount *api.MountOutput) (int, bool, error) {
+	if mount.Type != "kv" && mount.Type != "generic" {
+		return 0, false, nil
+	}
+	version, ok := mount.Options["version"]
+	if !ok || version == "" {
+		return 1, true, nil
+	}
+	v, err := strconv.Atoi(version)
+	if err != nil {
+		return 0, false, err
+	}
+	return v, true, nil
+}
+
 // NewClient creates a new Client Vault wrapper
 func NewClient(conf *VaultConfig) (*Client, error) {
 	config := &api.Config{
@@ -89,14 +130,28 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	vault.SetToken(conf.Token)
 
 	permissions, err := vault.Sys().CapabilitiesSelf("sys/mounts")
+	if err != nil {
+		logger.AppTrace("%+v", err)
+		return nil, err
+	}
 
 	mounts := make(map[string]*api.MountOutput)
 	if sliceContains(permissions, "list") || sliceContains(permissions, "root") {
 		mounts, err = vault.Sys().ListMounts()
+		if err != nil {
+			logger.AppTrace("%+v", err)
+			return nil, err
+		}
 	} else {
 		logger.UserDebug(
-			"Cannot auto-discover mount backends: Token does not have list permission on sys/mounts",
+			"Token does not have list permission on sys/mounts, falling back to sys/internal/ui/mounts",
 		)
+		uiMounts, uiErr := listUIMounts(vault)
+		if uiErr != nil {
+			logger.UserDebug("Cannot auto-discover mount backends: %v", uiErr)
+		} else {
+			mounts = uiMounts
+		}
 	}
 
 	if os.Getenv("VAULT_KV1_MOUNTS") != "" {
@@ -113,30 +168,25 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 		}
 	}
 
-	if len(mounts) == 0 {
+	var backends = make(map[string]int)
+	for path, mount := range mounts {
+		v, ok, err := kvVersion(mount)
+		if err != nil {
+			return nil, err
+		}
+		if ok {
+			backends[path] = v
+			logger.UserDebug("Found KV backend '%v' with version '%v'", path, v)
+		}
+	}
+
+	if len(backends) == 0 {
 		logger.UserDebug(
 			"No KV mounts found or specified, adding default KV version 2 mount at /secrets",
 		)
 
 		// Add default KV version 2 mount at /secrets
-		_, mounts["secrets/"] = getMountOutput("secrets/", 2)
-	}
-
-	if err != nil {
-		logger.AppTrace("%+v", err)
-		return nil, err
-	}
-
-	var backends = make(map[string]int)
-	for path, mount := range mounts {
-		if version, ok := mount.Options["version"]; ok {
-			v, err := strconv.Atoi(version)
-			if err != nil {
-				return nil, err
-			}
-			backends[path] = v
-			logger.UserDebug("Found KV backend '%v' with version '%v'", path, v)
-		}
+		backends["secrets/"] = 2
 	}
 
 	return verifyClientPwd(&Client{

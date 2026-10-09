@@ -74,7 +74,7 @@ func (cmd *ListCommand) Run() int {
 	result, err := cmd.client.List(newPwd)
 
 	if err != nil {
-		logger.UserError("not a valid path for operation: %s", newPwd)
+		logger.UserError("not a valid path for operation: %s: %v", newPwd, err)
 		return 1
 	}
 	logger.UserInfo("%s", strings.Join(result, "\n"))

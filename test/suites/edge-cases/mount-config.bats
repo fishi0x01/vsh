@@ -101,11 +101,42 @@ load ../../bin/plugins/bats-assert/load
   assert_line "key2 = value2"
 
   #######################################
-  echo "==== case: default mount when no environment variables and no auto-discovery ===="
-  # Test with a token that doesn't have list permissions
+  echo "==== case: auto-discovery via sys/internal/ui/mounts without sys/mounts list permission ===="
   run bash -c "VAULT_TOKEN=no-root ${APP_BIN} -v DEBUG -c 'ls /'"
   assert_success
-  assert_output --partial "Cannot auto-discover mount backends"
+  assert_output --partial "falling back to sys/internal/ui/mounts"
+  assert_output --partial "Found KV backend 'KV1/' with version '1'"
+  assert_output --partial "Found KV backend 'KV2/' with version '2'"
+  assert_line "KV1/"
+  assert_line "KV2/"
+  refute_line "secrets/"
+
+  #######################################
+  echo "==== case: KV mounts without a version option are discovered as KV version 1 ===="
+  vault_exec "vault secrets enable -path=kv-noversion kv"
+  vault_exec "vault secrets enable -path=kv-generic generic"
+  vault_exec "vault kv put kv-noversion/test key3=value3"
+  vault_exec "vault kv put kv-generic/test key4=value4"
+  run ${APP_BIN} -v DEBUG -c "ls /"
+  assert_success
+  assert_output --partial "Found KV backend 'kv-noversion/' with version '1'"
+  assert_output --partial "Found KV backend 'kv-generic/' with version '1'"
+
+  run ${APP_BIN} -c "cat /kv-noversion/test"
+  assert_success
+  assert_line "key3 = value3"
+
+  run ${APP_BIN} -c "cat /kv-generic/test"
+  assert_success
+  assert_line "key4 = value4"
+
+  #######################################
+  echo "==== case: default mount when no environment variables and no KV mounts discovered ===="
+  # A token with only the default policy can see no KV mounts at all
+  vault_exec "vault token create -id=default-only -policy=default"
+  run bash -c "VAULT_TOKEN=default-only ${APP_BIN} -v DEBUG -c 'ls /'"
+  assert_success
+  assert_output --partial "falling back to sys/internal/ui/mounts"
   assert_output --partial "No KV mounts found or specified, adding default KV version 2 mount at /secrets"
   assert_line "secrets/"
 
