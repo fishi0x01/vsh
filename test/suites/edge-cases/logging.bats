@@ -16,7 +16,7 @@ load ../../bin/plugins/bats-file/load
   echo "==== case: print debug info for user ===="
   run bash -c "VAULT_TOKEN=delete-only ${APP_BIN} -v DEBUG -c 'ls /KV2/src/a'"
   assert_success
-  assert_line "Token does not have list permission on sys/mounts, falling back to sys/internal/ui/mounts"
+  assert_line "sys/mounts returned 403, falling back to sys/internal/ui/mounts"
   assert_line "foo"
   assert_line "foo/"
   assert_file_exist vsh_trace.log

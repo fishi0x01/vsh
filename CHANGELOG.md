@@ -4,7 +4,7 @@
 
 BUG FIXES:
 
-* discover KV mounts via `sys/internal/ui/mounts` when the token lacks `sys/mounts` list permission; recognize KV1 mounts without a version option and include underlying Vault errors in `ls` failures ([#144](https://github.com/fishi0x01/vsh/pull/144))
+* discover KV mounts via `sys/internal/ui/mounts` when `sys/mounts` returns HTTP 403, without a capabilities pre-check; validate UI mount responses, recognize KV1 mounts without a version option and include underlying Vault errors in `ls` failures ([#144](https://github.com/fishi0x01/vsh/pull/144))
 
 ## v1.0.0 (May 25, 2026)
 

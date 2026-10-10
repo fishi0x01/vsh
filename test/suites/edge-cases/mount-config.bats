@@ -112,6 +112,19 @@ load ../../bin/plugins/bats-assert/load
   refute_line "secrets/"
 
   #######################################
+  echo "==== case: sys/mounts read access works without capabilities-self access ===="
+  vault_exec "printf '%s\n' \
+    'path \"sys/mounts\" { capabilities = [\"read\"] }' \
+    'path \"sys/capabilities-self\" { capabilities = [\"deny\"] }' \
+    | vault policy write mounts-read-only -"
+  vault_exec "vault token create -id=mounts-read-only -policy=mounts-read-only"
+  run bash -c "VAULT_TOKEN=mounts-read-only ${APP_BIN} -v DEBUG -c 'ls /'"
+  assert_success
+  assert_line "KV1/"
+  assert_line "KV2/"
+  refute_output --partial "falling back to sys/internal/ui/mounts"
+
+  #######################################
   echo "==== case: KV mounts without a version option are discovered as KV version 1 ===="
   vault_exec "vault secrets enable -path=kv-noversion kv"
   vault_exec "vault secrets enable -path=kv-generic generic"

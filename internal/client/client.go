@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -77,13 +78,20 @@ func listUIMounts(vault *api.Client) (map[string]*api.MountOutput, error) {
 		return nil, errors.New("empty response from sys/internal/ui/mounts")
 	}
 
-	raw, err := json.Marshal(secret.Data["secret"])
+	rawSecret, ok := secret.Data["secret"]
+	if !ok || rawSecret == nil {
+		return nil, errors.New("sys/internal/ui/mounts returned no secret mounts")
+	}
+	raw, err := json.Marshal(rawSecret)
 	if err != nil {
 		return nil, err
 	}
 	mounts := make(map[string]*api.MountOutput)
 	if err := json.Unmarshal(raw, &mounts); err != nil {
 		return nil, err
+	}
+	if mounts == nil {
+		mounts = make(map[string]*api.MountOutput)
 	}
 	return mounts, nil
 }
@@ -129,28 +137,18 @@ func NewClient(conf *VaultConfig) (*Client, error) {
 	}
 	vault.SetToken(conf.Token)
 
-	permissions, err := vault.Sys().CapabilitiesSelf("sys/mounts")
+	mounts, err := vault.Sys().ListMounts()
 	if err != nil {
 		logger.AppTrace("%+v", err)
-		return nil, err
-	}
-
-	mounts := make(map[string]*api.MountOutput)
-	if sliceContains(permissions, "list") || sliceContains(permissions, "root") {
-		mounts, err = vault.Sys().ListMounts()
-		if err != nil {
-			logger.AppTrace("%+v", err)
+		var responseErr *api.ResponseError
+		if !errors.As(err, &responseErr) || responseErr.StatusCode != http.StatusForbidden {
 			return nil, err
 		}
-	} else {
-		logger.UserDebug(
-			"Token does not have list permission on sys/mounts, falling back to sys/internal/ui/mounts",
-		)
-		uiMounts, uiErr := listUIMounts(vault)
-		if uiErr != nil {
-			logger.UserDebug("Cannot auto-discover mount backends: %v", uiErr)
-		} else {
-			mounts = uiMounts
+		logger.UserDebug("sys/mounts returned 403, falling back to sys/internal/ui/mounts")
+		mounts, err = listUIMounts(vault)
+		if err != nil {
+			logger.UserDebug("Cannot auto-discover mount backends: %v", err)
+			mounts = make(map[string]*api.MountOutput)
 		}
 	}
 
