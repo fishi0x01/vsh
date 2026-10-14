@@ -102,12 +102,3 @@ func normalizedVaultPath(absolutePath string) string {
 	}
 	return absolutePath
 }
-
-func sliceContains(arr []string, search string) bool {
-	for _, s := range arr {
-		if s == search {
-			return true
-		}
-	}
-	return false
-}
